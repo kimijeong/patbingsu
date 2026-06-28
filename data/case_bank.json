@@ -1,32 +1,33 @@
 {
   "meta": {
-    "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통) + 추가 보강 증례 + 의대생 제공 증례",
+    "source": "index.html embedded CASE_BANK (single source of truth)",
     "total_cases": 23,
-    "categories": [
-      "급성 복통",
-      "소화불량/만성 복통",
-      "급성 복통(추가 보강)"
-    ],
-    "theme_note": "전 증례 주소(chief_complaint)는 본 프로젝트 주제(복통)에 맞춰 '배가 아파요' 계열로 통일함. 원문 제시문은 history_original_chief_complaint에 보존.",
-    "added_cases_note": "extra_01~04 및 acute_08~11은 원본 PDF 15증례에 없던 복통 대표 진단(급성 위장관염, PID, 상부위장관출혈, 심근경색, 자궁외임신, 장폐색, 요로결석, 담석증)을 보강하기 위해 추가됨. 의대생 제공 자료 중 중복 진단(요로결석 x3, 자궁외임신 x2, 장폐색 x2)은 각 1건씩만 남기고 정리함."
+    "note": "이 파일이 단일 원본입니다. 수정 후 'python3 scripts/sync_app.py' 실행하면 index.html과 rubric xlsx가 동기화됩니다."
   },
   "cases": [
     {
       "case_id": "acute_01",
       "category": "급성 복통",
+      "hidden_diagnosis": "급성 충수돌기염 천공",
+      "top_diagnoses": [
+        "급성 충수돌기염 천공",
+        "급성 게실염 천공",
+        "난소 염전"
+      ],
       "patient": {
         "name": "서수민",
         "age": 38,
+        "vital_signs": {
+          "BP": "144/90",
+          "PR": 90,
+          "RR": 22,
+          "BT": 38.2
+        },
+        "setting": "응급실, 오전 7시",
+        "appearance": "[많이 아파서 침대 오고갈 때 많이 느림]",
         "sex": "여"
       },
       "chief_complaint": "배가 아파요",
-      "setting": "응급실, 오전 7시",
-      "vitals": {
-        "BP": "144/90",
-        "PR": 90,
-        "RR": 22,
-        "BT": 38.2
-      },
       "history": {
         "O_onset": "3일 전",
         "L_location": "오른쪽 아랫배",
@@ -46,7 +47,7 @@
         "medication": "타이레놀",
         "social": "술(+, 일주일에 소주 1병/-매일 1~2잔)/담배(+)/커피(+), 직업(교사, 스트레스 많지 않은 편), 식습관(-, 맵고 짜고 기름진 음식)",
         "family": "-",
-        "female_hx": "LMP 3주 전, 주기 양 모두 정상, 임신 가능성 없음"
+        "female_hx": "LMP 3주 전, 주기 양 모두 정상, 임신 가능성 c없음"
       },
       "physical_exam": {
         "General": "혈압 144/90으로 상승, 호흡수 22회/분으로 상승, 38.2도의 고열",
@@ -54,14 +55,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/+), Psoas sign/Obturator sign(+/+), DRE/골반 내진/CVAT(-/-/-)",
         "Extremity": "피부 긴장도/오목 부종(-/-)"
       },
-      "patient_question": "없음",
-      "special_behavior": "많이 아파서 침대 오고갈 때 많이 느림",
-      "answer_key": {
-        "top_diagnoses": [
-          "급성 충수돌기염 천공",
-          "급성 게실염 천공",
-          "난소 염전"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[많이 아파서 침대 오고갈 때 많이 느림]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "없음"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "흉부 X-ray",
           "복부 CT",
@@ -75,25 +80,178 @@
         "expected_skills": [
           "Psoas sign/Obturator sign 시행",
           "비협조적일 수 있는 환자 배려"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
         ]
       }
     },
     {
       "case_id": "acute_02",
       "category": "급성 복통",
+      "hidden_diagnosis": "담낭염",
+      "top_diagnoses": [
+        "담낭염",
+        "담도염",
+        "위염"
+      ],
       "patient": {
         "name": "박남용",
         "age": 42,
+        "vital_signs": {
+          "BP": "126/80",
+          "PR": 80,
+          "RR": 17,
+          "BT": 37.5
+        },
+        "setting": "응급실",
+        "appearance": "[응급실로 내원, 현재 시간 오후 6시, 환자가 배 부여잡고 그냥 앉아 있으나 지금은 조금 나아졌다고 함. 올 때 너무 아팠는데 지금은 좀 괜찮아졌다고 함. 언제든 불편하면 바로 말씀+진통제+수액 멘트하면 반응 좋음. 담낭이 어떤 장기인지 물어볼 때 '쓸개라고 알고 있다'고 대답함]",
         "sex": "남"
       },
       "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "126/80",
-        "PR": 80,
-        "RR": 17,
-        "BT": 37.5
-      },
       "history": {
         "O_onset": "3일 전 or 어제",
         "L_location": "3일 전과 어제는 명치쪽, 오늘은 RUQ로 이동",
@@ -113,7 +271,8 @@
         "PMH": "고혈압/당뇨(-/-)",
         "medication": "진통제(+, 어제 회사 근처 응급실에서 진통제 주사하여 나았다가 오늘 다시 아픔)",
         "social": "흡연(현재 금연), 음주(+, 3회/주, 하루 소주 한 병), 운동(-, 발목 다친 뒤 운동 못함), 스트레스(-), 직업(법무사)",
-        "family": "-"
+        "family": "-",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S stable",
@@ -121,14 +280,18 @@
         "Abdomen": "Murphy sign(+), Epigastric(+), RUQ Td/rTd/불편감(+/+/+), Obturator/Psoas sign(-/-), CVAT(+, 올린다고 말함), DRE(-)",
         "Extremity": "-"
       },
-      "patient_question": "빨리 치료해 주세요",
-      "special_behavior": "응급실로 내원, 현재 시간 오후 6시, 환자가 배 부여잡고 그냥 앉아 있으나 지금은 조금 나아졌다고 함. 올 때 너무 아팠는데 지금은 좀 괜찮아졌다고 함. 언제든 불편하면 바로 말씀+진통제+수액 멘트하면 반응 좋음. 담낭이 어떤 장기인지 물어볼 때 '쓸개라고 알고 있다'고 대답함",
-      "answer_key": {
-        "top_diagnoses": [
-          "담낭염",
-          "담도염",
-          "위염"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[응급실로 내원, 현재 시간 오후 6시, 환자가 배 부여잡고 그냥 앉아 있으나 지금은 조금 나아졌다고 함. 올 때 너무 아팠는데 지금은 좀 괜찮아졌다고 함. 언제든 불편하면 바로 말씀+진통제+수액 멘트하면 반응 좋음. 담낭이 어떤 장기인지 물어볼 때 '쓸개라고 알고 있다'고 대답함]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "빨리 치료해 주세요"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부초음파",
           "복부 CT",
@@ -142,25 +305,161 @@
         "expected_skills": [
           "Murphy's sign 시행",
           "황달/가려움증/소변색 변화 문진"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          }
         ]
       }
     },
     {
       "case_id": "acute_03",
       "category": "급성 복통",
+      "hidden_diagnosis": "만성 췌장염",
+      "top_diagnoses": [
+        "만성 췌장염",
+        "급성 췌장염",
+        "위궤양"
+      ],
       "patient": {
         "name": "정민성",
         "age": 51,
+        "vital_signs": {
+          "BP": "124/82",
+          "PR": 88,
+          "RR": 17,
+          "BT": 37.3
+        },
+        "setting": "응급실",
+        "appearance": "[응급실에서 진료 진행]",
         "sex": "남"
       },
       "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "124/82",
-        "PR": 88,
-        "RR": 17,
-        "BT": 37.3
-      },
       "history": {
         "O_onset": "오늘 아침",
         "L_location": "명치 부위",
@@ -180,7 +479,8 @@
         "PMH": "DM/TB/HTN/간염(-/-/-/-), 전립선 비대증(+)",
         "medication": "전립선 비대증약",
         "social": "술(+, 1주일 3~4번, 하루 소주 2병, 최근 줄였음), 담배(+, 30갑년, 최근 금연), 직업(회사원)",
-        "family": "-"
+        "family": "-",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 확인",
@@ -188,14 +488,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/-), DRE/CVAT(-/-)",
         "Extremity": "피부 긴장도/오목 부종(-/-)"
       },
-      "patient_question": "심각한 병일까요?",
-      "special_behavior": "응급실에서 진료 진행",
-      "answer_key": {
-        "top_diagnoses": [
-          "만성 췌장염",
-          "급성 췌장염",
-          "위궤양"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[응급실에서 진료 진행]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "심각한 병일까요?"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부 CT",
           "복부초음파",
@@ -208,25 +512,161 @@
         ],
         "expected_skills": [
           "체중감소/지방변/다음다뇨다갈 등 췌장 기능 관련 문진"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          }
         ]
       }
     },
     {
       "case_id": "acute_04",
       "category": "급성 복통",
+      "hidden_diagnosis": "소화성궤양 천공",
+      "top_diagnoses": [
+        "소화성궤양 천공",
+        "급성 췌장염",
+        "췌장 농양"
+      ],
       "patient": {
         "name": "강오석",
         "age": 51,
+        "vital_signs": {
+          "BP": "116/82",
+          "PR": 88,
+          "RR": 16,
+          "BT": 37.2
+        },
+        "setting": "응급실",
+        "appearance": "[응급실에서 진료 진행]",
         "sex": "남"
       },
       "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "116/82",
-        "PR": 88,
-        "RR": 16,
-        "BT": 37.2
-      },
       "history": {
         "O_onset": "어제 점심",
         "L_location": "명치 부위",
@@ -245,7 +685,8 @@
         "PMH": "DM/TB/HTN/간염(-/-/-/-)",
         "medication": "-",
         "social": "술(+, 1주일 6~7번, 하루 소주 2~3병), 담배(+, 30갑년), 식사(매우 불규칙), 직업(포크레인 조종수)",
-        "family": "-"
+        "family": "-",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 확인",
@@ -253,14 +694,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/+), DRE(-)",
         "Extremity": "피부 긴장도/오목 부종(-/-)"
       },
-      "patient_question": "없음",
-      "special_behavior": "응급실에서 진료 진행",
-      "answer_key": {
-        "top_diagnoses": [
-          "소화성궤양 천공",
-          "급성 췌장염",
-          "췌장 농양"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[응급실에서 진료 진행]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "없음"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "흉부 X-ray",
           "복부 X-ray",
@@ -270,25 +715,161 @@
         "expected_skills": [
           "항문 직장 진찰(종양 감별)",
           "조영제 CT 설명동의서 받기"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          }
         ]
       }
     },
     {
       "case_id": "acute_05",
       "category": "급성 복통",
+      "hidden_diagnosis": "만성 췌장염",
+      "top_diagnoses": [
+        "만성 췌장염",
+        "췌장 두부암",
+        "담도암"
+      ],
       "patient": {
         "name": "이영자",
         "age": 80,
+        "vital_signs": {
+          "BP": "120/82",
+          "PR": 80,
+          "RR": 18,
+          "BT": 36.5
+        },
+        "setting": "외래/응급실",
+        "appearance": "[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]",
         "sex": "여"
       },
       "chief_complaint": "배가 아파요",
-      "setting": "외래/응급실",
-      "vitals": {
-        "BP": "120/82",
-        "PR": 80,
-        "RR": 18,
-        "BT": 36.5
-      },
       "history": {
         "O_onset": "3개월 전",
         "L_location": "명치 부위에서 처음 시작하여 이후 등으로 뻗침",
@@ -317,14 +898,18 @@
         "Abdomen": "Epigastric Td(+)/rTd(-), CVA tenderness(-), DRE 정상",
         "Extremity": "손가락 노란색(+)"
       },
-      "patient_question": "없음",
-      "special_behavior": "진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근",
-      "answer_key": {
-        "top_diagnoses": [
-          "만성 췌장염",
-          "췌장 두부암",
-          "담도암"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "없음"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부 CT",
           "혈중 amylase/lipase",
@@ -335,24 +920,178 @@
           "항문 직장 진찰",
           "조영제 CT 설명동의서 받기",
           "황달 관련 문진(가려움, 소변색, 대변색)"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
         ]
       }
     },
     {
       "case_id": "acute_06",
       "category": "급성 복통",
+      "hidden_diagnosis": "급성 충수돌기염",
+      "top_diagnoses": [
+        "급성 충수돌기염",
+        "급성 게실염",
+        "난소 염전"
+      ],
       "patient": {
         "name": "김한빛",
         "age": 27,
+        "vital_signs": {
+          "BP": "100/72",
+          "PR": 79,
+          "RR": 16,
+          "BT": 37.5
+        },
+        "setting": "외래",
+        "appearance": "[충수돌기염 가능성이 높기 때문에 응급 수술의 가능성에 대해 설명하였음]",
         "sex": "여"
       },
       "chief_complaint": "배가 아파요",
-      "vitals": {
-        "BP": "100/72",
-        "PR": 79,
-        "RR": 16,
-        "BT": 37.5
-      },
       "history": {
         "O_onset": "3일 전",
         "L_location": "우하복부(처음에는 명치가 아프다가 현재 우하복부로 이동)",
@@ -372,7 +1111,8 @@
         "PMH": "DM/TB/HTN/간염(-/-/-/-), 소화기 질환/부인과 질환(-/-)",
         "medication": "어제 소화제 복용",
         "social": "술 social, 담배/커피(-/-)",
-        "family": "가족 중 소화기 질환/부인과 질환(-/-)"
+        "family": "가족 중 소화기 질환/부인과 질환(-/-)",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 확인",
@@ -380,14 +1120,18 @@
         "Abdomen": "시/청/타/촉, RLQ Td/rTd(+/+), Rovsing(+), Obturator(+), Psoas(+), DRE/pelvic exam 정상",
         "Extremity": "피부 긴장도 확인"
       },
-      "patient_question": "검사 결과는 오늘 다 나오나요?",
-      "special_behavior": "충수돌기염 가능성이 높기 때문에 응급 수술의 가능성에 대해 설명하였음",
-      "answer_key": {
-        "top_diagnoses": [
-          "급성 충수돌기염",
-          "급성 게실염",
-          "난소 염전"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[충수돌기염 가능성이 높기 때문에 응급 수술의 가능성에 대해 설명하였음]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "검사 결과는 오늘 다 나오나요?"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부 CT",
           "골반초음파",
@@ -398,24 +1142,161 @@
           "Rovsing/Obturator/Psoas sign 시행",
           "항문 직장 진찰",
           "조영제 CT 설명동의서 받기"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          }
         ]
       }
     },
     {
       "case_id": "acute_07",
       "category": "급성 복통",
+      "hidden_diagnosis": "요로결석",
+      "top_diagnoses": [
+        "요로결석",
+        "신우신염",
+        "난소 염전"
+      ],
       "patient": {
         "name": "양지희",
         "age": 29,
+        "vital_signs": {
+          "BP": "130/80",
+          "PR": 76,
+          "RR": 20,
+          "BT": 36.8
+        },
+        "setting": "외래",
+        "appearance": "[불편한 표정으로 들어옴]",
         "sex": "여"
       },
-      "chief_complaint": "배가 아파요",
-      "vitals": {
-        "BP": "130/80",
-        "PR": 76,
-        "RR": 20,
-        "BT": 36.8
-      },
+      "chief_complaint": "배가 아프다",
       "history": {
         "O_onset": "3시간 전",
         "L_location": "오른쪽 옆구리",
@@ -435,7 +1316,8 @@
         "PMH": "DM/HTN/Dyslipidemia/Tb/Hepatitis(-/-/-/-/-)",
         "medication": "혈압약 복용 중",
         "social": "음주력(-), 흡연력(-)",
-        "family": "-"
+        "family": "-",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "키, 체중, 허리둘레 측정(BMI)",
@@ -444,14 +1326,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/-), CVA tenderness(+), DRE/골반 진찰",
         "Extremity": "피부 긴장도 확인"
       },
-      "patient_question": "-",
-      "special_behavior": "-",
-      "answer_key": {
-        "top_diagnoses": [
-          "요로결석",
-          "신우신염",
-          "난소 염전"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[불편한 표정으로 들어옴]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "-"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부 X-ray",
           "복부초음파",
@@ -460,297 +1346,1448 @@
         "required_treatments": [],
         "expected_skills": [
           "CVA tenderness 확인을 빠뜨리지 말 것"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 응급증상(두근/어지럼/소변감소)",
+            "keywords": [
+              "두근",
+              "어지럼",
+              "소변"
+            ],
+            "score": 4
+          },
+          {
+            "item": "L - 통증 이동",
+            "keywords": [
+              "이동",
+              "처음에는",
+              "옮겼"
+            ],
+            "score": 3
+          }
         ]
       }
     },
     {
       "case_id": "acute_08",
-      "category": "급성 복통",
+      "category": "급성복통",
+      "hidden_diagnosis": "자궁외 임신 파열",
+      "top_diagnoses": [
+        "자궁외 임신 파열",
+        "난소 낭종 파열",
+        "급성 충수돌기염"
+      ],
       "patient": {
         "name": "이지은",
         "age": 28,
-        "sex": "여"
+        "appearance": "[아랫배를 움켜쥐고 다리를 구부린 채 누워 있음. 안색이 창백하고 식은땀을 흘림]",
+        "sex": "여",
+        "vital_signs": {
+          "BP": "105/65",
+          "PR": 96,
+          "RR": 20,
+          "BT": 36.9
+        },
+        "setting": ""
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "아랫배가 갑자기 너무 아파요",
-      "setting": "응급실, 오후 11시",
-      "vitals": {
-        "BP": "105/65",
-        "PR": 96,
-        "RR": 20,
-        "BT": 36.9
-      },
+      "chief_complaint": "아랫배가 갑자기 너무 아파요",
       "history": {
-        "O_onset": "6시간 전",
+        "O_onset": "6시간 전, 갑자기 시작됨",
         "L_location": "우하복부 및 골반 전반",
-        "D_duration_course": "갑자기 시작되어 지속되며 점점 칼로 찌르는 듯 심해짐",
+        "D_duration_course": "갑자기 시작되어 지속되며 칼로 찌르는 듯 점점 심해짐",
         "Co_change": "급격히 악화됨, 어지러움 동반",
         "Ex_prior_episode": "처음 발생함",
-        "C_character": "칼로 찌르는 듯하고 찢어지는 듯한 극심한 통증, NRS 8점, 오른쪽 어깨로 퍼지는 듯한 느낌(방사통+)",
-        "A_associated": {
-          "전신": "발열/오한/피로/체중감소/식은땀(-/-/-/-/+, 통증 심할 때 식은땀 남)",
-          "소화기": "식욕부진/구역/구토/변비/설사(+/+/-/-/-), 황달/혈변/흑색변(-/-/-)",
-          "비뇨": "빈뇨/절박뇨/배뇨통(-/-/-)",
-          "부인과": "질 출혈(+, 3일 전부터 소량의 갈색 혈이 지속됨), 생리 주기 변화(+, 예정일보다 10일 넘게 생리를 안 함)"
-        },
-        "F_factor": "악화(+, 움직이거나 누워있을 때 자세 바꿀 때 극심해짐), 완화(-, 어떤 자세를 해도 아픔)",
-        "E_prior_exam": "-",
-        "PSH": "-",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-), 골반염 치료력(+, 2년 전 약물치료)",
-        "medication": "-",
-        "social": "술(-), 담배(-), 커피(하루 1잔), 직업(디자이너)",
-        "family": "-",
-        "female_hx": "LMP 6주 전(평소 주기 28일로 매우 규칙적), 임신 가능성(+, 피임 안 함), 아이 없음"
+        "C_character": "칼로 찌르는 듯 찢어지는 극심한 통증, NRS 8점, 오른쪽 어깨로 퍼지는 방사통(+)",
+        "A_associated": "식욕부진/구역(+/+), 질출혈(+, 3일 전부터 소량의 갈색 혈 지속), 생리 예정일보다 10일 이상 지연, 어지러움(+), 발열(-)",
+        "F_factor": "움직이거나 자세 바꿀 때 극심해짐. 어떤 자세도 완화 없음",
+        "PSH": "없음",
+        "PMH": "골반염 치료력(+, 2년 전 약물치료)",
+        "medication": "없음",
+        "social": "음주(-), 흡연(-), 직업(디자이너), 커피(하루 1잔)",
+        "family": "없음",
+        "female_hx": "LMP 6주 전(평소 28일 주기로 매우 규칙적), 피임 안 함, 임신 가능성 있음, 아이 없음"
       },
       "physical_exam": {
-        "General": "혈압이 105/65로 다소 낮고 맥박이 96회/분으로 빠른 편, 안색이 창백함",
-        "HEENT": "결막 창백(+, anemia 소견), 공막 정상, 구강 점막 약간 건조함",
-        "Abdomen": "복부 시/청/타/촉(-/-/-/+), 우하복부 압통 및 반발압통 뚜렷함(Td/rTd +/+), 골반 내진 시 자궁목 유동 압통(Cervical motion tenderness, +), DRE 정상, CVAT(-)",
-        "Extremity": "피부 긴장도 정상, 오목 부종(-)"
+        "general": "안색 창백, 식은땀, 급성 병색. BP 105/65(저혈압 경향), PR 96(빈맥 경향)",
+        "eyes": "결막 창백(+, 빈혈 소견), 공막 정상",
+        "abdomen": {
+          "inspection": "특이소견 없음",
+          "auscultation": "장음 감소",
+          "percussion": "특이소견 없음",
+          "palpation": "우하복부 압통(+)",
+          "tenderness_location": "우하복부",
+          "rebound_tenderness": true,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        },
+        "pelvic": "자궁목 유동 압통(CMT, +)"
       },
-      "patient_question": "혹시 수술을 해야 하나요? 아이는 가질 수 있는 건가요?",
-      "special_behavior": "통증이 너무 심해 식은땀을 흘리며 아랫배를 움켜쥐고 다리를 구부린 자세를 유지함",
-      "answer_key": {
-        "top_diagnoses": [
-          "자궁 외 임신 파열",
-          "난소 낭종 파열",
-          "급성 충수돌기염"
+      "nonverbal_expressions": {
+        "on_entry": "[아랫배를 움켜쥐고 다리를 구부린 채 천천히 들어옴. 안색이 매우 창백하고 식은땀을 흘림]",
+        "on_pain_question": "[찡그리며] 여기가 너무 아파요... [아랫배를 가리킴]",
+        "on_palpation": "[아! 하며 움찔하고 눈물이 맺힘] 거기 누르니까 너무 아파요",
+        "on_rebound": "[표정이 일그러지며] 손 뗄 때 더 아파요",
+        "on_lmp_question": "[잠시 생각하다가] 6주 전이요... 생리가 좀 늦나 했는데...",
+        "on_pregnancy_question": "[불안해하며] 임신인가요? 왜 이렇게 아픈 거예요?",
+        "baseline_emotion": "극심한 불안과 통증"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "hcg",
+            "response": "그게 뭔지 잘 몰라요."
+          },
+          {
+            "question_pattern": "자궁외",
+            "response": "자궁외 임신이요? 그게 뭔가요..."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "female_hx - LMP 확인 (핵심!)",
+            "keywords": [
+              "생리",
+              "마지막 생리",
+              "lmp",
+              "월경",
+              "생리일"
+            ],
+            "score": 6
+          },
+          {
+            "category": "female_hx - 임신 가능성/피임 여부 (핵심!)",
+            "keywords": [
+              "임신",
+              "피임",
+              "임신 가능"
+            ],
+            "score": 5
+          },
+          {
+            "category": "A - 질 출혈 (핵심!)",
+            "keywords": [
+              "질 출혈",
+              "출혈",
+              "피가",
+              "하혈",
+              "혈"
+            ],
+            "score": 4
+          },
+          {
+            "category": "C - 어깨 방사통 (복강내출혈 징후)",
+            "keywords": [
+              "어깨",
+              "방사",
+              "퍼지"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 어지러움 (쇼크 징후)",
+            "keywords": [
+              "어지러",
+              "핑",
+              "실신",
+              "쓰러"
+            ],
+            "score": 4
+          },
+          {
+            "category": "O - 발병시기/양상",
+            "keywords": [
+              "언제",
+              "시작",
+              "갑자기"
+            ],
+            "score": 2
+          },
+          {
+            "category": "PMH - 골반염 과거력 (위험인자)",
+            "keywords": [
+              "골반염",
+              "pid",
+              "난관",
+              "과거"
+            ],
+            "score": 3
+          }
         ],
         "required_tests": [
-          "Urine/Serum b-hCG 검사",
-          "골반 초음파(Transvaginal US)",
-          "전체혈구검사(CBC, Hb 확인)"
+          "Urine hCG",
+          "골반 초음파",
+          "CBC"
         ],
         "required_treatments": [
-          "응급 수술(복강경 또는 개복 하 난관절제술)",
-          "다량의 수액 공급 및 수혈 준비",
-          "진통제 투여"
+          "응급 수술",
+          "수액",
+          "수혈"
         ],
         "expected_skills": [
           "마지막 생리 시작일(LMP) 및 임신 가능성 확인",
-          "골반 내진 및 자궁목 유동 압통 확인 안내",
-          "실혈 및 쇼크 징후(맥박, 결막 등) 평가"
+          "골반 내진 및 자궁목 유동 압통(CMT) 확인",
+          "실혈 및 쇼크 징후(맥박, 결막) 평가"
         ]
       }
     },
     {
       "case_id": "acute_09",
-      "category": "급성 복통",
+      "category": "급성복통",
+      "hidden_diagnosis": "수술 후 유착성 장폐색",
+      "top_diagnoses": [
+        "수술 후 유착성 장폐색",
+        "장중첩증",
+        "대장암에 의한 폐색"
+      ],
       "patient": {
         "name": "최영수",
         "age": 45,
-        "sex": "남"
+        "appearance": "[복부가 눈에 띄게 부풀어 있음. 잦은 구역질로 대화 중 구토할 것 같은 표정을 지음]",
+        "sex": "남",
+        "vital_signs": {
+          "BP": "130/85",
+          "PR": 84,
+          "RR": 18,
+          "BT": 37.1
+        },
+        "setting": ""
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "배가 아프고 가스가 차서 터질 것 같아요",
-      "setting": "응급실, 오후 2시",
-      "vitals": {
-        "BP": "130/85",
-        "PR": 84,
-        "RR": 18,
-        "BT": 37.1
-      },
+      "chief_complaint": "배가 아프고 가스가 차서 터질 것 같아요",
       "history": {
         "O_onset": "어제 저녁 식사 후",
         "L_location": "복부 전반, 배꼽 주변이 특히 심함",
         "D_duration_course": "어제 저녁부터 점차 심해지며 간헐적으로 쥐어짜듯 아프다가 현재는 계속 더부룩함",
         "Co_change": "시간이 갈수록 배가 더 부풀어 오르고 통증 주기가 짧아짐",
-        "Ex_prior_episode": "이전에도 가끔 과식하면 배가 빵빵했으나 이 정도로 아픈 적은 없음",
-        "C_character": "간헐적으로 파도치듯 쥐어짜는 듯한 통증, NRS 6점, 방사통(-), 통증 부위가 고정되지 않고 전체적으로 불편함",
-        "A_associated": {
-          "전신": "발열/오한/피로/체중감소(-/-/-/-)",
-          "소화기": "식욕부진/구역/구토(+/+/+, 오늘 아침부터 초록색 빛을 띠는 쓴 물을 두 차례 구토함), 변비/설사(+/-, 어제 아침 이후로 대변을 못 봄), 가스 배출(-, 어제 밤부터 방귀가 전혀 안 나옴), 황달(-)"
-        },
-        "F_factor": "악화(+, 음식을 먹거나 물만 마셔도 바로 구역질이 나고 복통이 심해짐), 완화(+, 토하고 나면 아주 잠깐 속이 편해지는 듯하나 다시 아픔)",
-        "E_prior_exam": "-",
-        "PSH": "3년 전 급성 충수염으로 개복 충수절제술 시행 받음",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-)",
-        "medication": "-",
-        "social": "술(소주 주 1회 1병), 담배(-), 직업(사무직)",
-        "family": "-"
+        "Ex_prior_episode": "이전에도 과식하면 배가 빵빵했으나 이 정도는 처음",
+        "C_character": "파도치듯 쥐어짜는 듯한 통증, NRS 6점, 방사통(-)",
+        "A_associated": "구역/구토(+/+, 초록색 쓴 물을 두 차례 구토), 변비(+, 어제 아침 이후 대변 못 봄), 방귀(-,  어젯밤부터 전혀 안 나옴), 발열(-)",
+        "F_factor": "음식/물 마시면 바로 구역질 심해짐. 토하면 잠깐 편하나 다시 아픔",
+        "PSH": "3년 전 급성 충수염으로 개복 충수절제술 시행",
+        "PMH": "특이사항 없음",
+        "medication": "없음",
+        "social": "술(소주 주 1회 1병), 흡연(-), 직업(사무직)",
+        "family": "없음"
       },
       "physical_exam": {
-        "General": "활력징후는 비교적 안정적이나 복부 팽만으로 힘들어함",
-        "HEENT": "결막/공막 정상, 구강 탈수 소견(+, 혀와 입술이 말라 있음)",
-        "Abdomen": "복부 시진 시 전반적으로 팽만되어 있음(Distension +), 과거 수술 흉터 확인됨. 장음 청진 시 금속성 장음(Metallic tinkling sound) 및 장음 증가 확인됨. 복부 전반에 경미한 압통 있으나 반발압통은 없음(Td/rTd +/-), CVAT(-)",
-        "Extremity": "피부 긴장도 약간 감소됨, 오목 부종(-)"
+        "general": "활력징후 비교적 안정적이나 복부 팽만으로 힘들어함. 구강 탈수 소견(혀와 입술이 말라 있음)",
+        "eyes": "결막/공막 정상",
+        "abdomen": {
+          "inspection": "복부 전반 팽만(Distension +), 우하복부 수술 흉터 확인됨",
+          "auscultation": "금속성 장음(Metallic tinkling sound) 및 장음 항진",
+          "percussion": "고장음(Tympany) 전반",
+          "palpation": "복부 전반 경미한 압통",
+          "tenderness_location": "전반적",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        }
       },
-      "patient_question": "가스가 너무 차서 그런데 변비약이나 관장을 좀 해주시면 안 되나요?",
-      "special_behavior": "잦은 구역질로 대화 도중 구토할 것 같은 모션을 취함, 배가 아플 때 끙끙 앓는 소리를 냄",
-      "answer_key": {
-        "top_diagnoses": [
-          "수술 후 유착에 의한 장폐색(Adhesion ileus)",
-          "장중첩증/장염전",
-          "대장암에 의한 폐색"
+      "nonverbal_expressions": {
+        "on_entry": "[배가 눈에 띄게 불러 있고 불편한 표정. 움직일 때마다 신음소리를 냄]",
+        "on_pain_question": "[배를 가리키며] 배 전체가 빵빵하고 쥐어짜는 것처럼 아파요",
+        "on_psh_question": "[아, 맞다는 표정으로] 3년 전에 맹장 수술했어요",
+        "on_nausea": "[대화 중 갑자기 구토할 것 같은 표정을 지으며 입을 막음]",
+        "on_flatus_question": "[당황한 표정] 방귀가 어젯밤부터 전혀 안 나와요",
+        "baseline_emotion": "불안, 불편함"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "유착",
+            "response": "유착이요? 그게 뭔가요?"
+          },
+          {
+            "question_pattern": "L-tube",
+            "response": "그게 뭔지 모르겠어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "PSH - 복부 수술력 (핵심!)",
+            "keywords": [
+              "수술",
+              "맹장",
+              "충수",
+              "개복",
+              "수술력"
+            ],
+            "score": 7
+          },
+          {
+            "category": "A - 방귀/가스 배출 여부 (핵심!)",
+            "keywords": [
+              "방귀",
+              "가스",
+              "배출",
+              "안 나와"
+            ],
+            "score": 6
+          },
+          {
+            "category": "A - 구토물 양상 (담즙성)",
+            "keywords": [
+              "구토",
+              "토",
+              "초록",
+              "쓴",
+              "담즙"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 배변 여부",
+            "keywords": [
+              "대변",
+              "변",
+              "배변",
+              "못 봄"
+            ],
+            "score": 4
+          },
+          {
+            "category": "O - 발병시기",
+            "keywords": [
+              "언제",
+              "시작",
+              "어제"
+            ],
+            "score": 2
+          },
+          {
+            "category": "C - 통증 양상 (산통)",
+            "keywords": [
+              "쥐어짜",
+              "간헐",
+              "파도",
+              "주기"
+            ],
+            "score": 3
+          }
         ],
         "required_tests": [
-          "복부 단순 방사선 검사(Erect/Supine Plain X-ray, 가스-액체층 확인)",
-          "복부 조영 CT (폐색 이행 부위 확인 및 장괴사 여부 평가)",
-          "전해질 및 혈액 검사"
+          "복부 X-ray",
+          "복부 CT",
+          "전해질 검사"
         ],
         "required_treatments": [
-          "금식(NPO) 및 수액/전해질 공급",
-          "코위관(L-tube) 삽입을 통한 감압",
-          "보존적 치료 실패 시 유착박리술 등 수술적 치료 고려"
+          "금식(NPO)",
+          "L-tube 삽입",
+          "수액/전해질 공급"
         ],
         "expected_skills": [
-          "과거 복부 수술 이력(PSH) 반드시 문진",
-          "가스 배출(방귀) 및 배변 여부, 구토물 양상 확인",
-          "복부 청진 시 장음의 변화(금속성 장음) 캐치"
+          "과거 복부 수술력(PSH) 적극적 문진",
+          "가스 배출 및 배변 여부 확인",
+          "복부 청진 시 금속성 장음 확인"
         ]
       }
     },
     {
       "case_id": "acute_10",
-      "category": "급성 복통",
+      "category": "급성복통",
+      "hidden_diagnosis": "요관결석",
+      "top_diagnoses": [
+        "요관결석",
+        "급성 신우신염",
+        "급성 충수돌기염"
+      ],
       "patient": {
         "name": "김명진",
         "age": 34,
-        "sex": "남"
+        "appearance": "[침대에 가만히 눕지 못하고 앉았다 일어났다 하며 몸을 비틂. 식은땀을 흘림]",
+        "sex": "남",
+        "vital_signs": {
+          "BP": "135/85",
+          "PR": 92,
+          "RR": 20,
+          "BT": 36.6
+        },
+        "setting": ""
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "옆구리가 끊어질 것처럼 아파요",
-      "setting": "응급실, 오전 4시",
-      "vitals": {
-        "BP": "135/85",
-        "PR": 92,
-        "RR": 20,
-        "BT": 36.6
-      },
+      "chief_complaint": "옆구리가 끊어질 것처럼 아파요",
       "history": {
         "O_onset": "2시간 전, 자다가 갑자기 깸",
-        "L_location": "오른쪽 옆구리(플랭크 부위)에서 시작하여 아래 아랫배 쪽으로 뻗침",
-        "D_duration_course": "통증이 가라앉았다가 갑자기 미칠 듯이 아픈 증상이 반복됨",
-        "Co_change": "통증이 올 때는 NRS 9점에 달할 정도로 극심함",
-        "Ex_prior_episode": "처음 느껴보는 통증임",
-        "C_character": "쥐어짜고 찌르는 듯한 격심한 통증, 우측 하복부 및 음낭 쪽으로 뻗치는 방사통(+)",
-        "A_associated": {
-          "전신": "발열/오한(-/-), 식은땀(+, 아플 때 온몸이 젖을 정도로 흘림)",
-          "소화기": "구역/구토(+/+, 너무 아파서 위액을 두 번 토함), 변비/설사(-/-)",
-          "비뇨기": "빈뇨(+, 화장실을 자꾸 가고 싶음), 배뇨통(+, 소변볼 때 찌릿함), 혈뇨(+, 소변 색이 평소와 달리 붉고 탁함)"
-        },
-        "F_factor": "악화(-, 자세를 어떻게 바꿔도 통증이 줄어들지 않음), 완화(-)",
-        "E_prior_exam": "-",
-        "PSH": "-",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-)",
-        "medication": "-",
-        "social": "술(주 2~3회, 회식 시 과음), 담배(10갑년), 직업(IT 개발자, 하루 종일 앉아서 근무하며 물을 거의 안 마심)",
-        "family": "아버지(요로결석으로 쇄석술 받으신 적 있음)"
+        "L_location": "오른쪽 옆구리에서 시작해 아랫배 및 음낭 쪽으로 뻗침",
+        "D_duration_course": "통증이 가라앉았다 갑자기 미칠 듯이 아픈 증상이 반복됨",
+        "Co_change": "통증이 올 때 NRS 9점에 달하는 극심한 강도",
+        "Ex_prior_episode": "처음 느껴보는 통증",
+        "C_character": "쥐어짜고 찌르는 듯한 격심한 통증, 우측 하복부·음낭 방사통(+)",
+        "A_associated": "혈뇨(+, 소변이 붉고 탁함), 빈뇨(+), 배뇨통(+, 소변볼 때 찌릿함), 구역/구토(+/+), 식은땀(+), 발열/오한(-/-)",
+        "F_factor": "자세를 어떻게 바꿔도 통증이 줄어들지 않음",
+        "PSH": "없음",
+        "PMH": "특이사항 없음",
+        "medication": "없음",
+        "social": "술(주 2~3회 과음), 흡연(10갑년), 직업(IT 개발자, 하루 종일 앉아 물을 거의 안 마심)",
+        "family": "아버지(요로결석으로 쇄석술 받은 적 있음)"
       },
       "physical_exam": {
-        "General": "통증으로 안절부절못하며 대답하는 도중에도 몸을 비틂",
-        "HEENT": "결막/공막 정상, 식은땀이 가득함",
-        "Abdomen": "복부는 부드러우며 뚜렷한 압통이나 반발압통은 없음(Td/rTd -/-). 우측 등 뒤 늑골척추각을 주먹으로 살짝 칠 때 깜짝 놀라며 극심한 통증을 호소함(우측 CVAT ++), DRE 정상",
-        "Extremity": "-"
+        "general": "통증으로 안절부절못하며 몸을 비틂. Tossing and turning 소견.",
+        "eyes": "결막/공막 정상. 식은땀.",
+        "abdomen": {
+          "inspection": "특이소견 없음",
+          "auscultation": "장음 정상",
+          "percussion": "특이소견 없음",
+          "palpation": "복부 부드러움. 뚜렷한 압통 없음",
+          "tenderness_location": "없음",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": true,
+          "CVAT_side": "우측(++, 극심한 통증 호소)"
+        }
       },
-      "patient_question": "진통제 주사 좀 먼저 빨리 놓아주시면 안 되나요? 죽을 것 같아요.",
-      "special_behavior": "침대에 가만히 눕지 못하고 앉았다 일어났다 하며 몸을 웅크리고 뒹굴며 괴로워함",
-      "answer_key": {
-        "top_diagnoses": [
-          "우측 요관 결석",
-          "급성 신우신염(APN)",
-          "급성 충수돌기염"
+      "nonverbal_expressions": {
+        "on_entry": "[침대 위에서 앉았다 누웠다 하며 가만히 있지 못함. 매우 괴로워함]",
+        "on_pain_question": "[옆구리를 가리키며 몸을 비틂] 여기가 죽을 것 같이 아파요",
+        "on_cvat": "[악 소리를 내며] 아!! 거기 너무 아파요!",
+        "on_hematuria_question": "[당황한 표정] 네, 소변이 빨갛게 나왔어요",
+        "on_analgesia_request": "진통제 주사 좀 먼저 빨리 놓아주시면 안 되나요? 죽을 것 같아요.",
+        "baseline_emotion": "극심한 통증, 초조함"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "쇄석술",
+            "response": "아버지가 그 치료 받으셨어요."
+          },
+          {
+            "question_pattern": "요산",
+            "response": "요산 수치는 재본 적이 없어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "L - 옆구리→사타구니 방사통 (핵심!)",
+            "keywords": [
+              "옆구리",
+              "사타구니",
+              "음낭",
+              "방사",
+              "뻗치"
+            ],
+            "score": 6
+          },
+          {
+            "category": "C - 산통 양상 (핵심!)",
+            "keywords": [
+              "간헐",
+              "반복",
+              "파도",
+              "왔다갔다",
+              "쥐어짜"
+            ],
+            "score": 5
+          },
+          {
+            "category": "A - 혈뇨 (핵심!)",
+            "keywords": [
+              "혈뇨",
+              "소변",
+              "붉",
+              "빨갛",
+              "탁"
+            ],
+            "score": 5
+          },
+          {
+            "category": "A - 비뇨기 증상",
+            "keywords": [
+              "빈뇨",
+              "배뇨통",
+              "찌릿",
+              "소변볼 때"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 발열 없음 (신우신염 감별)",
+            "keywords": [
+              "열",
+              "발열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "category": "family - 가족력",
+            "keywords": [
+              "가족",
+              "아버지",
+              "결석",
+              "가족력"
+            ],
+            "score": 3
+          },
+          {
+            "category": "social - 수분 섭취 부족 (위험인자)",
+            "keywords": [
+              "물",
+              "수분",
+              "커피"
+            ],
+            "score": 2
+          }
         ],
         "required_tests": [
-          "소변 검사(Urinalysis, 현미경적 혈뇨 확인)",
-          "KUB(단순 요로 방사선 검사)",
-          "복부/골반 비조영 CT(Non-contrast CT)"
+          "소변 검사",
+          "비조영 CT",
+          "KUB"
         ],
         "required_treatments": [
-          "마약성 진통제 또는 NSAIDs 주사 투여(통증 조절 우선)",
-          "충분한 수액 공급(가이드라인에 따른 수화)",
-          "결석 크기에 따라 체외충격파쇄석술(ESWL) 또는 자연 배출 대기"
+          "진통제(NSAIDs/마약성)",
+          "수액 공급",
+          "체외충격파쇄석술(ESWL)"
         ],
         "expected_skills": [
-          "늑골척추각 압통(CVAT) 검사를 정확히 시행",
-          "통증의 간헐적 요동 양상(Colicky pain)과 비뇨기계 증상(혈뇨, 배뇨통) 연계 문진",
-          "검사 전 진통제 우선 투여 멘트로 환자 안심시키기"
+          "늑골척추각 압통(CVAT) 검사 시행",
+          "Colicky pain 양상과 비뇨기계 증상 연계 문진",
+          "진통제 우선 투여로 환자 안심"
         ]
       }
     },
     {
       "case_id": "acute_11",
-      "category": "급성 복통",
+      "category": "급성복통",
+      "hidden_diagnosis": "담석증(담도산통)",
+      "top_diagnoses": [
+        "담석증(담도산통)",
+        "급성 담낭염(초기)",
+        "기능성 소화불량"
+      ],
       "patient": {
         "name": "송정자",
         "age": 56,
-        "sex": "여"
-      },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "오른쪽 윗배가 아프고 속이 메스꺼워요",
-      "setting": "외래, 오전 11시",
-      "vitals": {
-        "BP": "138/82",
-        "PR": 82,
-        "RR": 16,
-        "BT": 37.8
-      },
-      "history": {
-        "O_onset": "오늘 새벽 1시경(어제 저녁으로 삼겹살을 과식함)",
-        "L_location": "오른쪽 윗배(우상복부) 및 명치 부위",
-        "D_duration_course": "새벽에 시작되어 약 3시간 동안 지속되다가 새벽 4시쯤부터 서서히 호전됨",
-        "Co_change": "현재는 통증이 많이 가라앉고 둔한 불편감만 남은 상태",
-        "Ex_prior_episode": "수개월 전부터 기름진 음식을 먹으면 소화가 잘 안 되고 우상복부가 묵직하게 아프다가 한두 시간 뒤 좋아지곤 했음",
-        "C_character": "둔하게 쥐어짜는 듯한 묵직한 통증, NRS 5점(새벽에는 7점), 오른쪽 등과 오른쪽 어깨 쪽으로 뻐근하게 퍼지는 느낌이 있음(방사통+)",
-        "A_associated": {
-          "전신": "발열/오한/피로/체중변화(+/-/-/-)",
-          "소화기": "식욕부진/구역/구토(+/+/-/-, 새벽에 심하게 체한 듯 울렁거렸으나 토하지는 않음), 변비/설사(-/-), 황달/대변색 변화(-/-)"
+        "appearance": "[현재는 통증이 가라앉아 편한 자세로 앉아 있음. 약간 피곤해 보임]",
+        "sex": "여",
+        "vital_signs": {
+          "BP": "138/82",
+          "PR": 82,
+          "RR": 16,
+          "BT": 37.8
         },
-        "F_factor": "악화(+, 기름진 음식, 고기, 튀김류 섭취 시 발생), 완화(+, 시간이 지나면 서서히 호전됨, 타이레놀 먹었으나 효과 별로 없었음)",
-        "E_prior_exam": "1년 전 위내시경 검사 시 경미한 위염 소견 외 특이사항 없음",
-        "PSH": "-",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-), 고지혈증(+, 3년 전 진단)",
+        "setting": ""
+      },
+      "chief_complaint": "오른쪽 윗배가 아프고 속이 메스꺼워요",
+      "history": {
+        "O_onset": "오늘 새벽 1시경 (어제 저녁 삼겹살 과식 후)",
+        "L_location": "오른쪽 윗배(우상복부) 및 명치",
+        "D_duration_course": "새벽에 시작해 약 3시간 지속되다 새벽 4시부터 서서히 호전됨",
+        "Co_change": "현재는 통증이 많이 가라앉고 둔한 불편감만 남음",
+        "Ex_prior_episode": "수개월 전부터 기름진 음식 먹으면 우상복부가 묵직하게 아프다가 1~2시간 뒤 좋아지곤 했음",
+        "C_character": "쥐어짜는 듯한 묵직한 통증, NRS 5점(새벽에는 7점), 오른쪽 등·어깨 쪽 방사통(+)",
+        "A_associated": "구역(+), 구토(-), 발열(+, 미열), 황달(-), 체중변화(-)",
+        "F_factor": "기름진 음식·고기·튀김 섭취 시 발생. 시간이 지나면 서서히 호전. 타이레놀 효과 없음",
+        "PSH": "없음",
+        "PMH": "고지혈증(+, 3년 전 진단). 1년 전 위내시경 경미한 위염 외 특이사항 없음",
         "medication": "고지혈증약(Atorvastatin)",
-        "social": "술(-), 담배(-), 직업(가정주부), 비만 체형(BMI 26.5)",
-        "family": "어머니(담석증으로 쓸개 절제 수술 받음)",
-        "female_hx": "5년 전 폐경, 폐경 후 질출혈 없음, 현재 증상과 부인과적 연관성 없음"
+        "social": "술(-), 흡연(-), 직업(가정주부), 비만(BMI 26.5)",
+        "family": "어머니(담석증으로 담낭절제술 받음)"
       },
       "physical_exam": {
-        "General": "현재는 통증이 완화되어 활력징후 및 전신 상태 양호함",
-        "HEENT": "결막 정상, 공막 정상(황달 소견 없음)",
-        "Abdomen": "우상복부 깊게 촉진 시 약간의 불편감 호소하나 명확한 압통이나 반발압통은 없음. 숨을 깊게 들이마시게 한 상태에서 우상복부를 누를 때 통증으로 숨을 멈추는 징후는 없음(Murphy's sign -), CVAT(-), DRE 정상",
-        "Extremity": "-"
+        "general": "현재는 통증 완화, 활력징후 안정적. BT 37.8(미열)",
+        "eyes": "결막 정상, 공막 정상(황달 소견 없음)",
+        "abdomen": {
+          "inspection": "특이소견 없음",
+          "auscultation": "장음 정상",
+          "percussion": "특이소견 없음",
+          "palpation": "우상복부 깊게 촉진 시 약간의 불편감. 명확한 압통 없음",
+          "tenderness_location": "우상복부(경미)",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        }
       },
-      "patient_question": "체한 줄 알고 손도 따봤는데 왜 자꾸 고기만 먹으면 이럴까요? 위암 같은 건가요?",
-      "special_behavior": "이야기 도중 기름진 음식을 좋아하는 식습관을 멋쩍게 웃으며 이야기함",
-      "answer_key": {
-        "top_diagnoses": [
-          "급성 담낭염(초기)",
-          "담석증에 의한 담도산통(Biliary colic)",
-          "기능성 소화불량 / 위궤양"
+      "nonverbal_expressions": {
+        "on_entry": "[약간 피곤해 보이지만 현재는 비교적 편안한 표정으로 앉아 있음]",
+        "on_pain_question": "[우상복부를 가리키며] 새벽에 여기가 너무 아팠는데 지금은 좀 괜찮아요",
+        "on_fat_food_question": "[멋쩍게 웃으며] 기름진 거 좋아해서요... 고기 먹으면 꼭 이래요",
+        "on_family_hx": "[끄덕이며] 어머니도 담석이라고 쓸개 수술 받으셨어요",
+        "on_cancer_concern": "[걱정스러운 표정] 위암 같은 건 아닌 거죠?",
+        "baseline_emotion": "불안(암 걱정), 멋쩍음"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "murphy",
+            "response": "그게 무슨 검사예요?"
+          },
+          {
+            "question_pattern": "담석",
+            "response": "담석이 있는지는 아직 모르고 이번에 처음 검사 받으러 왔어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "F - 기름진 음식 후 발생 (핵심!)",
+            "keywords": [
+              "기름",
+              "고기",
+              "튀김",
+              "지방",
+              "삼겹"
+            ],
+            "score": 6
+          },
+          {
+            "category": "L - 우상복부→등/어깨 방사통 (핵심!)",
+            "keywords": [
+              "등",
+              "어깨",
+              "방사",
+              "퍼지",
+              "뻐근"
+            ],
+            "score": 5
+          },
+          {
+            "category": "D - 지속 시간 (1~5시간 후 호전)",
+            "keywords": [
+              "시간",
+              "지나면",
+              "호전",
+              "나아",
+              "얼마나"
+            ],
+            "score": 4
+          },
+          {
+            "category": "Ex - 반복 에피소드",
+            "keywords": [
+              "이전",
+              "전에도",
+              "반복",
+              "예전"
+            ],
+            "score": 4
+          },
+          {
+            "category": "family - 담석 가족력 (위험인자)",
+            "keywords": [
+              "가족",
+              "어머니",
+              "담석",
+              "쓸개"
+            ],
+            "score": 3
+          },
+          {
+            "category": "PMH - 고지혈증 (위험인자)",
+            "keywords": [
+              "고지혈",
+              "콜레스테롤",
+              "지질"
+            ],
+            "score": 2
+          },
+          {
+            "category": "A - 황달 유무",
+            "keywords": [
+              "황달",
+              "눈 노랗",
+              "소변 노랗"
+            ],
+            "score": 3
+          }
         ],
         "required_tests": [
-          "상복부 초음파 검사(Gallstone 확인 및 담낭벽 두께 확인)",
-          "간기능 검사(LFT, Bilirubin/ALP/GGT 확인)",
-          "전체혈구검사(CBC, 백혈구 상승 여부 배제)"
+          "복부 초음파",
+          "간기능 검사(LFT)",
+          "CBC"
         ],
         "required_treatments": [
-          "저지방 식이요법 및 식습관 교정 교육",
-          "통증 발생 시 진통제 투여",
-          "증상이 반복되므로 향후 선택적 복강경 담낭절제술 권유"
+          "저지방 식이",
+          "진통제",
+          "담낭절제술 권유"
         ],
         "expected_skills": [
-          "담도산통의 전형적인 지속 시간(보통 1~5시간 내외) 및 기름진 음식과의 연관성 문진",
-          "신체 진찰 시 Murphy 징후 및 황달 유무를 정확히 확인",
-          "담낭암 가족력 및 고지혈증 등 위험인자 연계 기술"
+          "기름진 음식과의 연관성 및 지속 시간 문진",
+          "Murphy sign 및 황달 유무 신체진찰",
+          "담낭암 가족력 및 고지혈증 위험인자 확인"
+        ]
+      }
+    },
+    {
+      "case_id": "acute_12",
+      "category": "급성복통",
+      "hidden_diagnosis": "난소 낭종 염전",
+      "top_diagnoses": [
+        "난소 낭종 염전",
+        "자궁외 임신",
+        "급성 충수돌기염"
+      ],
+      "patient": {
+        "name": "한수빈",
+        "age": 22,
+        "appearance": "[오른쪽 아랫배를 감싸 안고 앉아 있음. 통증으로 얼굴을 찡그리고 있음]",
+        "sex": "여",
+        "vital_signs": {
+          "BP": "118/74",
+          "PR": 102,
+          "RR": 20,
+          "BT": 37.2
+        },
+        "setting": ""
+      },
+      "chief_complaint": "오른쪽 아랫배가 갑자기 너무 아파요",
+      "history": {
+        "O_onset": "3시간 전, 체육 수업 중 갑자기 시작됨",
+        "L_location": "오른쪽 아랫배",
+        "D_duration_course": "갑자기 시작되어 지속적으로 아픔. 처음에 잠깐 나아지는 듯했으나 다시 심해짐",
+        "Co_change": "점차 악화됨",
+        "Ex_prior_episode": "1년 전에도 비슷하게 갑자기 오른쪽이 아팠다가 저절로 나은 적 있음",
+        "C_character": "쥐어짜고 비트는 듯한 극심한 통증, NRS 8점, 방사통 없음",
+        "A_associated": "구역/구토(+/+), 발열(-), 질출혈(-), 어지러움(경미)",
+        "F_factor": "움직일 때 심해짐. 쉬면 조금 나아지는 듯하나 큰 변화 없음",
+        "PSH": "없음",
+        "PMH": "난소 낭종(+, 6개월 전 초음파에서 우측 4cm 낭종 발견됨, 경과관찰 중)",
+        "medication": "없음",
+        "social": "음주(-), 흡연(-), 직업(대학생)",
+        "family": "없음",
+        "female_hx": "LMP 2주 전(28일 주기 규칙적), 성경험(-), 임신 가능성 없음"
+      },
+      "physical_exam": {
+        "general": "급성 통증 병색. PR 102(빈맥, 통증/미주신경성)",
+        "eyes": "결막 정상, 공막 정상",
+        "abdomen": {
+          "inspection": "특이소견 없음",
+          "auscultation": "장음 정상",
+          "percussion": "특이소견 없음",
+          "palpation": "우하복부 압통(+), 복부 전반 근육 긴장 경미",
+          "tenderness_location": "우하복부",
+          "rebound_tenderness": true,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        },
+        "pelvic": "우측 부속기 압통(+) 및 종물 촉지됨. CMT(-)"
+      },
+      "nonverbal_expressions": {
+        "on_entry": "[오른쪽 아랫배를 감싸 안고 허리를 약간 구부린 채 들어옴]",
+        "on_pain_question": "[찡그리며] 여기가 갑자기 너무 아파요 [오른쪽 아랫배를 가리킴]",
+        "on_activity_question": "[체육 수업 떠올리며] 줄넘기 하다가 갑자기 시작됐어요",
+        "on_palpation": "[움찔하며] 아, 거기 누르면 너무 아파요",
+        "on_pmh_question": "[기억하며] 아, 낭종이라고 경과 보자고 했는데...",
+        "baseline_emotion": "통증과 불안"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "염전",
+            "response": "염전이요? 그게 뭔가요?"
+          },
+          {
+            "question_pattern": "낭종",
+            "response": "네, 6개월 전에 초음파에서 낭종이 있다고 했어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "PMH - 난소 낭종 과거력 (핵심!)",
+            "keywords": [
+              "낭종",
+              "난소",
+              "초음파",
+              "혹",
+              "과거"
+            ],
+            "score": 7
+          },
+          {
+            "category": "O - 활동 중 갑작스러운 발병 (핵심!)",
+            "keywords": [
+              "갑자기",
+              "운동",
+              "체육",
+              "활동",
+              "움직"
+            ],
+            "score": 5
+          },
+          {
+            "category": "female_hx - LMP/임신 가능성",
+            "keywords": [
+              "생리",
+              "lmp",
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 질출혈 없음 (자궁외임신 감별)",
+            "keywords": [
+              "질출혈",
+              "출혈",
+              "피",
+              "하혈"
+            ],
+            "score": 4
+          },
+          {
+            "category": "Ex - 이전 유사 에피소드 (간헐적 염전 의심)",
+            "keywords": [
+              "이전",
+              "전에도",
+              "예전",
+              "반복"
+            ],
+            "score": 4
+          },
+          {
+            "category": "C - 통증 양상",
+            "keywords": [
+              "어떻게",
+              "양상",
+              "쥐어짜",
+              "비트"
+            ],
+            "score": 3
+          }
+        ],
+        "required_tests": [
+          "골반 초음파(도플러 포함)",
+          "소변 hCG",
+          "CBC"
+        ],
+        "required_treatments": [
+          "응급 복강경 수술(염전 해소/낭종 제거)",
+          "수액 공급",
+          "진통제"
+        ],
+        "expected_skills": [
+          "난소 낭종 과거력 적극 문진",
+          "LMP 및 임신 가능성 확인(자궁외임신 감별)",
+          "골반 초음파(도플러) 신속 시행 안내"
+        ]
+      }
+    },
+    {
+      "case_id": "acute_13",
+      "category": "급성복통",
+      "hidden_diagnosis": "복부 대동맥류 파열",
+      "top_diagnoses": [
+        "복부 대동맥류 파열",
+        "급성 심근경색(하벽)",
+        "장간막 허혈"
+      ],
+      "patient": {
+        "name": "오병철",
+        "age": 72,
+        "appearance": "[창백한 안색으로 등과 배를 동시에 감싸며 앉아 있음. 극심한 통증으로 표정이 일그러짐]",
+        "sex": "남",
+        "vital_signs": {
+          "BP": "90/60",
+          "PR": 110,
+          "RR": 22,
+          "BT": 36.8
+        },
+        "setting": ""
+      },
+      "chief_complaint": "배랑 등이 갑자기 찢어질 것 같이 아파요",
+      "history": {
+        "O_onset": "1시간 전, 갑자기 시작됨",
+        "L_location": "배꼽 주위 및 등 허리 쪽으로 동시에 퍼짐",
+        "D_duration_course": "갑자기 시작된 이후 지속적으로 극심하게 아픔",
+        "Co_change": "시작부터 극심하고 점점 어지럽고 기운이 없어짐",
+        "Ex_prior_episode": "없음",
+        "C_character": "찢어지는 듯한 극심한 통증, NRS 9점, 등 허리로 방사(+)",
+        "A_associated": "어지러움(+, 일어서려 하면 핑 돔), 식은땀(+), 구역(+), 발열(-), 혈뇨(-)",
+        "F_factor": "어떤 자세도 완화 없음",
+        "PSH": "없음",
+        "PMH": "고혈압(+, 15년, 약 불규칙 복용), 흡연(40갑년), 고지혈증(+)",
+        "medication": "혈압약(불규칙 복용), 고지혈증약",
+        "social": "술(소주 주 3회), 흡연(40갑년, 현재도 흡연 중), 직업(은퇴)",
+        "family": "형(심장 수술 받은 적 있음)"
+      },
+      "physical_exam": {
+        "general": "급성 병색. 창백하고 식은땀. BP 90/60(저혈압), PR 110(빈맥). 쇼크 징후.",
+        "eyes": "결막 창백(+)",
+        "abdomen": {
+          "inspection": "복부 약간 팽만",
+          "auscultation": "장음 감소",
+          "percussion": "특이소견 없음",
+          "palpation": "배꼽 주위 박동성 종물 촉지(+), 압통(+)",
+          "tenderness_location": "배꼽 주위(전반)",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false,
+          "pulsatile_mass": true
+        }
+      },
+      "nonverbal_expressions": {
+        "on_entry": "[창백한 얼굴로 배와 등을 동시에 감싸며 천천히 들어옴. 극심한 통증으로 표정이 일그러짐]",
+        "on_pain_question": "[힘겹게] 배도 아프고... 등도 같이 찢어지는 것 같아요",
+        "on_bp_drop": "[어지럽다는 표정으로] 좀 어지러워요... 기운이 없어요",
+        "on_htn_question": "[민망한 표정] 혈압약을 가끔 빠뜨렸어요...",
+        "on_palpation": "[움찔하며] 거기 뭔가 뛰는 것 같지 않아요?",
+        "baseline_emotion": "극심한 통증, 공포"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "대동맥",
+            "response": "대동맥이 어딘가요?"
+          },
+          {
+            "question_pattern": "동맥류",
+            "response": "그게 뭔지 잘 모르겠어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "C - 찢어지는 등 방사통 (핵심! AAA 전형 증상)",
+            "keywords": [
+              "등",
+              "허리",
+              "방사",
+              "찢어",
+              "퍼지"
+            ],
+            "score": 7
+          },
+          {
+            "category": "O - 갑작스러운 발병",
+            "keywords": [
+              "갑자기",
+              "시작",
+              "갑작스럽"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 저혈압/어지러움 (쇼크 징후)",
+            "keywords": [
+              "어지러",
+              "핑",
+              "기운 없",
+              "쓰러"
+            ],
+            "score": 5
+          },
+          {
+            "category": "PMH - 고혈압 (위험인자)",
+            "keywords": [
+              "고혈압",
+              "혈압",
+              "혈압약"
+            ],
+            "score": 4
+          },
+          {
+            "category": "social - 장기 흡연 (위험인자)",
+            "keywords": [
+              "담배",
+              "흡연",
+              "갑년"
+            ],
+            "score": 3
+          },
+          {
+            "category": "PMH - 고지혈증 (위험인자)",
+            "keywords": [
+              "고지혈",
+              "콜레스테롤",
+              "지질"
+            ],
+            "score": 2
+          }
+        ],
+        "required_tests": [
+          "복부 CT(조영)",
+          "복부 초음파(응급)",
+          "CBC/혈액형/교차시험"
+        ],
+        "required_treatments": [
+          "응급 수술(혈관 재건)",
+          "대량 수액/수혈",
+          "혈압 유지"
+        ],
+        "expected_skills": [
+          "배꼽 주위 박동성 종물 촉지 확인",
+          "저혈압+복통+등 방사통 → AAA 파열 즉시 의심",
+          "혈압 조절 불량 및 흡연 위험인자 파악"
+        ]
+      }
+    },
+    {
+      "case_id": "acute_14",
+      "category": "급성복통",
+      "hidden_diagnosis": "급성 A형 간염",
+      "top_diagnoses": [
+        "급성 A형 간염",
+        "급성 담낭염",
+        "약인성 간손상"
+      ],
+      "patient": {
+        "name": "임도현",
+        "age": 26,
+        "appearance": "[전반적으로 피곤해 보이고 피부와 눈 흰자가 약간 노랗게 보임]",
+        "sex": "남",
+        "vital_signs": {
+          "BP": "118/76",
+          "PR": 80,
+          "RR": 16,
+          "BT": 38.1
+        },
+        "setting": ""
+      },
+      "chief_complaint": "오른쪽 윗배가 아프고 몸이 너무 피곤해요. 눈도 노래진 것 같아요",
+      "history": {
+        "O_onset": "1주일 전부터 피로감과 식욕부진, 3일 전부터 황달",
+        "L_location": "오른쪽 윗배(우상복부), 전반적 피로감",
+        "D_duration_course": "처음에는 몸살인 줄 알았는데 점점 피부/눈이 노래지고 소변이 진해짐",
+        "Co_change": "점점 황달이 심해지고 소변 색이 진한 갈색(콜라색)으로 변함",
+        "Ex_prior_episode": "없음",
+        "C_character": "우상복부 둔한 불편감, NRS 3점. 날카로운 통증은 아님",
+        "A_associated": "황달(+, 3일 전부터), 진한 갈색 소변(+), 회색 변(+), 발열(+, 38.1도), 식욕부진(+), 구역(+), 구토(+), 심한 피로감(+)",
+        "F_factor": "특별한 악화/완화 요인 없음",
+        "PSH": "없음",
+        "PMH": "없음",
+        "medication": "없음",
+        "social": "술(주 2~3회 회식), 흡연(-), 직업(직장인 1년차)",
+        "family": "없음",
+        "travel_food": "3~4주 전 동남아 배낭여행, 현지 길거리 음식 자주 섭취"
+      },
+      "physical_exam": {
+        "general": "급성 피로 병색. BT 38.1(발열). 피부 및 공막 황달 뚜렷.",
+        "eyes": "공막 황달(+, 뚜렷), 결막 정상",
+        "abdomen": {
+          "inspection": "특이소견 없음",
+          "auscultation": "장음 정상",
+          "percussion": "간 타진 시 간비대 소견(간 탁음 범위 증가)",
+          "palpation": "우상복부 간 촉진 시 압통 및 간비대(+). 반동압통(-)",
+          "tenderness_location": "우상복부(간)",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        }
+      },
+      "nonverbal_expressions": {
+        "on_entry": "[기운 없이 천천히 들어옴. 눈 흰자가 노랗게 보임]",
+        "on_jaundice_question": "[본인 손을 보며] 피부도 노랗게 된 것 같아요. 친구들도 그러더라고요",
+        "on_urine_question": "[당황한 표정] 소변이 콜라색으로 나와서 놀랐어요",
+        "on_travel_question": "[기억하며] 아, 한 달 전에 베트남 여행 갔다 왔어요. 길거리 음식 많이 먹었는데...",
+        "on_alcohol_question": "[머뭇거리며] 회식이 좀 잦긴 했어요...",
+        "baseline_emotion": "피로, 불안"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "A형 간염",
+            "response": "A형 간염 예방접종은 안 맞은 것 같아요."
+          },
+          {
+            "question_pattern": "예방접종",
+            "response": "A형 간염 예방접종은 안 맞았어요."
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "A - 황달 (핵심!)",
+            "keywords": [
+              "황달",
+              "노래",
+              "눈",
+              "피부",
+              "공막"
+            ],
+            "score": 6
+          },
+          {
+            "category": "A - 소변 색 변화 (콜라색)",
+            "keywords": [
+              "소변",
+              "진한",
+              "갈색",
+              "콜라",
+              "소변색"
+            ],
+            "score": 5
+          },
+          {
+            "category": "travel - 해외여행/오염 음식 (역학)",
+            "keywords": [
+              "여행",
+              "해외",
+              "동남아",
+              "길거리",
+              "음식"
+            ],
+            "score": 6
+          },
+          {
+            "category": "A - 회색 변 (폐색성 황달 감별)",
+            "keywords": [
+              "변",
+              "회색",
+              "흰색",
+              "색",
+              "대변"
+            ],
+            "score": 4
+          },
+          {
+            "category": "A - 피로감/식욕부진/발열 (전구증상)",
+            "keywords": [
+              "피로",
+              "피곤",
+              "식욕",
+              "밥맛",
+              "열"
+            ],
+            "score": 3
+          },
+          {
+            "category": "PMH - 간염 예방접종 여부",
+            "keywords": [
+              "예방접종",
+              "간염",
+              "백신",
+              "맞은"
+            ],
+            "score": 3
+          },
+          {
+            "category": "social - 음주 (악화 인자)",
+            "keywords": [
+              "술",
+              "음주",
+              "회식"
+            ],
+            "score": 2
+          }
+        ],
+        "required_tests": [
+          "간기능 검사(AST/ALT/Bilirubin)",
+          "HAV IgM 항체",
+          "복부 초음파"
+        ],
+        "required_treatments": [
+          "절대 금주",
+          "충분한 수분/영양 공급",
+          "안정 가료(입원)"
+        ],
+        "expected_skills": [
+          "황달 3종 세트 확인(황달/진한 소변/회색 변)",
+          "해외여행력 및 오염 음식 섭취 역학 문진",
+          "A형 간염 예방접종 여부 확인"
+        ]
+      }
+    },
+    {
+      "case_id": "acute_15",
+      "category": "급성복통",
+      "hidden_diagnosis": "급성 장간막 허혈",
+      "top_diagnoses": [
+        "급성 장간막 허혈",
+        "장폐색",
+        "허혈성 대장염"
+      ],
+      "patient": {
+        "name": "권말순",
+        "age": 75,
+        "appearance": "[심한 통증을 호소하지만 복부 진찰 소견에 비해 불균형하게 아파 보임]",
+        "sex": "여",
+        "vital_signs": {
+          "BP": "155/92",
+          "PR": 98,
+          "RR": 20,
+          "BT": 37.3
+        },
+        "setting": ""
+      },
+      "chief_complaint": "배가 갑자기 너무 아파요. 죽을 것 같아요",
+      "history": {
+        "O_onset": "2시간 전, 식사 후 갑자기 시작됨",
+        "L_location": "배 전체, 특히 배꼽 주위",
+        "D_duration_course": "갑자기 시작된 이후 지속적으로 극심하게 아픔",
+        "Co_change": "점점 심해짐. 진통제(타이레놀) 먹었으나 전혀 효과 없음",
+        "Ex_prior_episode": "식사 후 30분~1시간 뒤에 배가 아픈 일이 3개월 전부터 가끔 있었음(식후 통증 반복)",
+        "C_character": "극심한 통증, NRS 9점. 지속적이고 쥐어짜는 듯함. 방사통 없음",
+        "A_associated": "구역/구토(+/+), 혈변(+, 검붉은 점액 변), 발열(-), 어지러움(경미)",
+        "F_factor": "어떤 자세도 완화 없음. 식사 후 발생",
+        "PSH": "없음",
+        "PMH": "심방세동(+, 5년, 항응고제 복용 불규칙), 고혈압(+), 고지혈증(+)",
+        "medication": "항응고제(와파린, 불규칙 복용), 혈압약, 고지혈증약",
+        "social": "음주(-), 흡연(-), 직업(은퇴)",
+        "family": "없음"
+      },
+      "physical_exam": {
+        "general": "고령 여성, 통증을 극심하게 호소하나 복부 진찰 소견이 생각보다 경미함(Pain out of proportion)",
+        "eyes": "결막 약간 창백, 공막 정상",
+        "abdomen": {
+          "inspection": "약간 팽만",
+          "auscultation": "장음 감소 또는 소실",
+          "percussion": "특이소견 없음",
+          "palpation": "복부 전반 경미한 압통(호소하는 통증에 비해 진찰 소견 경미)",
+          "tenderness_location": "전반적(경미)",
+          "rebound_tenderness": false,
+          "guarding": false,
+          "murphy_sign": false,
+          "CVAT": false
+        }
+      },
+      "nonverbal_expressions": {
+        "on_entry": "[심한 통증으로 얼굴을 찡그리며 들어옴. 배를 감싸고 있음]",
+        "on_pain_question": "[매우 고통스러운 표정으로] 배가 죽을 것 같이 아파요. 이렇게 아픈 건 처음이에요",
+        "on_palpation": "[의외로 진찰 시 반응이 덜함] 음... 아프긴 한데 아까보다는...",
+        "on_afib_question": "[끄덕이며] 심장이 불규칙하다고 해서 약을 받았는데 깜빡할 때가 있어요",
+        "on_stool_question": "[당황한 표정] 아까 화장실에 갔더니 검붉은 변이 나왔어요",
+        "baseline_emotion": "극심한 공포와 통증"
+      },
+      "unknown_responses": {
+        "default_unknown": "잘 모르겠어요.",
+        "specific_unknowns": [
+          {
+            "question_pattern": "와파린",
+            "response": "피 묽게 하는 약이라고 해서 먹고 있어요."
+          },
+          {
+            "question_pattern": "장간막",
+            "response": "그게 뭔가요?"
+          }
+        ]
+      },
+      "scoring": {
+        "history_checklist": [
+          {
+            "category": "PMH - 심방세동/항응고제 (핵심!)",
+            "keywords": [
+              "심방세동",
+              "부정맥",
+              "심장",
+              "와파린",
+              "항응고"
+            ],
+            "score": 7
+          },
+          {
+            "category": "A - 통증-진찰 불일치 인지 (Pain out of proportion)",
+            "keywords": [
+              "심하게",
+              "극심",
+              "9점",
+              "죽을 것"
+            ],
+            "score": 5
+          },
+          {
+            "category": "A - 혈변/점액변",
+            "keywords": [
+              "혈변",
+              "검붉",
+              "피",
+              "점액",
+              "변"
+            ],
+            "score": 5
+          },
+          {
+            "category": "Ex - 식후 반복 통증 (장간막 협심증)",
+            "keywords": [
+              "식사 후",
+              "밥 먹고",
+              "식후",
+              "먹으면",
+              "전에도"
+            ],
+            "score": 5
+          },
+          {
+            "category": "O - 갑작스러운 발병 + 고령",
+            "keywords": [
+              "갑자기",
+              "시작",
+              "처음"
+            ],
+            "score": 3
+          },
+          {
+            "category": "PMH - 항응고제 복용 불규칙",
+            "keywords": [
+              "불규칙",
+              "깜빡",
+              "가끔",
+              "빠뜨"
+            ],
+            "score": 3
+          }
+        ],
+        "required_tests": [
+          "복부 CT 혈관조영(CTA)",
+          "CBC/응고검사(PT-INR)",
+          "혈중 젖산(Lactate)"
+        ],
+        "required_treatments": [
+          "응급 수술 또는 혈관 중재술",
+          "항응고 요법",
+          "수액/수혈"
+        ],
+        "expected_skills": [
+          "심방세동 과거력 및 항응고제 복용 여부 반드시 문진",
+          "통증-진찰 불일치(Pain out of proportion) 인지",
+          "식후 반복 복통(장간막 협심증) 패턴 문진"
         ]
       }
     },
     {
       "case_id": "chronic_01",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "십이지장궤양",
+      "top_diagnoses": [
+        "십이지장궤양",
+        "위염/위궤양",
+        "기능성 소화불량"
+      ],
       "patient": {
         "name": "이상혁",
         "age": 42,
+        "vital_signs": {
+          "BP": "131/79",
+          "PR": 80,
+          "RR": 19,
+          "BT": 36.5
+        },
+        "setting": "외래",
+        "appearance": "[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]",
         "sex": "남"
       },
       "chief_complaint": "배가 아파요",
-      "vitals": {
-        "BP": "131/79",
-        "PR": 80,
-        "RR": 19,
-        "BT": 36.5
-      },
       "history": {
         "O_onset": "2개월",
         "L_location": "명치",
@@ -769,7 +2806,8 @@
         "PMH": "1년 전 위염이라고 들었으나 치료하지 않음, DM/HTN/Tb/Hepatitis(-/-/-/-)",
         "medication": "홍삼 복용 중",
         "social": "음주(-), 흡연(+, 20갑년), 스트레스(+, 아프기 전부터 원래 있었음), 식사 불규칙/고른 식단, 직업(택시 운전사)",
-        "family": "아버지(간암)"
+        "family": "아버지(간암)",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 정상",
@@ -777,14 +2815,18 @@
         "Abdomen": "Epigastric Td/rTd(+/-), 간비대/비장비대/Murphy's sign(-/-/-)",
         "Extremity": "복부 시/청(-/-), DRE 정상, 피부 긴장도 감소/오목 부종(-/-)"
       },
-      "patient_question": "-",
-      "special_behavior": "제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심",
-      "answer_key": {
-        "top_diagnoses": [
-          "십이지장궤양",
-          "위염/위궤양",
-          "기능성 소화불량"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "-"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "상부위장관내시경",
           "요소날숨검사"
@@ -795,25 +2837,161 @@
         ],
         "expected_skills": [
           "H. pylori에 대한 진단과 치료 설명"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          }
         ]
       }
     },
     {
       "case_id": "chronic_02",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "만성 췌장염",
+      "top_diagnoses": [
+        "만성 췌장염",
+        "위궤양/위염",
+        "기능성 소화불량"
+      ],
       "patient": {
         "name": "차순혁",
         "age": 42,
+        "vital_signs": {
+          "BP": "124/82",
+          "PR": 81,
+          "RR": 17,
+          "BT": 36.4
+        },
+        "setting": "외래",
+        "appearance": "[불편한 표정으로 들어옴]",
         "sex": "남"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "소화가 되지 않아요",
-      "vitals": {
-        "BP": "124/82",
-        "PR": 81,
-        "RR": 17,
-        "BT": 36.4
-      },
+      "chief_complaint": "소화가 되지 않아요",
       "history": {
         "O_onset": "4개월 전",
         "L_location": "명치쪽이 불편한 느낌이 지속됨, 최근 1주 전부터 윗배와 등쪽 통증",
@@ -831,7 +3009,8 @@
         "PMH": "DM/TB/HTN/간염(-/-/-/-)",
         "medication": "소화제",
         "social": "술/담배(+, 주 2~3회, 맥주 2캔+, 10갑년), 커피(-), 직업(회사원, 스트레스 많지 않은 편), 식습관(야식으로 피자 치킨 즐겨 먹음, 기름진 음식 좋아함)",
-        "family": "아버지(알코올성 췌장염), 큰아버지(담낭암)"
+        "family": "아버지(알코올성 췌장염), 큰아버지(담낭암)",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 정상",
@@ -839,14 +3018,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/-), Murphy's sign(-), CVAT(-)",
         "Extremity": "피부 긴장도/오목 부종(-/-)"
       },
-      "patient_question": "큰아버지가 담낭암이라서 걱정돼요",
-      "special_behavior": "없음",
-      "answer_key": {
-        "top_diagnoses": [
-          "만성 췌장염",
-          "위궤양/위염",
-          "기능성 소화불량"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[불편한 표정으로 들어옴]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "큰아버지가 담낭암이라서 걱정돼요"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "복부영상검사",
           "혈액검사",
@@ -857,25 +3040,161 @@
           "췌장소화효소제",
           "진경제"
         ],
-        "expected_skills": []
+        "expected_skills": [],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          }
+        ]
       }
     },
     {
       "case_id": "chronic_03",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "위염",
+      "top_diagnoses": [
+        "위염",
+        "위암",
+        "위궤양"
+      ],
       "patient": {
         "name": "박태민",
         "age": 50,
+        "vital_signs": {
+          "BP": "126/84",
+          "PR": 78,
+          "RR": 16,
+          "BT": 36.3
+        },
+        "setting": "외래",
+        "appearance": "[대답 빨리 해줌]",
         "sex": "남"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "소화가 되지 않아요",
-      "vitals": {
-        "BP": "126/84",
-        "PR": 78,
-        "RR": 16,
-        "BT": 36.3
-      },
+      "chief_complaint": "소화가 되지 않아요",
       "history": {
         "O_onset": "3개월 전",
         "L_location": "통증 없음",
@@ -893,7 +3212,8 @@
         "PMH": "DM/TB/HTN/간염(-/-/-/-)",
         "medication": "-",
         "social": "술/담배/커피(+, 회식 때마다 1병씩/-/+, 하루에 1번), 직업(회사 이사, 스트레스 심함), 식습관(규칙적인 식사)",
-        "family": "아버지(조기 위암)"
+        "family": "아버지(조기 위암)",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 정상",
@@ -901,14 +3221,18 @@
         "Abdomen": "복부 시/청/타/촉(-/-/-/-), Murphy's sign(-), CVAT(-)",
         "Extremity": "피부 긴장도/오목 부종(-/-)"
       },
-      "patient_question": "없음",
-      "special_behavior": "대답 빨리 해줌",
-      "answer_key": {
-        "top_diagnoses": [
-          "위염",
-          "위암",
-          "위궤양"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[대답 빨리 해줌]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "없음"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "상부위장관내시경",
           "혈액검사",
@@ -918,25 +3242,161 @@
           "양성자 펌프 억제제",
           "스트레스 관리"
         ],
-        "expected_skills": []
+        "expected_skills": [],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          }
+        ]
       }
     },
     {
       "case_id": "chronic_04",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "일차성 소화불량",
+      "top_diagnoses": [
+        "일차성 소화불량",
+        "위암",
+        "위궤양"
+      ],
       "patient": {
         "name": "박지영",
         "age": 55,
+        "vital_signs": {
+          "BP": "125/75",
+          "PR": 72,
+          "RR": 18,
+          "BT": 36.5
+        },
+        "setting": "외래",
+        "appearance": "[SP 순응도 좋고, 대답도 빠름]",
         "sex": "여"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "소화가 되지 않아요",
-      "vitals": {
-        "BP": "125/75",
-        "PR": 72,
-        "RR": 18,
-        "BT": 36.5
-      },
+      "chief_complaint": "소화가 되지 않아요",
       "history": {
         "O_onset": "3개월 전",
         "L_location": "상복부(명치)",
@@ -963,14 +3423,18 @@
         "Abdomen": "Epigastric Td(+), Td/rTd(+/±, 반동압통 유무 불확실), Td/rTd 모두 아프게 아니라 불편하다고 함(깊이 누를 때 아파함), DRE/CVAT(-/-)",
         "Extremity": "-"
       },
-      "patient_question": "-",
-      "special_behavior": "SP 순응도 좋고, 대답도 빠름",
-      "answer_key": {
-        "top_diagnoses": [
-          "일차성 소화불량",
-          "위암",
-          "위궤양"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[SP 순응도 좋고, 대답도 빠름]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "-"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "위내시경",
           "H. pylori 검사",
@@ -981,24 +3445,178 @@
           "악성인 경우 병기에 따른 치료",
           "혈당 조절"
         ],
-        "expected_skills": []
+        "expected_skills": [],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
+        ]
       }
     },
     {
       "case_id": "chronic_05",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "과민성 대장증후군(IBS)",
+      "top_diagnoses": [
+        "과민성 대장증후군(IBS)",
+        "감염성 장염",
+        "난소 염전"
+      ],
       "patient": {
         "name": "김소린",
         "age": 51,
+        "vital_signs": {
+          "BP": "125/70",
+          "PR": 82,
+          "RR": 19,
+          "BT": 36.3
+        },
+        "setting": "외래",
+        "appearance": "[제시문 상 '복통'이라고만 적혀 있어 급성/만성 유무 모른 상태로 들어감]",
         "sex": "여"
       },
       "chief_complaint": "배가 아파요",
-      "vitals": {
-        "BP": "125/70",
-        "PR": 82,
-        "RR": 19,
-        "BT": 36.3
-      },
       "history": {
         "O_onset": "2주 전",
         "L_location": "아랫배(좌우 구분 X, 이동 X), 자세히 물어보면 배꼽 아래만 아픔",
@@ -1028,14 +3646,18 @@
         "Abdomen": "Td/rTd(-/-), 아랫배 누를 때 불편감(+), CVAT(-), 골반 내진(정상, 종이 줌), DRE(-)",
         "Extremity": "-"
       },
-      "patient_question": "-",
-      "special_behavior": "제시문 상 '복통'이라고만 적혀 있어 급성/만성 유무 모른 상태로 들어감",
-      "answer_key": {
-        "top_diagnoses": [
-          "과민성 대장증후군(IBS)",
-          "감염성 장염",
-          "난소 염전"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[제시문 상 '복통'이라고만 적혀 있어 급성/만성 유무 모른 상태로 들어감]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "-"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "대장내시경",
           "대변배양검사",
@@ -1046,25 +3668,177 @@
           "수액 치료",
           "지사제"
         ],
-        "expected_skills": []
+        "expected_skills": [],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
+        ]
       }
     },
     {
       "case_id": "chronic_06",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "위염/위궤양",
+      "top_diagnoses": [
+        "위염/위궤양",
+        "기능성 소화불량"
+      ],
       "patient": {
         "name": "김지현",
         "age": 23,
+        "vital_signs": {
+          "BP": "112/83",
+          "PR": 87,
+          "RR": 16,
+          "BT": 36.7
+        },
+        "setting": "외래",
+        "appearance": "[말이 느려서 빠르게 진행해야 함]",
         "sex": "여"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "소화가 되지 않아요",
-      "vitals": {
-        "BP": "112/83",
-        "PR": 87,
-        "RR": 16,
-        "BT": 36.7
-      },
+      "chief_complaint": "소화가 되지 않아요",
       "history": {
         "O_onset": "1년 전부터 증상 있었고, 2주 전부터 증상 악화",
         "L_location": "명치 부위",
@@ -1091,13 +3865,18 @@
         "Abdomen": "Epigastric Td(+)/rTd(-), 타진 시 배가 울린다고 함, 복부 시/청 정상, DRE 정상",
         "Extremity": "피부 긴장도 정상, 오목 부종(-)"
       },
-      "patient_question": "큰 병이 아닐까 걱정돼요",
-      "special_behavior": "말이 느려서 빠르게 진행해야 함",
-      "answer_key": {
-        "top_diagnoses": [
-          "위염/위궤양",
-          "기능성 소화불량"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[말이 느려서 빠르게 진행해야 함]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "큰 병이 아닐까 걱정돼요"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "위내시경",
           "복부영상검사"
@@ -1106,25 +3885,178 @@
           "생활 습관 교정",
           "약물 치료"
         ],
-        "expected_skills": []
+        "expected_skills": [],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
+        ]
       }
     },
     {
       "case_id": "chronic_07",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "위염",
+      "top_diagnoses": [
+        "위염",
+        "위궤양",
+        "위암"
+      ],
       "patient": {
         "name": "김숙영",
         "age": 40,
+        "vital_signs": {
+          "BP": "148/88",
+          "PR": 102,
+          "RR": 20,
+          "BT": 36.7
+        },
+        "setting": "외래",
+        "appearance": "[복용 약제에 대해 항생제, 소염제 등 구체적으로 물어볼 것]",
         "sex": "여"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "속이 불편해요",
-      "vitals": {
-        "BP": "148/88",
-        "PR": 102,
-        "RR": 20,
-        "BT": 36.7
-      },
+      "chief_complaint": "속이 불편해요",
       "history": {
         "O_onset": "2주 전",
         "L_location": "명치 부근",
@@ -1152,14 +4084,18 @@
         "Abdomen": "Epigastric Td(+)/rTd(-), CVAT(-), DRE 정상",
         "Extremity": "피부 긴장도/오목 부종 정상"
       },
-      "patient_question": "없음",
-      "special_behavior": "복용 약제에 대해 항생제, 소염제 등 구체적으로 물어볼 것",
-      "answer_key": {
-        "top_diagnoses": [
-          "위염",
-          "위궤양",
-          "위암"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[복용 약제에 대해 항생제, 소염제 등 구체적으로 물어볼 것]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "없음"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "위내시경",
           "신속요소분해효소검사",
@@ -1169,25 +4105,178 @@
         "expected_skills": [
           "항문 직장 진찰(혈변 감별)",
           "위내시경/조직생검/조영제 CT 설명동의서 받기"
+        ],
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 생리/LMP",
+            "keywords": [
+              "생리",
+              "월경",
+              "LMP"
+            ],
+            "score": 4
+          },
+          {
+            "item": "(여) 임신 가능성",
+            "keywords": [
+              "임신",
+              "피임"
+            ],
+            "score": 4
+          }
         ]
       }
     },
     {
       "case_id": "chronic_08",
       "category": "소화불량/만성 복통",
+      "hidden_diagnosis": "당뇨병성 위마비",
+      "top_diagnoses": [
+        "당뇨병성 위마비",
+        "기능성 소화불량",
+        "만성 위염"
+      ],
       "patient": {
         "name": "김혜선",
         "age": 54,
+        "vital_signs": {
+          "BP": "130/90",
+          "PR": 72,
+          "RR": 15,
+          "BT": 36.5
+        },
+        "setting": "외래",
+        "appearance": "[당뇨약 잘 먹고 있는지, 당 수치 잘 조절되고 있는지 구체적으로 물어봐야 함]",
         "sex": "여"
       },
-      "chief_complaint": "배가 아파요",
-      "history_original_chief_complaint": "속이 안 좋아서",
-      "vitals": {
-        "BP": "130/90",
-        "PR": 72,
-        "RR": 15,
-        "BT": 36.5
-      },
+      "chief_complaint": "속이 안 좋아서",
       "history": {
         "O_onset": "3개월",
         "L_location": "상복부 전반적으로 불편함",
@@ -1205,7 +4294,8 @@
         "PMH": "DM(+)/TB(-)/HTN(-)/간염(-), 고지혈증(+), 최근 당뇨 조절 잘 안 되어 약 바꿀 계획, 소화기 질환/부인과 질환(+, 만성 위염/-)",
         "medication": "당뇨약, 고지혈증약",
         "social": "술/담배/커피(-/-/-), 직업(가정주부), 식사(한식 위주, 과식하지 않음), 운동(주 3회 수영), 스트레스(없음)",
-        "family": "어머니(담도암), 아버지(당뇨)"
+        "family": "어머니(담도암), 아버지(당뇨)",
+        "female_hx": null
       },
       "physical_exam": {
         "General": "V/S 확인",
@@ -1214,14 +4304,18 @@
         "Abdomen": "시/청/타/촉(-/-/-/-), DRE/pelvic exam 정상",
         "Extremity": "피부 긴장도 확인"
       },
-      "patient_question": "큰 병일까봐 걱정돼요",
-      "special_behavior": "당뇨약 잘 먹고 있는지, 당 수치 잘 조절되고 있는지 구체적으로 물어봐야 함",
-      "answer_key": {
-        "top_diagnoses": [
-          "당뇨병성 위마비",
-          "기능성 소화불량",
-          "만성 위염"
-        ],
+      "nonverbal_expressions": {
+        "on_entry": "[당뇨약 잘 먹고 있는지, 당 수치 잘 조절되고 있는지 구체적으로 물어봐야 함]",
+        "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+        "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+        "baseline_emotion": "불안",
+        "patient_question": "큰 병일까봐 걱정돼요"
+      },
+      "unknown_responses": {
+        "default_unknown": "글쎄요, 잘 모르겠어요.",
+        "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+      },
+      "scoring": {
         "required_tests": [
           "상부위장관내시경",
           "혈중 HbA1c",
@@ -1232,279 +4326,135 @@
         "expected_skills": [
           "항문 직장 진찰",
           "위내시경/조직생검/조영제 CT 설명동의서 받기"
-        ]
-      }
-    },
-    {
-      "case_id": "extra_01",
-      "category": "급성 복통(추가 보강)",
-      "patient": {
-        "name": "오민지",
-        "age": 31,
-        "sex": "여"
-      },
-      "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "108/68",
-        "PR": 102,
-        "RR": 20,
-        "BT": 38.4
-      },
-      "history": {
-        "O_onset": "어제 저녁",
-        "L_location": "배 전체적으로 아픔(국소화되지 않음)",
-        "D_duration_course": "어제 저녁 회식 이후 시작, 밤새 지속",
-        "Co_change": "설사 시작한 후 통증은 약간 완화되나 반복됨",
-        "Ex_prior_episode": "처음",
-        "C_character": "쥐어짜는 듯한 경련성 통증, NRS 5점, 설사 직전 심해짐",
-        "A_associated": {
-          "전신": "발열/오한/피로(+/+/+,콜록오한)",
-          "소화기": "구역/구토(+, 2회)/설사(+, 어제부터 6회, 물설사)/혈변(-)/점액변(-)",
-          "탈수": "갈증(+)/소변량 감소(+)/어지럼(+, 일어설 때)"
-        },
-        "F_factor": "어제 회식에서 회와 육류 함께 먹음, 같이 먹은 동료도 비슷한 증상 있다고 함",
-        "E_prior_exam": "-",
-        "PSH": "-",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-)",
-        "medication": "-",
-        "social": "술(+, 어제 소주 2잔), 담배(-), 직업(회사원)",
-        "family": "-",
-        "female_hx": "LMP 2주 전, 임신 가능성 없음"
-      },
-      "physical_exam": {
-        "General": "급성 병색, 약간의 탈수 소견",
-        "HEENT": "구강 점막 건조(+), 결막/공막(-/-)",
-        "Abdomen": "복부 전반적 압통(+, 국소 반동압통 없음), 장음 항진(+), Murphy's/Psoas/Obturator(-/-/-), DRE 정상(설사 변)",
-        "Extremity": "피부 긴장도 감소(+)"
-      },
-      "patient_question": "수액 맞으면 빨리 나아요?",
-      "special_behavior": "같이 식사한 동료들도 비슷한 증상이 있다고 자발적으로 말함(역학적 단서)",
-      "answer_key": {
-        "top_diagnoses": [
-          "급성 위장관염(식중독)",
-          "급성 충수돌기염",
-          "염증성 장질환"
         ],
-        "required_tests": [
-          "대변배양검사",
-          "전해질/신기능검사",
-          "복부영상검사(감별 필요시)"
-        ],
-        "required_treatments": [
-          "수액 공급",
-          "전해질 교정",
-          "대증 치료(지사제/해열제)"
-        ],
-        "expected_skills": [
-          "공동 식사자/역학적 노출력 확인",
-          "탈수 정도 평가(피부긴장도, 점막)"
-        ]
-      }
-    },
-    {
-      "case_id": "extra_02",
-      "category": "급성 복통(추가 보강)",
-      "patient": {
-        "name": "한소연",
-        "age": 24,
-        "sex": "여"
-      },
-      "chief_complaint": "배가 아파요",
-      "setting": "외래",
-      "vitals": {
-        "BP": "112/70",
-        "PR": 96,
-        "RR": 18,
-        "BT": 38.0
-      },
-      "history": {
-        "O_onset": "3일 전",
-        "L_location": "아랫배 양쪽(좌우 모두)",
-        "D_duration_course": "지속, 점점 심해짐",
-        "Co_change": "악화",
-        "Ex_prior_episode": "처음",
-        "C_character": "묵직하고 쑤시는 통증, NRS 6점, 성관계 시 통증 심해짐",
-        "A_associated": {
-          "전신": "발열/오한/피로(+/-/+)",
-          "소화기": "구역/구토/설사/변비(±/-/-/-)",
-          "부인과": "질분비물 증가(+, 냄새 나는 분비물)/비정상 질출혈(+, 소량)/성교통(+)",
-          "비뇨": "배뇨통(-)/빈뇨(-)"
-        },
-        "F_factor": "성관계 후 악화, 최근 새로운 파트너와 무피임 성관계",
-        "E_prior_exam": "-",
-        "PSH": "-",
-        "PMH": "DM/TB/HTN/간염(-/-/-/-), 성매개감염 검사 받은 적 없음",
-        "medication": "-",
-        "social": "음주(social), 흡연(-)",
-        "family": "-",
-        "female_hx": "LMP 10일 전, 임신 가능성 낮음(최근 무피임 성관계 있어 완전히 배제 안 됨), 파트너 다수력 있음"
-      },
-      "physical_exam": {
-        "General": "급성 병색 아님, 미열",
-        "HEENT": "-",
-        "Abdomen": "양측 하복부 압통(+), 반동압통 경미(±)",
-        "Extremity": "-",
-        "GYN": "Cervical motion tenderness(+), bilateral adnexal tenderness(+), 질분비물 화농성(+)"
-      },
-      "patient_question": "성병인가요? 파트너도 검사 받아야 하나요?",
-      "special_behavior": "성생활 관련 질문에 처음엔 머뭇거림, 비밀 보장을 먼저 안내하면 솔직하게 답변함",
-      "answer_key": {
-        "top_diagnoses": [
-          "골반염증성질환(PID)",
-          "자궁외임신",
-          "난소염전"
-        ],
-        "required_tests": [
-          "임신반응검사(필수, 감별진단 배제)",
-          "골반초음파",
-          "자궁경부 분비물 배양/STD 검사"
-        ],
-        "required_treatments": [
-          "경험적 항생제 치료",
-          "파트너 동반 치료 권고",
-          "성매개감염 예방 교육"
-        ],
-        "expected_skills": [
-          "임신 가능성 먼저 배제(임신반응검사)",
-          "성병 관련 민감한 병력 비밀보장 전제로 문진",
-          "파트너 치료 필요성 설명"
-        ]
-      }
-    },
-    {
-      "case_id": "extra_03",
-      "category": "급성 복통(추가 보강)",
-      "patient": {
-        "name": "최병호",
-        "age": 58,
-        "sex": "남"
-      },
-      "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "100/64",
-        "PR": 110,
-        "RR": 22,
-        "BT": 36.8
-      },
-      "history": {
-        "O_onset": "오늘 아침",
-        "L_location": "명치 부위",
-        "D_duration_course": "지속",
-        "Co_change": "점점 심해짐",
-        "Ex_prior_episode": "1개월 전부터 명치가 가끔 쓰렸음",
-        "C_character": "쓰리고 타는 듯한 통증, NRS 7점, 어지러움 동반",
-        "A_associated": {
-          "전신": "식은땀(+), 어지럼(+), 실신감(+)",
-          "소화기": "흑색변(+, 오늘 아침 2회)/토혈(+, 한 번, 커피색 구토물)/구역(+)",
-          "심혈관": "가슴 답답함(-, 본인은 부인하나 추가 문진 시 약간의 압박감 인정)"
-        },
-        "F_factor": "한 달 전부터 허리 통증으로 진통소염제(NSAID) 매일 복용",
-        "E_prior_exam": "-",
-        "PSH": "-",
-        "PMH": "고혈압(+), 당뇨(-)",
-        "medication": "NSAID(진통소염제, 매일), 혈압약",
-        "social": "음주(+, 매일 소주 1병), 담배(+, 30갑년)",
-        "family": "-"
-      },
-      "physical_exam": {
-        "General": "창백, 식은땀, 기립성 어지럼 동반",
-        "HEENT": "결막 창백(+)",
-        "Abdomen": "명치 압통(+), 반동압통(-), 장음 정상",
-        "Extremity": "말단 차가움(+), 모세혈관 재충전 시간 지연(+)",
-        "DRE": "흑색변 확인(+, 잠혈반응 양성 추정)"
-      },
-      "patient_question": "피를 토했는데 위험한가요?",
-      "special_behavior": "처음에는 어지러움을 별 일 아닌 듯 말하지만 토혈/흑색변 직접 물어보면 인정함",
-      "answer_key": {
-        "top_diagnoses": [
-          "상부위장관출혈(NSAID 관련 위/십이지장궤양 출혈)",
-          "출혈성 위염",
-          "식도정맥류 출혈"
-        ],
-        "required_tests": [
-          "혈색소/혈액형 및 교차검사",
-          "응급 상부위장관내시경",
-          "생체징후 모니터링"
-        ],
-        "required_treatments": [
-          "수액 및 수혈",
-          "양성자 펌프 억제제 정맥 투여",
-          "내시경적 지혈술"
-        ],
-        "expected_skills": [
-          "혈역학적 불안정 징후(기립성 저혈압, 빈맥) 즉시 인지",
-          "NSAID 복용력 확인",
-          "직장 수지검사로 흑색변 확인"
-        ]
-      }
-    },
-    {
-      "case_id": "extra_04",
-      "category": "급성 복통(추가 보강)",
-      "patient": {
-        "name": "정태일",
-        "age": 63,
-        "sex": "남"
-      },
-      "chief_complaint": "배가 아파요",
-      "setting": "응급실",
-      "vitals": {
-        "BP": "138/88",
-        "PR": 92,
-        "RR": 20,
-        "BT": 36.6
-      },
-      "history": {
-        "O_onset": "1시간 전",
-        "L_location": "명치/상복부",
-        "D_duration_course": "지속적, 계단 오르다 발생",
-        "Co_change": "안정 후에도 호전 없음",
-        "Ex_prior_episode": "최근 1주일 동안 비슷한 가벼운 증상이 운동 시 있었다가 쉬면 좋아졌음",
-        "C_character": "쥐어짜듯 누르는 듯한 통증, NRS 7점, 방사통(+, 좌측 어깨/턱으로)",
-        "A_associated": {
-          "전신": "식은땀(+), 호흡곤란(+), 피로감(+)",
-          "소화기": "구역/구토(+/+), 속쓰림(본인은 속쓰림 같다고 표현)",
-          "심혈관": "흉통(환자는 '가슴보다 배가 아프다'고 표현하나 추가 문진 시 흉부 압박감 인정)"
-        },
-        "F_factor": "운동/계단 오를 때 악화, 안정 시에도 이번엔 호전 없음",
-        "E_prior_exam": "건강검진에서 고지혈증 진단받았으나 약 안 먹음",
-        "PSH": "-",
-        "PMH": "당뇨(+, 10년), 고혈압(+), 고지혈증(+, 미치료)",
-        "medication": "당뇨약, 혈압약",
-        "social": "흡연(+, 35갑년), 음주(+, social)",
-        "family": "아버지(심근경색으로 사망)"
-      },
-      "physical_exam": {
-        "General": "급성 병색, 식은땀, 불안한 표정",
-        "HEENT": "-",
-        "Chest": "심음/호흡음 청진(특이소견 없을 수 있음), S3/S4 청취 시도",
-        "Abdomen": "명치 압통 경미(+), 반동압통(-), 복부 자체 소견은 비교적 정상적",
-        "Extremity": "발한(+), 말단 청색증(-)"
-      },
-      "patient_question": "소화가 안 돼서 그런 거 아닐까요?",
-      "special_behavior": "환자가 스스로 소화불량으로 단정하고 있어, 통증 양상/방사통/관련 위험요인(당뇨로 인한 무통성 심근경색 가능성)을 적극적으로 재확인해야 함",
-      "answer_key": {
-        "top_diagnoses": [
-          "급성 심근경색(비전형적, 상복부 통증으로 발현)",
-          "불안정형 협심증",
-          "급성 위염"
-        ],
-        "required_tests": [
-          "심전도(ECG, 최우선)",
-          "Troponin 등 심장표지자",
-          "흉부 X-ray"
-        ],
-        "required_treatments": [
-          "즉시 심전도 확인 후 심장내과 협진",
-          "산소/아스피린/니트로글리세린 등 ACS 프로토콜",
-          "모니터링 하 응급 이송"
-        ],
-        "expected_skills": [
-          "복통이라도 심혈관 위험요인(당뇨/고혈압/흡연/가족력) 있으면 ECG를 우선 고려",
-          "방사통(어깨/턱) 및 운동 관련성 적극 문진",
-          "환자의 자가진단(소화불량)에 끌려가지 않고 감별진단 유지"
+        "history_checklist": [
+          {
+            "item": "인사/자기소개",
+            "keywords": [
+              "안녕",
+              "학생의사"
+            ],
+            "score": 2
+          },
+          {
+            "item": "진료시간 안내 및 동의",
+            "keywords": [
+              "분 동안",
+              "괜찮으시겠어요"
+            ],
+            "score": 2
+          },
+          {
+            "item": "불편 시 말씀 안내",
+            "keywords": [
+              "불편하시면",
+              "말씀해"
+            ],
+            "score": 1
+          },
+          {
+            "item": "O - 발병 시기",
+            "keywords": [
+              "언제",
+              "얼마나"
+            ],
+            "score": 3
+          },
+          {
+            "item": "L - 위치",
+            "keywords": [
+              "어디",
+              "짚어"
+            ],
+            "score": 3
+          },
+          {
+            "item": "C - 통증 양상",
+            "keywords": [
+              "어떻게 아프",
+              "양상"
+            ],
+            "score": 2
+          },
+          {
+            "item": "C - NRS",
+            "keywords": [
+              "몇 점",
+              "10점"
+            ],
+            "score": 2
+          },
+          {
+            "item": "Co - 경과",
+            "keywords": [
+              "심해지",
+              "변화"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 발열/오한",
+            "keywords": [
+              "열",
+              "오한"
+            ],
+            "score": 3
+          },
+          {
+            "item": "A - 구역/구토",
+            "keywords": [
+              "구역",
+              "구토",
+              "토"
+            ],
+            "score": 2
+          },
+          {
+            "item": "F - 악화/완화 요인",
+            "keywords": [
+              "악화",
+              "완화",
+              "먹으면",
+              "자세"
+            ],
+            "score": 3
+          },
+          {
+            "item": "사회력 - 음주/흡연",
+            "keywords": [
+              "술",
+              "담배",
+              "흡연"
+            ],
+            "score": 2
+          },
+          {
+            "item": "과거력/복용약",
+            "keywords": [
+              "수술",
+              "지병",
+              "약"
+            ],
+            "score": 2
+          },
+          {
+            "item": "A - 체중감소 (악성 감별)",
+            "keywords": [
+              "체중",
+              "살",
+              "빠졌"
+            ],
+            "score": 4
+          },
+          {
+            "item": "A - 혈변/흑색변 (악성 감별)",
+            "keywords": [
+              "혈변",
+              "검은 변",
+              "흑색"
+            ],
+            "score": 4
+          }
         ]
       }
     }

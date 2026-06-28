@@ -1,0 +1,8 @@
+_old_backup/
+.DS_Store
+__pycache__/
+*.pyc
+# Excel/Office 임시 잠금 파일
+~$*
+# 로컬 실행 헬퍼 (개인 API 키 포함)
+run.command

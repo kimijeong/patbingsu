@@ -37,17 +37,33 @@ codemedipotbingsu/
 - 촉진·타진 등 위치가 중요한 신체진찰 항목은 괄호 행동 텍스트에 **구역이 명시된 경우에만** 인정하는 엄격한 기준을 적용합니다.
 - 이 정책은 `rubric/CPX_채점기준표.xlsx`의 "안내" 시트와 `index.html`의 채점 프롬프트에 동일하게 반영되어 있습니다.
 
-## 데이터/채점기준 수정 시 재생성 방법
+## 데이터/채점기준 관리 — 단일 원본(Single Source of Truth)
 
-증례 데이터(`data/case_bank.json`)나 채점 항목을 수정한 뒤에는 아래를 실행해 결과물을 재생성하세요.
+증례 데이터와 채점기준의 **유일한 원본은 `data/case_bank.json`** 입니다. 각 증례 안에 환자
+정보·병력·신체진찰 소견과 함께 `scoring` 블록(병력청취 체크리스트·예상 술기·필요검사·치료계획)이
+들어 있습니다. 이 파일만 고치면 됩니다.
+
+수정한 뒤에는 아래 한 줄만 실행하면 `index.html`(실제 앱)과 `rubric/CPX_채점기준표.xlsx`가 함께
+동기화됩니다.
 
 ```bash
-cd scripts
-python3 build_rubric.py      # rubric/CPX_채점기준표.xlsx 갱신
-python3 build_chat_app.py    # index.html 갱신 (케이스/채점기준 재임베딩)
+python3 scripts/sync_app.py
 ```
 
-`build_rubric.py`로 수식이 포함된 엑셀을 다시 만들었다면, LibreOffice 기반 재계산 스크립트로 수식 오류 여부를 확인하는 것을 권장합니다 (Cowork 환경에서 사용한 `recalc.py`와 동일한 방식이며, 로컬에 LibreOffice가 설치되어 있다면 동일하게 사용 가능).
+`sync_app.py`가 하는 일:
+
+1. `index.html` 안의 `const CASE_BANK = {...}` / `const KEY_ITEMS = {...}` 데이터 블록만
+   `case_bank.json` 기준으로 다시 채웁니다. (그 외 화면/로직/프롬프트/스타일은 건드리지 않음)
+2. `KEY_ITEMS`(병력청취 체크리스트)는 각 증례의 `scoring.history_checklist` 에서 **자동 파생**되므로
+   따로 관리할 필요가 없습니다.
+3. `rubric/CPX_채점기준표.xlsx` 를 채점기준대로 새로 생성합니다(사람이 보는 참고 표).
+
+> 참고: 실제 채점은 `index.html` 안에 임베드된 데이터로 동작합니다(더블클릭 실행 구조라 실행 중
+> 외부 파일을 읽지 않음). 그래서 `case_bank.json` 수정 후에는 반드시 `sync_app.py` 를 실행해
+> 앱에 반영해야 합니다.
+>
+> 구버전 `build_chat_app.py`/`build_rubric.py` 는 더 이상 사용하지 않습니다(옛 스키마용). 기존
+> `data/case_bank_legacy.json` 은 이전 형식 백업본입니다.
 
 ## 주의사항
 
