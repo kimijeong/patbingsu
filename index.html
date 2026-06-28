@@ -586,7 +586,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   <div class="chat-input-area">
     <div class="exam-quick">
       <span style="font-size:11px;color:#475569;align-self:center">빠른검진:</span>
-      <button class="eq-btn" onclick="openExamMap()" style="background:#1d4ed8;color:#fff;border-color:#1d4ed8">🩺 검진맵</button>
+      <button class="eq-btn" onclick="openExamMap()" style="background:#1d4ed8;color:#fff;border-color:#1d4ed8">🩺 신체진찰 시작</button>
       <span style="font-size:10.5px;color:#fbbf24;align-self:center;line-height:1.3">⚠️ 검진 전 환자에게 <b>"누우세요"</b> 등 자세를 먼저 지시한 뒤 검진하세요</span>
     </div>
     <div class="input-row">
@@ -657,8 +657,12 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
         </div>
         <div class="exam-region-grid" id="exam-region-grid"></div>
         <h3 id="exam-map-region">부위를 선택하세요</h3>
-        <div class="hint" id="exam-map-hint">왼쪽 그림에서 부위를 클릭하거나, 위 버튼에서 부위를 고르면 해당 검진 항목이 나타납니다. 케이스에 <b>적절한 검진</b>을 고르면 가점, <b>불필요한 검진</b>을 하면 감점됩니다.</div>
+        <div class="hint" id="exam-map-hint">왼쪽 그림에서 부위를 클릭하거나, 위 버튼에서 부위를 고르면 해당 검진 항목이 나타납니다. 항목을 눌러도 창은 닫히지 않으니 여러 부위를 이어서 검진하세요. 케이스에 <b>적절한 검진</b>은 가점, <b>불필요한 검진</b>은 감점됩니다.</div>
         <div id="exam-map-options"></div>
+        <div style="font-size:11px;color:#64748b;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">환자 반응 (대화)</div>
+        <div id="exam-map-feed" style="min-height:80px;max-height:200px;overflow-y:auto;background:#0c1018;border:1px solid #2d3148;border-radius:8px;padding:8px 10px"></div>
+        <div style="font-size:11px;color:#64748b;margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em">메모</div>
+        <textarea id="exam-map-memo" placeholder="문진 메모... (왼쪽 메모와 같은 내용으로 이어집니다)" style="background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;font-size:12px;line-height:1.6;padding:8px 10px;resize:vertical;height:80px;outline:none;font-family:inherit"></textarea>
       </div>
     </div>
     <button class="btn-close" onclick="closeExamMap()">닫기</button>
@@ -857,7 +861,7 @@ function applyPatientAppearance(c){
 function startSession(){
   const idx=parseInt($('caseSelect').value||'0');
   currentCase=allCases[idx]; if(!currentCase)return;
-  chatHistory=[]; transcript=[];
+  chatHistory=[]; transcript=[]; convoLog=[];
   sessionActive=true; sessionEnded=false; timerStarted=false;
   const tmVal=parseInt(($('timerMode')&&$('timerMode').value)||'720');
   timerUnlimited=(tmVal===0); totalSeconds=timerUnlimited?0:tmVal; elapsedSeconds=0;
@@ -1036,6 +1040,7 @@ function showSpeech(text){
 }
 
 // ── CHAT ────────────────────────────────────────────────────────────────
+let convoLog=[];
 function addMsg(text,role,type='normal'){
   const w=$('chat-messages'),d=document.createElement('div');
   d.className=`msg ${role==='system'?'patient':role}`;
@@ -1045,6 +1050,19 @@ function addMsg(text,role,type='normal'){
   if(type==='result')b.classList.add('exam-result');
   if(role==='system')b.classList.add('system-msg');
   b.textContent=text;d.appendChild(b);w.appendChild(d);w.scrollTop=w.scrollHeight;
+  const tm=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  convoLog.push({role,type,text,time:tm});
+  mirrorToExamFeed(role,type,text,tm);
+}
+// 검진맵이 열려 있으면 대화를 검진맵 창에도 표시
+function mirrorToExamFeed(role,type,text,tm){
+  const feed=$('exam-map-feed'); if(!feed||!$('exam-map').classList.contains('show'))return;
+  const who=role==='doctor'?'학생':(role==='system'?'안내':'환자');
+  const col=role==='doctor'?'#60a5fa':(role==='system'?'#64748b':(type==='result'?'#93c5fd':'#cbd5e1'));
+  const row=document.createElement('div');
+  row.style.cssText='font-size:12px;line-height:1.5;padding:4px 0;border-bottom:1px solid #161a23';
+  row.innerHTML=`<span style="color:#475569;font-size:10px">${tm}</span> <b style="color:${col}">${who}</b> <span style="color:${col}">${text.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</span>`;
+  feed.appendChild(row); feed.scrollTop=feed.scrollHeight;
 }
 function showTyping(){
   const w=$('chat-messages'),d=document.createElement('div');d.className='msg patient';d.id='typing-ind';
@@ -1331,6 +1349,8 @@ h1{font-size:22px;border-bottom:2px solid #1d4ed8;padding-bottom:8px;margin:0} h
 ${r.feedback?`<p style="font-size:13px;color:#444;margin-top:8px">${E(r.feedback)}</p>`:''}
 <h2>항목별 피드백</h2>${itemHtml('병력청취',r.history_items)}${itemHtml('신체진찰',r.exam_items)}${itemHtml('임상추론·계획',r.reasoning_items)}
 ${(rev.findings||rev.flow)?`<h2>진단 추론 복습</h2>${rev.findings?`<p style="font-size:12.5px">${E(rev.findings)}</p>`:''}${rev.flow?`<div class="flow">${E(rev.flow)}</div>`:''}`:''}
+${(()=>{ const memo=($('memo-text')&&$('memo-text').value.trim())||''; return memo?`<h2>메모</h2><div style="white-space:pre-wrap;font-size:12.5px;background:#f7f7f7;border:1px solid #eee;border-radius:6px;padding:10px">${E(memo)}</div>`:''; })()}
+${(convoLog&&convoLog.length)?`<h2>진료 대화 기록</h2><table style="font-size:12px">${convoLog.map(m=>{const who=m.role==='doctor'?'학생':(m.role==='system'?'안내':'환자');const col=m.role==='doctor'?'#1d4ed8':(m.role==='system'?'#888':'#166534');return `<tr><td style="white-space:nowrap;color:#999;width:64px;vertical-align:top">${E(m.time||'')}</td><td style="white-space:nowrap;color:${col};font-weight:700;width:46px;vertical-align:top">${who}</td><td>${E(m.text)}</td></tr>`;}).join('')}</table>`:''}
 </body></html>`;
   const w=window.open('','_blank'); if(!w){alert('팝업이 차단됐습니다. 브라우저에서 팝업을 허용해주세요.');return;}
   w.document.write(html); w.document.close();
@@ -1598,10 +1618,13 @@ function toggleMemo(){
   if(b)b.textContent=show?'📝 메모 닫기':'📝 메모';
   if(show)$('memo-text')&&$('memo-text').focus();
 }
+function memoSync(val,srcId){
+  try{sessionStorage.setItem('cpx_memo',val);}catch(e){}
+  ['memo-text','exam-map-memo'].forEach(id=>{ if(id!==srcId){const el=$(id); if(el&&el.value!==val)el.value=val;} });
+}
 function initMemo(){
-  const t=$('memo-text'); if(!t)return;
-  const saved=sessionStorage.getItem('cpx_memo'); if(saved)t.value=saved;
-  t.addEventListener('input',()=>sessionStorage.setItem('cpx_memo',t.value));
+  const saved=sessionStorage.getItem('cpx_memo')||'';
+  ['memo-text','exam-map-memo'].forEach(id=>{ const el=$(id); if(el){ el.value=saved; el.addEventListener('input',()=>memoSync(el.value,id)); } });
 }
 
 // ── 화면 녹화 ─────────────────────────────────────────────────────────────
@@ -1732,6 +1755,8 @@ const EXAM_MENU={
 function openExamMap(){
   if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
   $('exam-map').classList.add('show');
+  // 지금까지 대화를 검진맵 피드에 채워넣기
+  const feed=$('exam-map-feed'); if(feed){feed.innerHTML=''; convoLog.forEach(m=>mirrorToExamFeed(m.role,m.type,m.text,m.time));}
   // 성별에 맞는 누운 환자 이미지 배경
   const bg=$('exam-map-bg');
   if(bg){const src=patientImgSrc(patientSex(),'lie_back'); bg.setAttribute('href',src); bg.setAttributeNS('http://www.w3.org/1999/xlink','href',src);}
@@ -1762,7 +1787,7 @@ function selectExamRegion(region,el){
   const box=$('exam-map-options');
   box.innerHTML=m.opts.map((o,i)=>`<button class="exam-opt" data-i="${i}">${o[0]}${o[3]?`<small>${o[3]}</small>`:''}</button>`).join('');
   box.querySelectorAll('.exam-opt').forEach((b,i)=>{
-    b.onclick=()=>{const o=m.opts[i]; if(o[1]==='exam')quickExam(o[2]); else quickCmd(o[2]); closeExamMap();};
+    b.onclick=()=>{const o=m.opts[i]; if(o[1]==='exam')quickExam(o[2]); else quickCmd(o[2]); /* 검진맵 유지: 닫지 않음 */};
   });
 }
 </script>
