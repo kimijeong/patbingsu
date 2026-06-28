@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPX 환자 시뮬레이션</title>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0f1117; color:#e2e8f0; height:100vh; display:flex; overflow:hidden; }
+
+/* ── LEFT PANEL ── */
+.left-panel { width:210px; min-width:210px; background:#1a1d27; border-right:1px solid #2d3148; display:flex; flex-direction:column; padding:14px 12px; gap:12px; }
+.pt-meta small { color:#64748b; font-size:10px; }
+.pt-meta h2 { font-size:21px; font-weight:700; margin-top:2px; }
+.pt-meta p { color:#94a3b8; font-size:13px; }
+.section-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#475569; margin-bottom:5px; }
+.vitals-grid { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; font-size:13px; }
+.vitals-grid .key { color:#64748b; }
+.vitals-grid .val { text-align:right; font-weight:600; }
+.val.warn { color:#f97316; }
+.chief-badge { background:#1e293b; border-left:3px solid #f97316; padding:8px 10px; font-size:12px; line-height:1.5; color:#fbbf24; border-radius:0 6px 6px 0; }
+.exam-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.tag { background:#1e293b; border:1px solid #334155; border-radius:6px; padding:4px 7px; font-size:11px; color:#94a3b8; cursor:pointer; transition:all .15s; user-select:none; }
+.tag:hover { background:#2d3f5e; border-color:#3b82f6; color:#93c5fd; }
+.timer-box { margin-top:auto; background:#1e293b; border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:8px; }
+.timer-val { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.timer-val.warn { color:#ef4444; }
+.timer-sub { font-size:10px; color:#475569; }
+
+/* ── AVATAR PANEL ── */
+.avatar-panel { width:340px; min-width:340px; background:#13151f; border-right:1px solid #2d3148; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; overflow:hidden; padding-bottom:28px; }
+.avatar-panel::before { content:''; position:absolute; bottom:0; left:0; right:0; height:70px; background:linear-gradient(to top,#1a1d27,transparent); pointer-events:none; z-index:1; }
+
+/* WEBCAM PIP */
+.webcam-pip { position:absolute; top:14px; right:14px; z-index:20; width:180px; height:135px; border-radius:14px; overflow:hidden; border:2px solid #3b82f6; box-shadow:0 0 22px rgba(59,130,246,.4); background:#0d1117; cursor:pointer; transition:transform .2s; }
+.webcam-pip:hover { transform:scale(1.03); }
+.webcam-pip video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+.pip-label { position:absolute; bottom:4px; left:6px; font-size:10px; color:#93c5fd; background:rgba(0,0,0,.5); padding:1px 5px; border-radius:4px; }
+.student-emo { position:absolute; top:4px; right:5px; font-size:14px; background:rgba(0,0,0,.5); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.pip-off-msg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#475569; font-size:11px; text-align:center; }
+.pip-off-msg span { font-size:22px; }
+
+/* BODY STATE BADGE */
+.state-badge { position:absolute; top:14px; left:14px; z-index:10; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:4px 10px; font-size:11px; color:#64748b; transition:all .3s; }
+.state-badge.changed { border-color:#3b82f6; color:#93c5fd; }
+
+/* SPEECH BUBBLE */
+.avatar-speech { position:absolute; bottom:440px; left:50%; transform:translateX(-50%); background:#1e3a5f; border:1.5px solid #3b82f6; border-radius:12px; padding:8px 14px; font-size:12px; color:#93c5fd; max-width:220px; line-height:1.5; text-align:center; opacity:0; transition:opacity .25s; pointer-events:none; white-space:normal; box-shadow:0 4px 20px rgba(59,130,246,.2); z-index:10; }
+.avatar-speech::after { content:''; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); border:7px solid transparent; border-top-color:#1e3a5f; border-bottom:none; }
+.avatar-speech.show { opacity:1; }
+
+/* EMOTION ROW */
+.emotion-row { position:absolute; bottom:8px; left:0; right:0; z-index:2; display:flex; justify-content:center; }
+.emotion-badge { background:#1e293b; border:1px solid #334155; border-radius:20px; padding:4px 16px; font-size:12px; color:#94a3b8; transition:all .3s; }
+
+/* SVG CHARACTER */
+.char-svg { display:block; transition:all 0.5s ease; }
+.char-svg.sitting { width:290px; height:420px; }
+.char-svg.lying   { width:320px; height:160px; }
+
+/* ── BODY ANIMATIONS ── */
+@keyframes breathe { 0%,100%{transform:scaleY(1) translateY(0);}50%{transform:scaleY(1.018) translateY(-3px);} }
+@keyframes shake-hard { 0%,100%{transform:translateX(0)rotate(0);}15%{transform:translateX(-8px)rotate(-2.5deg);}30%{transform:translateX(8px)rotate(2.5deg);}50%{transform:translateX(-6px)rotate(-1.5deg);}70%{transform:translateX(6px)rotate(1.5deg);}85%{transform:translateX(-3px)rotate(-.5deg);} }
+@keyframes flinch-up { 0%{transform:translateY(0)scale(1)rotate(0);}25%{transform:translateY(-14px)scale(.96)rotate(-1.5deg);}60%{transform:translateY(6px)scale(1.02)rotate(.5deg);}100%{transform:translateY(0)scale(1)rotate(0);} }
+@keyframes hunch { 0%,100%{transform:translateY(0)rotate(0);}50%{transform:translateY(8px)rotate(4deg);} }
+@keyframes nod-worry { 0%,100%{transform:rotate(0)translateX(0);}30%{transform:rotate(-5deg)translateX(-3px);}70%{transform:rotate(3deg)translateX(2px);} }
+@keyframes leg-raise-anim { 0%{transform:rotate(0);}100%{transform:rotate(-45deg);}  }
+
+.body-anim { transform-origin:140px 380px; }
+.body-anim.idle   { animation:breathe 3.5s ease-in-out infinite; }
+.body-anim.pain   { animation:shake-hard .5s ease-in-out 1; }
+.body-anim.flinch { animation:flinch-up .4s cubic-bezier(.36,.07,.19,.97) 1; }
+.body-anim.hunch  { animation:hunch 1.2s ease-in-out 2; }
+.body-anim.worry  { animation:nod-worry 1s ease-in-out 2; }
+
+/* ── CHAT PANEL ── */
+.chat-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat-header { padding:12px 20px; border-bottom:1px solid #2d3148; display:flex; align-items:center; justify-content:space-between; }
+.chat-header h3 { font-size:14px; color:#94a3b8; }
+.btn-end { background:#7f1d1d; border:none; color:#fca5a5; padding:5px 14px; border-radius:6px; font-size:12px; cursor:pointer; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+.msg { display:flex; align-items:flex-start; gap:8px; }
+.msg.doctor { flex-direction:row-reverse; }
+.avatar-chip { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0; }
+.avatar-chip.patient{background:#1e3a5f;color:#60a5fa;}
+.avatar-chip.doctor{background:#14532d;color:#4ade80;}
+.bubble { max-width:75%; padding:9px 13px; border-radius:12px; font-size:13px; line-height:1.55; }
+.msg.patient .bubble { background:#1e293b; color:#e2e8f0; border-radius:2px 12px 12px 12px; }
+.msg.doctor  .bubble { background:#1d4ed8; color:#fff; border-radius:12px 2px 12px 12px; }
+.bubble.exam-bubble { background:#0f2f1a; border:1px dashed #16a34a; color:#4ade80; font-size:12px; }
+.bubble.exam-result { background:#1a2744; border:1px solid #1e40af; color:#93c5fd; font-size:12px; }
+.bubble.system-msg  { background:#1e2030; border:1px solid #334155; color:#64748b; font-size:11px; font-style:italic; }
+.chat-input-area { border-top:1px solid #2d3148; padding:12px 16px; background:#13151f; }
+.input-row { display:flex; gap:8px; align-items:flex-end; }
+.chat-input { flex:1; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 14px; color:#e2e8f0; font-size:13px; resize:none; max-height:100px; line-height:1.5; outline:none; transition:border-color .15s; }
+.chat-input:focus{border-color:#3b82f6;}
+.chat-input::placeholder{color:#475569;}
+.send-btn { width:38px;height:38px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.send-btn:hover{background:#2563eb;}
+.send-btn:disabled{background:#334155;cursor:not-allowed;}
+.hint-text{font-size:11px;color:#475569;margin-top:6px;}
+.exam-quick{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.eq-btn{background:#0f2f1a;border:1px solid #166534;border-radius:6px;padding:3px 9px;font-size:11px;color:#4ade80;cursor:pointer;}
+.eq-btn:hover{background:#14532d;}
+.typing-dots{display:flex;gap:4px;padding:10px 14px;background:#1e293b;border-radius:2px 12px 12px 12px;width:fit-content;}
+.typing-dots span{width:6px;height:6px;background:#475569;border-radius:50%;animation:dot-bounce .9s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:.15s;}
+.typing-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dot-bounce{0%,80%,100%{transform:translateY(0);opacity:.5;}40%{transform:translateY(-5px);opacity:1;}}
+
+/* ── FEEDBACK MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:#1a1d27;border:1px solid #334155;border-radius:16px;padding:28px 32px;width:540px;max-width:95vw;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.modal h2{font-size:18px;color:#e2e8f0;}
+.modal-section{background:#0f1117;border-radius:10px;padding:14px 16px;}
+.modal-section h4{font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #1e293b;}
+.score-row:last-child{border-bottom:none;}
+.score-val{font-weight:700;color:#60a5fa;}
+.score-bar-wrap{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:3px;}
+.score-bar{height:100%;background:#3b82f6;border-radius:3px;transition:width .8s ease;}
+.diagnosis-box{background:#0f2f1a;border:1px solid #166534;border-radius:8px;padding:10px 14px;font-size:13px;color:#4ade80;}
+.face-report{display:flex;gap:12px;align-items:flex-start;}
+.face-snap{width:100px;height:75px;border-radius:8px;object-fit:cover;border:1px solid #334155;transform:scaleX(-1);}
+.face-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
+.emo-bar-row{display:flex;align-items:center;gap:6px;font-size:11px;}
+.emo-bar-track{flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden;}
+.emo-bar-fill{height:100%;border-radius:3px;transition:width .6s;}
+.btn-close{background:#1d4ed8;border:none;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;align-self:flex-end;}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="pt-meta">
+    <small id="pt-location">응급실</small>
+    <h2 id="pt-name">로딩 중...</h2>
+    <p id="pt-age"></p>
+  </div>
+  <div>
+    <div class="section-label">바이탈</div>
+    <div class="vitals-grid">
+      <span class="key">BP</span><span class="val" id="v-bp">—</span>
+      <span class="key">PR</span><span class="val" id="v-pr">—</span>
+      <span class="key">RR</span><span class="val" id="v-rr">—</span>
+      <span class="key">BT</span><span class="val" id="v-bt">—</span>
+    </div>
+  </div>
+  <div>
+    <div class="section-label">주소</div>
+    <div class="chief-badge" id="chief-badge">로딩 중...</div>
+  </div>
+  <div>
+    <div class="section-label">신체검진</div>
+    <div class="exam-tags">
+      <div class="tag" onclick="insertExam('복부 시진')">시진</div>
+      <div class="tag" onclick="insertExam('복부 청진')">청진</div>
+      <div class="tag" onclick="insertExam('복부 타진')">타진</div>
+      <div class="tag" onclick="insertExam('복부 촉진')">촉진</div>
+      <div class="tag" onclick="insertExam('압통/반발통')">반발통</div>
+      <div class="tag" onclick="insertExam('Murphy\'s sign')">머피징후</div>
+      <div class="tag" onclick="insertExam('CVAT')">CVAT</div>
+    </div>
+  </div>
+  <div class="timer-box">
+    <span>⏱</span>
+    <div>
+      <div class="timer-val" id="timer-display">10:00</div>
+      <div class="timer-sub">남은 시간</div>
+    </div>
+  </div>
+</div>
+
+<!-- AVATAR PANEL -->
+<div class="avatar-panel">
+  <!-- 자세 배지 -->
+  <div class="state-badge" id="state-badge">🪑 앉은 자세</div>
+
+  <!-- 웹캠 PIP -->
+  <div class="webcam-pip" id="webcam-pip" onclick="togglePip()" title="클릭해서 카메라 켜기">
+    <div class="pip-off-msg" id="pip-off"><span>📷</span>내 카메라</div>
+    <video id="webcam-video" autoplay muted playsinline style="display:none"></video>
+    <div class="pip-label">나</div>
+    <div class="student-emo" id="student-emo">😐</div>
+  </div>
+
+  <!-- speech bubble -->
+  <div class="avatar-speech" id="avatar-speech"></div>
+
+  <!-- ── PATIENT SVG ── -->
+  <svg class="char-svg sitting" id="char-svg"
+       viewBox="0 0 280 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="g-face" cx="50%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#fce4c8"/><stop offset="65%" stop-color="#f0b98a"/><stop offset="100%" stop-color="#d9895a"/>
+      </radialGradient>
+      <radialGradient id="g-skin" cx="50%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#f9d5b5"/><stop offset="100%" stop-color="#e8a97c"/>
+      </radialGradient>
+      <radialGradient id="g-shirt" cx="50%" cy="20%" r="80%">
+        <stop offset="0%" stop-color="#3b5bdb"/><stop offset="100%" stop-color="#1e3a8a"/>
+      </radialGradient>
+      <radialGradient id="g-blush" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#f87171" stop-opacity=".7"/><stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ══ SITTING GROUP ══ -->
+    <g id="group-sitting">
+      <g class="body-anim idle" id="body-group">
+        <!-- shirt -->
+        <path d="M65 200 Q46 228 44 290 L196 290 Q194 228 175 200 Q148 188 120 189 Q92 188 65 200Z" fill="url(#g-shirt)"/>
+        <path d="M105 200 L120 220 L135 200" fill="none" stroke="#93c5fd" stroke-width="1.3" opacity=".35"/>
+        <!-- arms -->
+        <path id="s-armL" d="M65 200 Q44 232 46 272" fill="none" stroke="url(#g-skin)" stroke-width="22" stroke-linecap="round"/>
+        <path id="s-armR" d="M175 200 Q196 232 194 272" fill="none" stroke="url(#g-skin)" stroke-width="22" stroke-linecap="round"/>
+        <ellipse cx="46" cy="277" rx="13" ry="10" fill="url(#g-skin)"/>
+        <ellipse cx="194" cy="277" rx="13" ry="10" fill="url(#g-skin)"/>
+        <!-- neck -->
+        <path d="M105 163 Q103 185 120 186 Q137 185 135 163" fill="url(#g-skin)"/>
+        <!-- head -->
+        <ellipse cx="120" cy="128" rx="52" ry="56" fill="url(#g-face)"/>
+        <ellipse cx="120" cy="176" rx="30" ry="6" fill="#c47a45" opacity=".25"/>
+        <!-- hair -->
+        <path d="M68 115 Q73 66 120 62 Q167 66 172 115 Q167 80 120 76 Q73 80 68 115Z" fill="#1c0f05"/>
+        <path d="M68 115 Q64 102 70 88 Q74 78 82 72" fill="none" stroke="#1c0f05" stroke-width="12" stroke-linecap="round"/>
+        <path d="M172 115 Q176 102 170 88 Q166 78 158 72" fill="none" stroke="#1c0f05" stroke-width="12" stroke-linecap="round"/>
+        <path d="M100 68 Q120 63 140 70" fill="none" stroke="#3d1f08" stroke-width="3.5" opacity=".4" stroke-linecap="round"/>
+        <!-- ears -->
+        <ellipse cx="68" cy="130" rx="9" ry="13" fill="#e8a97c"/>
+        <ellipse cx="172" cy="130" rx="9" ry="13" fill="#e8a97c"/>
+        <!-- blush -->
+        <ellipse id="s-blushL" cx="96" cy="144" rx="19" ry="11" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+        <ellipse id="s-blushR" cx="144" cy="144" rx="19" ry="11" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+        <!-- eyebrows -->
+        <path id="s-browL" d="M88 106 Q102 99 116 104" fill="none" stroke="#3d1f08" stroke-width="3.2" stroke-linecap="round"/>
+        <path id="s-browR" d="M124 104 Q138 99 152 106" fill="none" stroke="#3d1f08" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- eyes -->
+        <ellipse cx="102" cy="122" rx="14" ry="15" fill="white"/>
+        <path id="s-elidL" d="M88 122 Q102 110 116 122" fill="#f0b98a"/>
+        <ellipse cx="102" cy="125" rx="8.5" ry="9.5" fill="#3d2810"/>
+        <ellipse cx="102" cy="124" rx="5" ry="5.5" fill="#0d0805"/>
+        <ellipse cx="105" cy="120" rx="2.5" ry="2.5" fill="white"/>
+        <ellipse cx="138" cy="122" rx="14" ry="15" fill="white"/>
+        <path id="s-elidR" d="M124 122 Q138 110 152 122" fill="#f0b98a"/>
+        <ellipse cx="138" cy="125" rx="8.5" ry="9.5" fill="#3d2810"/>
+        <ellipse cx="138" cy="124" rx="5" ry="5.5" fill="#0d0805"/>
+        <ellipse cx="141" cy="120" rx="2.5" ry="2.5" fill="white"/>
+        <!-- nose -->
+        <path d="M116 138 Q120 148 124 138" fill="none" stroke="#c4845a" stroke-width="2" stroke-linecap="round"/>
+        <!-- mouth -->
+        <path id="s-lipU" d="M106 158 Q113 153 120 155 Q127 153 134 158" fill="none" stroke="#a0522d" stroke-width="1.8" stroke-linecap="round"/>
+        <path id="s-mouth" d="M105 159 Q120 170 135 159" fill="none" stroke="#a0522d" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="s-teeth" d="M109 160 L131 160 Q133 169 120 172 Q107 169 109 160Z" fill="white" opacity="0" style="transition:opacity .2s"/>
+        <ellipse id="s-tongue" cx="120" cy="169" rx="9" ry="5" fill="#e07070" opacity="0" style="transition:opacity .2s"/>
+        <!-- sweat -->
+        <g id="s-sweat1" opacity="0" style="transition:opacity .3s"><ellipse cx="160" cy="108" rx="5" ry="7" fill="#60a5fa" opacity=".75"/><path d="M160 102 Q164 98 160 100" fill="none" stroke="#60a5fa" stroke-width="1.2"/></g>
+        <g id="s-sweat2" opacity="0" style="transition:opacity .3s"><ellipse cx="168" cy="122" rx="4" ry="5.5" fill="#93c5fd" opacity=".6"/></g>
+        <!-- pain zone sitting -->
+        <g id="s-pain-zone" opacity="0" style="transition:opacity .4s">
+          <circle cx="120" cy="248" r="26" fill="#ef4444" opacity=".1"/>
+          <circle cx="120" cy="248" r="26" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" opacity=".5">
+            <animate attributeName="r" values="20;30;20" dur="1.3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".5;.15;.5" dur="1.3s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      </g>
+    </g>
+
+    <!-- ══ LYING GROUP ══ viewBox switches to "0 0 480 200" -->
+    <g id="group-lying" opacity="0" style="pointer-events:none">
+      <!-- exam table -->
+      <rect x="0" y="148" width="480" height="16" rx="4" fill="#1e3a5f"/>
+      <rect x="0" y="160" width="480" height="6" rx="2" fill="#162040"/>
+      <!-- pillow -->
+      <rect x="10" y="112" width="80" height="38" rx="13" fill="#2d3a52"/>
+      <line x1="18" y1="122" x2="82" y2="122" stroke="#384d70" stroke-width="1.5"/>
+      <!-- head -->
+      <ellipse cx="52" cy="126" rx="40" ry="34" fill="url(#g-face)"/>
+      <!-- hair -->
+      <path d="M14 112 Q18 84 52 82 Q86 84 90 112 Q86 92 52 90 Q18 92 14 112Z" fill="#1c0f05"/>
+      <path d="M14 112 Q10 104 16 94" fill="none" stroke="#1c0f05" stroke-width="10" stroke-linecap="round"/>
+      <!-- neck -->
+      <rect x="88" y="113" width="24" height="26" rx="10" fill="url(#g-skin)"/>
+      <!-- torso / shirt -->
+      <rect x="108" y="100" width="240" height="50" rx="18" fill="url(#g-shirt)"/>
+      <path d="M138 100 L150 125 L138 150" fill="none" stroke="#93c5fd" stroke-width="1.2" opacity=".3"/>
+      <!-- arm top (visible above body) -->
+      <path d="M160 100 Q180 82 225 80" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <ellipse cx="233" cy="80" rx="13" ry="9" fill="url(#g-skin)"/>
+      <!-- arm bottom (resting near table) -->
+      <path d="M160 150 Q180 162 225 164" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <ellipse cx="233" cy="164" rx="13" ry="9" fill="url(#g-skin)"/>
+      <!-- pants/hips -->
+      <rect x="342" y="100" width="110" height="50" rx="12" fill="#2d3748"/>
+      <line x1="397" y1="100" x2="397" y2="150" stroke="#1a2535" stroke-width="1.5"/>
+      <!-- legs -->
+      <path id="l-legFar"  d="M370 108 Q425 106 456 108" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round" opacity=".75"/>
+      <path id="l-legNear" d="M370 122 Q425 122 456 124" fill="none" stroke="url(#g-skin)" stroke-width="24" stroke-linecap="round"/>
+      <!-- feet -->
+      <ellipse id="l-footFar"  cx="460" cy="108" rx="10" ry="17" fill="url(#g-skin)" opacity=".8"/>
+      <ellipse id="l-footNear" cx="460" cy="124" rx="10" ry="18" fill="url(#g-skin)"/>
+      <!-- LYING FACE -->
+      <!-- blush -->
+      <ellipse id="l-blushL" cx="36" cy="124" rx="14" ry="9" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+      <ellipse id="l-blushR" cx="68" cy="124" rx="14" ry="9" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+      <!-- eyebrows -->
+      <path id="l-browL" d="M26 112 Q38 106 50 110" fill="none" stroke="#3d1f08" stroke-width="2.5" stroke-linecap="round"/>
+      <path id="l-browR" d="M54 110 Q66 106 78 112" fill="none" stroke="#3d1f08" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- eyes -->
+      <ellipse cx="38" cy="120" rx="10" ry="9" fill="white"/>
+      <path id="l-elidL" d="M28 120 Q38 111 48 120" fill="#f0b98a"/>
+      <ellipse cx="38" cy="122" rx="6" ry="6.5" fill="#3d2810"/>
+      <ellipse cx="38" cy="121" rx="3.5" ry="3.5" fill="#0d0805"/>
+      <ellipse cx="40.5" cy="118" rx="1.8" ry="1.8" fill="white"/>
+      <ellipse cx="62" cy="120" rx="10" ry="9" fill="white"/>
+      <path id="l-elidR" d="M52 120 Q62 111 72 120" fill="#f0b98a"/>
+      <ellipse cx="62" cy="122" rx="6" ry="6.5" fill="#3d2810"/>
+      <ellipse cx="62" cy="121" rx="3.5" ry="3.5" fill="#0d0805"/>
+      <ellipse cx="64.5" cy="118" rx="1.8" ry="1.8" fill="white"/>
+      <!-- nose -->
+      <path d="M48 133 Q52 139 56 133" fill="none" stroke="#c4845a" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- mouth -->
+      <path id="l-mouth" d="M35 143 Q52 150 69 143" fill="none" stroke="#a0522d" stroke-width="2" stroke-linecap="round"/>
+      <path id="l-teeth" d="M39 145 L65 145 Q67 153 52 156 Q37 153 39 145Z" fill="white" opacity="0" style="transition:opacity .2s"/>
+      <!-- sweat -->
+      <g id="l-sweat1" opacity="0" style="transition:opacity .3s"><ellipse cx="82" cy="110" rx="4" ry="5.5" fill="#60a5fa" opacity=".75"/></g>
+      <!-- pain zone lying (abdomen) -->
+      <g id="l-pain-zone" opacity="0" style="transition:opacity .4s">
+        <ellipse cx="230" cy="124" rx="38" ry="20" fill="#ef4444" opacity=".1"/>
+        <ellipse cx="230" cy="124" rx="38" ry="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" opacity=".5">
+          <animate attributeName="rx" values="30;46;30" dur="1.3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".5;.15;.5" dur="1.3s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+    </g>
+
+    <!-- ══ LEG RAISE OVERLAY (on top of lying group) ══ -->
+    <g id="group-leg-raise" opacity="0" style="pointer-events:none">
+      <!-- raised right leg (near side) -->
+      <path d="M370 122 Q385 90 395 55" fill="none" stroke="#2d3748" stroke-width="26" stroke-linecap="round"/>
+      <path d="M370 122 Q385 90 395 55" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <!-- knee cap -->
+      <circle cx="387" cy="90" r="13" fill="url(#g-skin)"/>
+      <!-- lower leg raised -->
+      <path d="M395 55 Q410 30 418 16" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <!-- raised foot -->
+      <ellipse cx="420" cy="12" rx="10" ry="17" fill="url(#g-skin)" transform="rotate(-40,420,12)"/>
+      <!-- cover original near-leg -->
+      <rect x="360" y="108" width="108" height="32" fill="#13151f" opacity="0"/>
+    </g>
+
+    <!-- ══ KNEE BEND OVERLAY ══ -->
+    <g id="group-knee-bend" opacity="0" style="pointer-events:none">
+      <!-- both knees bent up -->
+      <!-- near leg bent -->
+      <path d="M370 124 Q382 96 394 72" fill="none" stroke="#2d3748" stroke-width="26" stroke-linecap="round"/>
+      <path d="M370 124 Q382 96 394 72" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <path d="M394 72 Q414 92 422 118" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <!-- far leg bent -->
+      <path d="M370 110 Q382 84 393 62" fill="none" stroke="url(#g-skin)" stroke-width="16" stroke-linecap="round" opacity=".75"/>
+      <path d="M393 62 Q412 80 420 106" fill="none" stroke="url(#g-skin)" stroke-width="16" stroke-linecap="round" opacity=".75"/>
+    </g>
+
+  </svg>
+
+  <div class="emotion-row">
+    <span class="emotion-badge" id="emotion-badge">😐 안정</span>
+  </div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel">
+  <div class="chat-header">
+    <h3>CPX 환자 시뮬레이션</h3>
+    <button class="btn-end" onclick="endSession()">종료 및 채점</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-area">
+    <div class="exam-quick">
+      <span style="font-size:11px;color:#475569;align-self:center">빠른검진:</span>
+      <button class="eq-btn" onclick="quickExam('복부 청진')">청진</button>
+      <button class="eq-btn" onclick="quickExam('복부 촉진')">촉진</button>
+      <button class="eq-btn" onclick="quickExam('압통/반발통')">반발통</button>
+      <button class="eq-btn" onclick="quickExam('CVAT')">CVAT</button>
+      <button class="eq-btn" onclick="quickExam('Murphy\'s sign')">머피</button>
+      <button class="eq-btn" onclick="quickCmd('누워주세요.')">눕기</button>
+      <button class="eq-btn" onclick="quickCmd('다리를 들어올려 보세요.')">다리올리기</button>
+      <button class="eq-btn" onclick="quickCmd('무릎을 구부려 주세요.')">무릎굽히기</button>
+    </div>
+    <div class="input-row">
+      <textarea class="chat-input" id="chat-input" rows="1"
+        placeholder="질문하거나, (신체검진) 형태로 검진 입력"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <div class="hint-text">신체검진: 〈복부 촉진 시작하겠습니다〉 / 자세: 〈누워주세요〉</div>
+  </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>📋 CPX 채점 결과</h2>
+    <div class="modal-section" id="modal-diagnosis" style="display:none">
+      <h4>🔍 숨겨진 진단</h4>
+      <div class="diagnosis-box" id="diagnosis-text"></div>
+    </div>
+    <div class="modal-section">
+      <h4>채점 결과</h4>
+      <div id="score-rows"></div>
+    </div>
+    <div class="modal-section">
+      <h4>🎥 수험자 표정 분석</h4>
+      <div class="face-report">
+        <video id="face-snap" class="face-snap" autoplay muted playsinline></video>
+        <div class="face-bars" id="face-bars">
+          <div style="font-size:12px;color:#475569">카메라가 꺼져 있어 표정 분석을 할 수 없습니다.</div>
+        </div>
+      </div>
+      <div id="face-comment" style="font-size:12px;color:#94a3b8;margin-top:10px;line-height:1.7"></div>
+    </div>
+    <button class="btn-close" onclick="closeModal()">닫기</button>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:8001';
+const $ = id => document.getElementById(id);
+
+// ─── STATE ───────────────────────────────────────────────
+let scenarioId = null;
+let chatHistory = [];       // [{role, content}]
+let doctorTranscript = [];  // 학생 발화만
+let bodyState = 'sitting';  // sitting | lying | leg-raise | knee-bend
+let curEmotion = 'neutral';
+let webcamStream = null;
+let faceApiReady = false;
+let emotionLog = [];
+let faceDetectInterval = null;
+let animTO = null;
+let spTO = null;
+let totalSeconds = 600;
+let timerInterval = null;
+let sessionEnded = false;
+
+// ─── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadScenario();
+  startTimer();
+  setFace('neutral');
+});
+
+// ─── SCENARIO LOAD ────────────────────────────────────────
+async function loadScenario() {
+  try {
+    const res = await fetch(`${API}/api/scenario/random`);
+    if (!res.ok) throw new Error('서버 연결 실패');
+    const sc = await res.json();
+    scenarioId = sc.scenario_id;
+    const p = sc.patient;
+    const v = p.vitals || {};
+
+    $('pt-name').textContent = p.name;
+    $('pt-age').textContent = `${p.gender === '남' ? '남' : '여'} · ${p.age}세`;
+    $('chief-badge').textContent = `"${sc.chief_complaint}"`;
+
+    $('v-bp').textContent = v.BP || '—';
+    const pr = v.PR;
+    $('v-pr').textContent = pr || '—';
+    if (pr && pr > 100) $('v-pr').classList.add('warn');
+    $('v-rr').textContent = v.RR || '—';
+    $('v-bt').textContent = v.BT ? `${v.BT}°C` : '—';
+    if (v.BT && v.BT > 37.5) $('v-bt').classList.add('warn');
+
+    addMsg(`[시스템] 환자: ${p.name} (${p.age}세, ${p.gender === '남' ? '남성' : '여성'}) — 시나리오 ID: ${sc.scenario_id}`, 'system');
+    if (p.appearance) addMsg(p.appearance, 'system');
+
+  } catch (e) {
+    addMsg('[시스템] 서버에 연결할 수 없습니다. server.py를 먼저 실행하세요.', 'system');
+    $('pt-name').textContent = '서버 오프라인';
+  }
+}
+
+// ─── TIMER ────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (sessionEnded) return;
+    if (--totalSeconds <= 0) {
+      $('timer-display').textContent = '00:00';
+      $('timer-display').classList.add('warn');
+      clearInterval(timerInterval);
+      addMsg('[시스템] 시험 시간이 종료되었습니다.', 'system');
+      return;
+    }
+    const m = String(Math.floor(totalSeconds/60)).padStart(2,'0');
+    const s = String(totalSeconds%60).padStart(2,'0');
+    $('timer-display').textContent = `${m}:${s}`;
+    if (totalSeconds <= 120) $('timer-display').classList.add('warn');
+  }, 1000);
+}
+
+// ─── BODY POSITION DETECTION ─────────────────────────────
+const POS_RULES = [
+  { re: /누워|눕|바로 누|드러누/, state: 'lying',      badge: '🛏 누운 자세',    viewBox: '0 0 480 200' },
+  { re: /앉[아으]|일어나|다시 앉/, state: 'sitting',   badge: '🪑 앉은 자세',   viewBox: '0 0 280 400' },
+  { re: /다리.*(들|올려|올리|올려주|들어주)|직거상|slr/i, state: 'leg-raise', badge: '🦵 다리 올리기', viewBox: '0 0 480 200' },
+  { re: /무릎.*(구부|접어|굽혀)|무릎 올려|양 무릎/, state: 'knee-bend', badge: '🦴 무릎 구부리기', viewBox: '0 0 480 200' },
+];
+
+function detectPosition(text) {
+  for (const rule of POS_RULES) {
+    if (rule.re.test(text)) return rule;
+  }
+  return null;
+}
+
+function setBodyState(rule) {
+  if (!rule) return;
+  const { state, badge, viewBox } = rule;
+  bodyState = state;
+
+  // viewBox & css class
+  const svg = $('char-svg');
+  svg.setAttribute('viewBox', viewBox);
+  svg.className = `char-svg ${state === 'sitting' ? 'sitting' : 'lying'}`;
+
+  // show/hide groups
+  $('group-sitting').style.opacity  = state === 'sitting' ? '1' : '0';
+  $('group-lying').style.opacity    = (state === 'lying' || state === 'leg-raise' || state === 'knee-bend') ? '1' : '0';
+  $('group-leg-raise').style.opacity  = state === 'leg-raise' ? '1' : '0';
+  $('group-knee-bend').style.opacity  = state === 'knee-bend' ? '1' : '0';
+
+  // pointer-events
+  ['group-sitting','group-lying','group-leg-raise','group-knee-bend'].forEach(id => {
+    $(id).style.pointerEvents = 'none';
+  });
+
+  // state badge
+  const badgeEl = $('state-badge');
+  badgeEl.textContent = badge;
+  badgeEl.classList.add('changed');
+  setTimeout(() => badgeEl.classList.remove('changed'), 1500);
+
+  // update speech bubble position for lying
+  $('avatar-speech').style.bottom = state === 'sitting' ? '440px' : '220px';
+}
+
+// ─── AVATAR FACE ─────────────────────────────────────────
+function triggerAnim(cls, ms=600) {
+  const bg = $('body-group');
+  if (!bg) return;
+  bg.className = `body-anim ${cls}`;
+  clearTimeout(animTO);
+  animTO = setTimeout(() => { bg.className = 'body-anim idle'; }, ms);
+}
+
+function triggerFlinch() {
+  triggerAnim('flinch', 460);
+  ['s-elidL','s-elidR'].forEach(id => {
+    const el = $(id); if(!el) return;
+    const orig = el.getAttribute('d');
+    const isSitting = bodyState === 'sitting';
+    if (isSitting) {
+      el.setAttribute('d', el.getAttribute('d').replace(/Q\d+\s+\d+/, 'Q'+[$(id==='s-elidL'?'s-browL':'s-browR').getBBox().x+30]+' 128'));
+    }
+    setTimeout(() => el.setAttribute('d', orig), 380);
+  });
+}
+
+function setFace(emotion, intensity='low') {
+  // sitting elements
+  const sEl = {
+    browL: $('s-browL'), browR: $('s-browR'),
+    elidL: $('s-elidL'), elidR: $('s-elidR'),
+    mouth: $('s-mouth'), lipU:  $('s-lipU'),
+    teeth: $('s-teeth'), tongue: $('s-tongue'),
+    blL: $('s-blushL'), blR: $('s-blushR'),
+    sw1: $('s-sweat1'), sw2: $('s-sweat2'),
+    pz:  $('s-pain-zone'),
+  };
+  // lying elements
+  const lEl = {
+    browL: $('l-browL'), browR: $('l-browR'),
+    elidL: $('l-elidL'), elidR: $('l-elidR'),
+    mouth: $('l-mouth'), teeth: $('l-teeth'),
+    blL: $('l-blushL'), blR: $('l-blushR'),
+    sw1: $('l-sweat1'), pz: $('l-pain-zone'),
+  };
+
+  const badge = $('emotion-badge');
+  const resetCommon = (e) => {
+    if(!e) return;
+    [e.sw1, e.sw2, e.pz].forEach(x => { if(x) x.style.opacity='0'; });
+    if(e.teeth) e.teeth.style.opacity='0';
+    if(e.tongue) e.tongue.style.opacity='0';
+    if(e.blL) e.blL.style.opacity='0';
+    if(e.blR) e.blR.style.opacity='0';
+  };
+  resetCommon(sEl); resetCommon(lEl);
+
+  if (emotion === 'pain') {
+    // sitting brows - V shape
+    sEl.browL?.setAttribute('d','M88 111 Q102 99 116 106');
+    sEl.browR?.setAttribute('d','M124 106 Q138 99 152 111');
+    lEl.browL?.setAttribute('d','M26 116 Q38 108 50 113');
+    lEl.browR?.setAttribute('d','M54 113 Q66 108 78 116');
+
+    if (intensity === 'high') {
+      sEl.elidL?.setAttribute('d','M88 122 Q102 117 116 122');
+      sEl.elidR?.setAttribute('d','M124 122 Q138 117 152 122');
+      lEl.elidL?.setAttribute('d','M28 120 Q38 115 48 120');
+      lEl.elidR?.setAttribute('d','M52 120 Q62 115 72 120');
+      sEl.mouth?.setAttribute('d','M107 162 Q120 176 133 162');
+      sEl.lipU?.setAttribute('d','M107 157 Q114 150 120 153 Q126 150 133 157');
+      lEl.mouth?.setAttribute('d','M36 146 Q52 154 68 146');
+      if(sEl.teeth) sEl.teeth.style.opacity='1';
+      if(sEl.tongue) sEl.tongue.style.opacity='0.7';
+      if(lEl.teeth) lEl.teeth.style.opacity='1';
+      if(sEl.sw1) sEl.sw1.style.opacity='1';
+      if(sEl.sw2) sEl.sw2.style.opacity='1';
+      if(lEl.sw1) lEl.sw1.style.opacity='1';
+      if(sEl.pz) sEl.pz.style.opacity='1';
+      if(lEl.pz) lEl.pz.style.opacity='1';
+      if(sEl.blL) sEl.blL.style.opacity='.5'; if(sEl.blR) sEl.blR.style.opacity='.5';
+      if(lEl.blL) lEl.blL.style.opacity='.5'; if(lEl.blR) lEl.blR.style.opacity='.5';
+      badge.textContent='😣 극심한 통증';
+      triggerAnim('hunch',1500);
+    } else if (intensity === 'mid') {
+      sEl.elidL?.setAttribute('d','M88 122 Q102 113 116 122');
+      sEl.elidR?.setAttribute('d','M124 122 Q138 113 152 122');
+      lEl.elidL?.setAttribute('d','M28 120 Q38 113 48 120');
+      lEl.elidR?.setAttribute('d','M52 120 Q62 113 72 120');
+      sEl.mouth?.setAttribute('d','M107 160 Q120 172 133 160');
+      sEl.lipU?.setAttribute('d','M107 157 Q114 152 120 154 Q126 152 133 157');
+      lEl.mouth?.setAttribute('d','M36 145 Q52 152 68 145');
+      if(sEl.sw1) sEl.sw1.style.opacity='0.8';
+      if(lEl.sw1) lEl.sw1.style.opacity='0.8';
+      if(sEl.pz) sEl.pz.style.opacity='0.7';
+      if(lEl.pz) lEl.pz.style.opacity='0.7';
+      if(sEl.blL) sEl.blL.style.opacity='.4'; if(sEl.blR) sEl.blR.style.opacity='.4';
+      if(lEl.blL) lEl.blL.style.opacity='.4'; if(lEl.blR) lEl.blR.style.opacity='.4';
+      badge.textContent='😖 통증';
+      triggerAnim('pain',600);
+    } else {
+      sEl.elidL?.setAttribute('d','M88 122 Q102 115 116 122');
+      sEl.elidR?.setAttribute('d','M124 122 Q138 115 152 122');
+      sEl.mouth?.setAttribute('d','M108 160 Q120 169 132 160');
+      lEl.mouth?.setAttribute('d','M36 144 Q52 150 68 144');
+      badge.textContent='😣 통증';
+      triggerAnim('pain',500);
+    }
+  } else if (emotion === 'worry') {
+    sEl.browL?.setAttribute('d','M88 108 Q99 99 116 105');
+    sEl.browR?.setAttribute('d','M124 105 Q141 99 152 108');
+    lEl.browL?.setAttribute('d','M26 114 Q37 107 50 112');
+    lEl.browR?.setAttribute('d','M54 112 Q67 107 78 114');
+    sEl.elidL?.setAttribute('d','M88 122 Q102 111 116 122');
+    sEl.elidR?.setAttribute('d','M124 122 Q138 111 152 122');
+    sEl.mouth?.setAttribute('d','M108 162 Q120 155 132 162');
+    lEl.mouth?.setAttribute('d','M37 144 Q52 139 67 144');
+    badge.textContent='😟 걱정';
+    triggerAnim('worry',1300);
+  } else if (emotion === 'nausea') {
+    sEl.elidL?.setAttribute('d','M88 122 Q102 113 116 122');
+    sEl.elidR?.setAttribute('d','M124 122 Q138 113 152 122');
+    sEl.mouth?.setAttribute('d','M108 162 Q114 156 120 159 Q126 156 132 162');
+    if(sEl.blL) sEl.blL.style.opacity='.2'; if(sEl.blR) sEl.blR.style.opacity='.2';
+    badge.textContent='🤢 구역감';
+    triggerAnim('hunch',1100);
+  } else {
+    // neutral reset
+    sEl.browL?.setAttribute('d','M88 106 Q102 99 116 104');
+    sEl.browR?.setAttribute('d','M124 104 Q138 99 152 106');
+    lEl.browL?.setAttribute('d','M26 112 Q38 106 50 110');
+    lEl.browR?.setAttribute('d','M54 110 Q66 106 78 112');
+    sEl.elidL?.setAttribute('d','M88 122 Q102 110 116 122');
+    sEl.elidR?.setAttribute('d','M124 122 Q138 110 152 122');
+    lEl.elidL?.setAttribute('d','M28 120 Q38 111 48 120');
+    lEl.elidR?.setAttribute('d','M52 120 Q62 111 72 120');
+    sEl.mouth?.setAttribute('d','M105 159 Q120 170 135 159');
+    sEl.lipU?.setAttribute('d','M106 158 Q113 153 120 155 Q127 153 134 158');
+    lEl.mouth?.setAttribute('d','M35 143 Q52 150 69 143');
+    badge.textContent='😐 안정';
+  }
+  curEmotion = emotion;
+}
+
+// ─── SPEECH BUBBLE ────────────────────────────────────────
+function showSpeech(text) {
+  const el = $('avatar-speech');
+  el.textContent = text.replace(/\[.*?\]\s*/g,'').trim().slice(0,55);
+  el.classList.add('show');
+  clearTimeout(spTO);
+  spTO = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ─── CHAT MESSAGES ────────────────────────────────────────
+function addMsg(text, role, type='normal') {
+  const w = $('chat-messages');
+  const d = document.createElement('div');
+  d.className = `msg ${role === 'system' ? 'patient' : role}`;
+  if (role !== 'system') {
+    const ch = document.createElement('div');
+    ch.className = `avatar-chip ${role}`;
+    ch.textContent = role === 'patient' ? '환' : '학';
+    d.appendChild(ch);
+  }
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  if (type === 'exam')   b.classList.add('exam-bubble');
+  if (type === 'result') b.classList.add('exam-result');
+  if (role === 'system') b.classList.add('system-msg');
+  b.textContent = text;
+  d.appendChild(b);
+  w.appendChild(d);
+  w.scrollTop = w.scrollHeight;
+}
+
+function showTyping() {
+  const w = $('chat-messages');
+  const d = document.createElement('div'); d.className='msg patient'; d.id='typing-ind';
+  const ch = document.createElement('div'); ch.className='avatar-chip patient'; ch.textContent='환';
+  const dots = document.createElement('div'); dots.className='typing-dots';
+  dots.innerHTML='<span></span><span></span><span></span>';
+  d.appendChild(ch); d.appendChild(dots); w.appendChild(d); w.scrollTop=w.scrollHeight;
+}
+function removeTyping() { const e=$('typing-ind'); if(e) e.remove(); }
+
+// ─── SEND MESSAGE ─────────────────────────────────────────
+function detectExam(text) {
+  if (/청진/.test(text)) return '복부 청진';
+  if (/타진/.test(text)) return '복부 타진';
+  if (/촉진/.test(text)) return '복부 촉진';
+  if (/반발|반동/.test(text)) return '압통/반발통';
+  if (/murphy|머피/i.test(text)) return "Murphy's sign";
+  if (/cvat|등 두드/i.test(text)) return 'CVAT';
+  if (/시진/.test(text)) return '복부 시진';
+  return null;
+}
+
+async function sendMessage() {
+  if (sessionEnded || !scenarioId) return;
+  const inp = $('chat-input');
+  const text = inp.value.trim(); if (!text) return;
+  inp.value = ''; autoResize(inp);
+
+  const isExam = !!detectExam(text);
+  addMsg(text, 'doctor', isExam ? 'exam' : 'normal');
+  doctorTranscript.push(text);
+
+  // 자세 전환 감지 (학생 발화에서)
+  const posRule = detectPosition(text);
+  if (posRule) {
+    setBodyState(posRule);
+    if (posRule.state !== 'sitting') {
+      addMsg(`[${posRule.badge}으로 전환됩니다]`, 'system');
+    }
+  }
+
+  setLoading(true);
+  showTyping();
+
+  try {
+    const res = await fetch(`${API}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        scenario_id: scenarioId,
+        history: chatHistory,
+        message: text,
+      }),
+    });
+    if (!res.ok) throw new Error('API 오류');
+    const data = await res.json();
+    const reply = data.reply;
+
+    removeTyping();
+    chatHistory.push({ role: 'user', content: text });
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    // 환자 응답에서 감정/자세 감지
+    const emo = detectEmoFromReply(reply);
+    setFace(emo.emotion, emo.intensity);
+
+    // flinch if exam
+    if (isExam) triggerFlinch();
+
+    addMsg(reply, 'patient');
+    showSpeech(reply);
+
+    // [EXAM:...] 태그 있으면 결과 표시
+    const examTag = reply.match(/\(([^)]+)\)\s*$/);
+    if (examTag) {
+      setTimeout(() => addMsg(`📋 ${examTag[1]}`, 'patient', 'result'), 400);
+    }
+  } catch (e) {
+    removeTyping();
+    addMsg('[오류] 서버 응답 실패. 서버 연결을 확인하세요.', 'system');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function detectEmoFromReply(text) {
+  const painKw = /아파|아프|통증|쥐어|찌르|죽을|식은땀|움찔|아!/;
+  const highKw  = /극심|8점|9점|너무너무|못 참/;
+  const worryKw = /걱정|무서|불안|혹시|큰 병/;
+  const nauseaKw = /메스|구역|토할|울렁/;
+  if (painKw.test(text)) {
+    return { emotion: 'pain', intensity: highKw.test(text) ? 'high' : 'mid' };
+  }
+  if (nauseaKw.test(text)) return { emotion: 'nausea', intensity: 'mid' };
+  if (worryKw.test(text)) return { emotion: 'worry', intensity: 'low' };
+  return { emotion: 'neutral', intensity: 'low' };
+}
+
+function setLoading(on) {
+  $('send-btn').disabled = on;
+}
+
+// ─── SCORE / END SESSION ──────────────────────────────────
+async function endSession() {
+  if (sessionEnded) { $('modal').classList.add('show'); return; }
+  sessionEnded = true;
+  clearInterval(timerInterval);
+  clearInterval(faceDetectInterval);
+
+  if (!scenarioId || doctorTranscript.length === 0) {
+    $('score-rows').innerHTML = '<div style="color:#64748b;font-size:13px">대화 기록이 없습니다.</div>';
+    buildFaceReport();
+    $('modal').classList.add('show');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/api/score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario_id: scenarioId, transcript: doctorTranscript }),
+    });
+    const data = await res.json();
+    buildScoreRows(data);
+    if (data.hidden_diagnosis) {
+      $('diagnosis-text').textContent = data.hidden_diagnosis;
+      $('modal-diagnosis').style.display = 'block';
+    }
+  } catch (e) {
+    $('score-rows').innerHTML = '<div style="color:#64748b;font-size:13px">채점 서버 연결 실패.</div>';
+  }
+
+  buildFaceReport();
+  $('modal').classList.add('show');
+}
+
+function buildScoreRows(data) {
+  const scores = data.scores || {};
+  const sections = [
+    { label:'병력 청취', s:'history',     max:'history_max' },
+    { label:'신체진찰',  s:'exam',        max:'exam_max' },
+    { label:'정보 제공', s:'information', max:'information_max' },
+    { label:'환자-의사 관계', s:'ppi',    max:'ppi_max' },
+  ];
+  let html = '';
+  for (const { label, s, max } of sections) {
+    const earned = (scores[s] || 0).toFixed(1);
+    const mx     = (scores[max] || 0).toFixed(0);
+    const pct    = mx > 0 ? Math.round(earned/mx*100) : 0;
+    html += `
+      <div class="score-row">
+        <span>${label}</span>
+        <span class="score-val">${earned} / ${mx}점</span>
+      </div>
+      <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>`;
+  }
+  const total    = (data.total_score || 0).toFixed(1);
+  const totalMax = (data.total_max || 0).toFixed(0);
+  const totalPct = totalMax > 0 ? Math.round(total/totalMax*100) : 0;
+  html += `
+    <div class="score-row" style="border-top:1px solid #334155;margin-top:8px;padding-top:8px">
+      <span style="font-weight:700">총점</span>
+      <span class="score-val" style="font-size:16px">${total} / ${totalMax}점 (${totalPct}%)</span>
+    </div>`;
+  $('score-rows').innerHTML = html;
+  // trigger bar animation
+  setTimeout(() => {
+    document.querySelectorAll('.score-bar').forEach((b, i) => {
+      const w = b.style.width; b.style.width='0';
+      setTimeout(() => b.style.width=w, 100 + i*80);
+    });
+  }, 100);
+}
+
+function buildFaceReport() {
+  const barsEl = $('face-bars');
+  const commentEl = $('face-comment');
+  if (emotionLog.length === 0) {
+    barsEl.innerHTML='<div style="font-size:12px;color:#475569">카메라가 꺼져 있어 분석을 할 수 없습니다.<br>다음엔 📷를 눌러 카메라를 켜보세요!</div>';
+    commentEl.textContent='';
+    return;
+  }
+  const totals = { neutral:0, happy:0, surprised:0, fearful:0, disgusted:0, angry:0, sad:0 };
+  emotionLog.forEach(({expr}) => {
+    Object.entries(expr).forEach(([k,v]) => { if(totals[k]!==undefined) totals[k]+=v; });
+  });
+  const sum = Object.values(totals).reduce((a,b)=>a+b,0);
+  const pct = {};
+  Object.entries(totals).forEach(([k,v]) => pct[k]=Math.round(v/sum*100));
+  const labels = { neutral:'😐 안정', happy:'😊 긍정', surprised:'😲 놀람', fearful:'😨 긴장', disgusted:'😤 당황', angry:'😠 답답', sad:'😢 슬픔' };
+  const colors  = { neutral:'#64748b', happy:'#22c55e', surprised:'#f59e0b', fearful:'#6366f1', disgusted:'#f97316', angry:'#ef4444', sad:'#60a5fa' };
+  const sorted = Object.entries(pct).sort((a,b)=>b[1]-a[1]);
+  barsEl.innerHTML = sorted.slice(0,5).map(([k,p]) => `
+    <div class="emo-bar-row">
+      <span style="width:72px;color:#94a3b8">${labels[k]}</span>
+      <div class="emo-bar-track"><div class="emo-bar-fill" style="width:${p}%;background:${colors[k]}"></div></div>
+      <span style="width:30px;text-align:right;color:#64748b">${p}%</span>
+    </div>`).join('');
+  const dominant = sorted[0][0];
+  const fearPct = (pct.fearful||0) + (pct.surprised||0);
+  const comments = [];
+  if (fearPct > 40) comments.push('⚠️ 면담 중 긴장/불안한 표정이 많았습니다. 자연스럽게 눈을 마주치며 대화해보세요.');
+  if ((pct.neutral||0) > 55) comments.push('✅ 전반적으로 안정된 표정을 유지했습니다.');
+  if ((pct.happy||0) > 20) comments.push('✅ 공감하는 따뜻한 표정이 자주 관찰됐습니다.');
+  if ((pct.disgusted||0) > 15 || (pct.angry||0) > 10) comments.push('⚠️ 당황하거나 불편한 표정이 감지됐습니다. 환자가 위축될 수 있어요.');
+  commentEl.textContent = comments.join('\n') || '표정 분석 완료.';
+}
+
+function closeModal() { $('modal').classList.remove('show'); }
+
+// ─── WEBCAM ───────────────────────────────────────────────
+async function togglePip() {
+  if (webcamStream) return;
+  try {
+    webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    const vid = $('webcam-video');
+    vid.srcObject = webcamStream; vid.style.display='block';
+    $('pip-off').style.display='none';
+    $('face-snap').srcObject = webcamStream;
+    await loadFaceModels();
+    startFaceDetection();
+  } catch(e) {
+    $('pip-off').innerHTML = '<span>🚫</span>카메라 거부됨';
+  }
+}
+async function loadFaceModels() {
+  try {
+    const URL = 'https://justadudewhohacks.github.io/face-api.js/models';
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(URL),
+    ]);
+    faceApiReady = true;
+  } catch(e) {}
+}
+function startFaceDetection() {
+  if (!faceApiReady) return;
+  faceDetectInterval = setInterval(async () => {
+    const vid = $('webcam-video');
+    if (!vid || vid.readyState < 2) return;
+    try {
+      const result = await faceapi
+        .detectSingleFace(vid, new faceapi.TinyFaceDetectorOptions({ inputSize:128 }))
+        .withFaceExpressions();
+      if (result) {
+        emotionLog.push({ ts: Date.now(), expr: result.expressions });
+        const dom = Object.entries(result.expressions).sort((a,b)=>b[1]-a[1])[0][0];
+        const map = { neutral:'😐', happy:'😊', surprised:'😲', fearful:'😨', disgusted:'😤', angry:'😠', sad:'😢' };
+        $('student-emo').textContent = map[dom] || '😐';
+      }
+    } catch(e) {}
+  }, 1500);
+}
+
+// ─── INPUT HELPERS ────────────────────────────────────────
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+function insertExam(n) { $('chat-input').value=`(${n} 시작하겠습니다)`; $('chat-input').focus(); }
+function quickExam(n)  { $('chat-input').value=`(${n} 시작하겠습니다)`; sendMessage(); }
+function quickCmd(t)   { $('chat-input').value=t; sendMessage(); }
+</script>
+</body>
+</html>

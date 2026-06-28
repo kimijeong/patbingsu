@@ -1,0 +1,77 @@
+{
+  "scenario_id": "acute_15",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "급성 장간막 허혈",
+  "top_diagnoses": ["급성 장간막 허혈", "장폐색", "허혈성 대장염"],
+  "patient": {
+    "name": "권말순",
+    "age": 75,
+    "gender": "여",
+    "vitals": { "BP": "155/92", "PR": 98, "RR": 20, "BT": 37.3 },
+    "appearance": "[심한 통증을 호소하지만 복부 진찰 소견에 비해 불균형하게 아파 보임]"
+  },
+  "chief_complaint": "배가 갑자기 너무 아파요. 죽을 것 같아요",
+  "history": {
+    "O_onset": "2시간 전, 식사 후 갑자기 시작됨",
+    "L_location": "배 전체, 특히 배꼽 주위",
+    "D_duration_course": "갑자기 시작된 이후 지속적으로 극심하게 아픔",
+    "Co_change": "점점 심해짐. 진통제(타이레놀) 먹었으나 전혀 효과 없음",
+    "Ex_prior_episode": "식사 후 30분~1시간 뒤에 배가 아픈 일이 3개월 전부터 가끔 있었음(식후 통증 반복)",
+    "C_character": "극심한 통증, NRS 9점. 지속적이고 쥐어짜는 듯함. 방사통 없음",
+    "A_associated": "구역/구토(+/+), 혈변(+, 검붉은 점액 변), 발열(-), 어지러움(경미)",
+    "F_factor": "어떤 자세도 완화 없음. 식사 후 발생",
+    "PSH": "없음",
+    "PMH": "심방세동(+, 5년, 항응고제 복용 불규칙), 고혈압(+), 고지혈증(+)",
+    "medication": "항응고제(와파린, 불규칙 복용), 혈압약, 고지혈증약",
+    "social": "음주(-), 흡연(-), 직업(은퇴)",
+    "family": "없음"
+  },
+  "physical_exam": {
+    "general": "고령 여성, 통증을 극심하게 호소하나 복부 진찰 소견이 생각보다 경미함(Pain out of proportion)",
+    "eyes": "결막 약간 창백, 공막 정상",
+    "abdomen": {
+      "inspection": "약간 팽만",
+      "auscultation": "장음 감소 또는 소실",
+      "percussion": "특이소견 없음",
+      "palpation": "복부 전반 경미한 압통(호소하는 통증에 비해 진찰 소견 경미)",
+      "tenderness_location": "전반적(경미)",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": false
+    }
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[심한 통증으로 얼굴을 찡그리며 들어옴. 배를 감싸고 있음]",
+    "on_pain_question": "[매우 고통스러운 표정으로] 배가 죽을 것 같이 아파요. 이렇게 아픈 건 처음이에요",
+    "on_palpation": "[의외로 진찰 시 반응이 덜함] 음... 아프긴 한데 아까보다는...",
+    "on_afib_question": "[끄덕이며] 심장이 불규칙하다고 해서 약을 받았는데 깜빡할 때가 있어요",
+    "on_stool_question": "[당황한 표정] 아까 화장실에 갔더니 검붉은 변이 나왔어요",
+    "baseline_emotion": "극심한 공포와 통증"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "와파린", "response": "피 묽게 하는 약이라고 해서 먹고 있어요." },
+      { "question_pattern": "장간막", "response": "그게 뭔가요?" }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "PMH - 심방세동/항응고제 (핵심!)", "keywords": ["심방세동", "부정맥", "심장", "와파린", "항응고"], "score": 7 },
+      { "category": "A - 통증-진찰 불일치 인지 (Pain out of proportion)", "keywords": ["심하게", "극심", "9점", "죽을 것"], "score": 5 },
+      { "category": "A - 혈변/점액변", "keywords": ["혈변", "검붉", "피", "점액", "변"], "score": 5 },
+      { "category": "Ex - 식후 반복 통증 (장간막 협심증)", "keywords": ["식사 후", "밥 먹고", "식후", "먹으면", "전에도"], "score": 5 },
+      { "category": "O - 갑작스러운 발병 + 고령", "keywords": ["갑자기", "시작", "처음"], "score": 3 },
+      { "category": "PMH - 항응고제 복용 불규칙", "keywords": ["불규칙", "깜빡", "가끔", "빠뜨"], "score": 3 }
+    ],
+    "required_tests": ["복부 CT 혈관조영(CTA)", "CBC/응고검사(PT-INR)", "혈중 젖산(Lactate)"],
+    "required_treatments": ["응급 수술 또는 혈관 중재술", "항응고 요법", "수액/수혈"],
+    "expected_skills": [
+      "심방세동 과거력 및 항응고제 복용 여부 반드시 문진",
+      "통증-진찰 불일치(Pain out of proportion) 인지",
+      "식후 반복 복통(장간막 협심증) 패턴 문진"
+    ]
+  }
+}

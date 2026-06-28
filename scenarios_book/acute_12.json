@@ -1,0 +1,79 @@
+{
+  "scenario_id": "acute_12",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "난소 낭종 염전",
+  "top_diagnoses": ["난소 낭종 염전", "자궁외 임신", "급성 충수돌기염"],
+  "patient": {
+    "name": "한수빈",
+    "age": 22,
+    "gender": "여",
+    "vitals": { "BP": "118/74", "PR": 102, "RR": 20, "BT": 37.2 },
+    "appearance": "[오른쪽 아랫배를 감싸 안고 앉아 있음. 통증으로 얼굴을 찡그리고 있음]"
+  },
+  "chief_complaint": "오른쪽 아랫배가 갑자기 너무 아파요",
+  "history": {
+    "O_onset": "3시간 전, 체육 수업 중 갑자기 시작됨",
+    "L_location": "오른쪽 아랫배",
+    "D_duration_course": "갑자기 시작되어 지속적으로 아픔. 처음에 잠깐 나아지는 듯했으나 다시 심해짐",
+    "Co_change": "점차 악화됨",
+    "Ex_prior_episode": "1년 전에도 비슷하게 갑자기 오른쪽이 아팠다가 저절로 나은 적 있음",
+    "C_character": "쥐어짜고 비트는 듯한 극심한 통증, NRS 8점, 방사통 없음",
+    "A_associated": "구역/구토(+/+), 발열(-), 질출혈(-), 어지러움(경미)",
+    "F_factor": "움직일 때 심해짐. 쉬면 조금 나아지는 듯하나 큰 변화 없음",
+    "PSH": "없음",
+    "PMH": "난소 낭종(+, 6개월 전 초음파에서 우측 4cm 낭종 발견됨, 경과관찰 중)",
+    "medication": "없음",
+    "social": "음주(-), 흡연(-), 직업(대학생)",
+    "family": "없음",
+    "female_hx": "LMP 2주 전(28일 주기 규칙적), 성경험(-), 임신 가능성 없음"
+  },
+  "physical_exam": {
+    "general": "급성 통증 병색. PR 102(빈맥, 통증/미주신경성)",
+    "eyes": "결막 정상, 공막 정상",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "특이소견 없음",
+      "palpation": "우하복부 압통(+), 복부 전반 근육 긴장 경미",
+      "tenderness_location": "우하복부",
+      "rebound_tenderness": true,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": false
+    },
+    "pelvic": "우측 부속기 압통(+) 및 종물 촉지됨. CMT(-)"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[오른쪽 아랫배를 감싸 안고 허리를 약간 구부린 채 들어옴]",
+    "on_pain_question": "[찡그리며] 여기가 갑자기 너무 아파요 [오른쪽 아랫배를 가리킴]",
+    "on_activity_question": "[체육 수업 떠올리며] 줄넘기 하다가 갑자기 시작됐어요",
+    "on_palpation": "[움찔하며] 아, 거기 누르면 너무 아파요",
+    "on_pmh_question": "[기억하며] 아, 낭종이라고 경과 보자고 했는데...",
+    "baseline_emotion": "통증과 불안"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "염전", "response": "염전이요? 그게 뭔가요?" },
+      { "question_pattern": "낭종", "response": "네, 6개월 전에 초음파에서 낭종이 있다고 했어요." }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "PMH - 난소 낭종 과거력 (핵심!)", "keywords": ["낭종", "난소", "초음파", "혹", "과거"], "score": 7 },
+      { "category": "O - 활동 중 갑작스러운 발병 (핵심!)", "keywords": ["갑자기", "운동", "체육", "활동", "움직"], "score": 5 },
+      { "category": "female_hx - LMP/임신 가능성", "keywords": ["생리", "lmp", "임신", "피임"], "score": 4 },
+      { "category": "A - 질출혈 없음 (자궁외임신 감별)", "keywords": ["질출혈", "출혈", "피", "하혈"], "score": 4 },
+      { "category": "Ex - 이전 유사 에피소드 (간헐적 염전 의심)", "keywords": ["이전", "전에도", "예전", "반복"], "score": 4 },
+      { "category": "C - 통증 양상", "keywords": ["어떻게", "양상", "쥐어짜", "비트"], "score": 3 }
+    ],
+    "required_tests": ["골반 초음파(도플러 포함)", "소변 hCG", "CBC"],
+    "required_treatments": ["응급 복강경 수술(염전 해소/낭종 제거)", "수액 공급", "진통제"],
+    "expected_skills": [
+      "난소 낭종 과거력 적극 문진",
+      "LMP 및 임신 가능성 확인(자궁외임신 감별)",
+      "골반 초음파(도플러) 신속 시행 안내"
+    ]
+  }
+}

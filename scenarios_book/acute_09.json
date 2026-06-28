@@ -1,0 +1,77 @@
+{
+  "scenario_id": "acute_09",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "수술 후 유착성 장폐색",
+  "top_diagnoses": ["수술 후 유착성 장폐색", "장중첩증", "대장암에 의한 폐색"],
+  "patient": {
+    "name": "최영수",
+    "age": 45,
+    "gender": "남",
+    "vitals": { "BP": "130/85", "PR": 84, "RR": 18, "BT": 37.1 },
+    "appearance": "[복부가 눈에 띄게 부풀어 있음. 잦은 구역질로 대화 중 구토할 것 같은 표정을 지음]"
+  },
+  "chief_complaint": "배가 아프고 가스가 차서 터질 것 같아요",
+  "history": {
+    "O_onset": "어제 저녁 식사 후",
+    "L_location": "복부 전반, 배꼽 주변이 특히 심함",
+    "D_duration_course": "어제 저녁부터 점차 심해지며 간헐적으로 쥐어짜듯 아프다가 현재는 계속 더부룩함",
+    "Co_change": "시간이 갈수록 배가 더 부풀어 오르고 통증 주기가 짧아짐",
+    "Ex_prior_episode": "이전에도 과식하면 배가 빵빵했으나 이 정도는 처음",
+    "C_character": "파도치듯 쥐어짜는 듯한 통증, NRS 6점, 방사통(-)",
+    "A_associated": "구역/구토(+/+, 초록색 쓴 물을 두 차례 구토), 변비(+, 어제 아침 이후 대변 못 봄), 방귀(-,  어젯밤부터 전혀 안 나옴), 발열(-)",
+    "F_factor": "음식/물 마시면 바로 구역질 심해짐. 토하면 잠깐 편하나 다시 아픔",
+    "PSH": "3년 전 급성 충수염으로 개복 충수절제술 시행",
+    "PMH": "특이사항 없음",
+    "medication": "없음",
+    "social": "술(소주 주 1회 1병), 흡연(-), 직업(사무직)",
+    "family": "없음"
+  },
+  "physical_exam": {
+    "general": "활력징후 비교적 안정적이나 복부 팽만으로 힘들어함. 구강 탈수 소견(혀와 입술이 말라 있음)",
+    "eyes": "결막/공막 정상",
+    "abdomen": {
+      "inspection": "복부 전반 팽만(Distension +), 우하복부 수술 흉터 확인됨",
+      "auscultation": "금속성 장음(Metallic tinkling sound) 및 장음 항진",
+      "percussion": "고장음(Tympany) 전반",
+      "palpation": "복부 전반 경미한 압통",
+      "tenderness_location": "전반적",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": false
+    }
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[배가 눈에 띄게 불러 있고 불편한 표정. 움직일 때마다 신음소리를 냄]",
+    "on_pain_question": "[배를 가리키며] 배 전체가 빵빵하고 쥐어짜는 것처럼 아파요",
+    "on_psh_question": "[아, 맞다는 표정으로] 3년 전에 맹장 수술했어요",
+    "on_nausea": "[대화 중 갑자기 구토할 것 같은 표정을 지으며 입을 막음]",
+    "on_flatus_question": "[당황한 표정] 방귀가 어젯밤부터 전혀 안 나와요",
+    "baseline_emotion": "불안, 불편함"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "유착", "response": "유착이요? 그게 뭔가요?" },
+      { "question_pattern": "L-tube", "response": "그게 뭔지 모르겠어요." }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "PSH - 복부 수술력 (핵심!)", "keywords": ["수술", "맹장", "충수", "개복", "수술력"], "score": 7 },
+      { "category": "A - 방귀/가스 배출 여부 (핵심!)", "keywords": ["방귀", "가스", "배출", "안 나와"], "score": 6 },
+      { "category": "A - 구토물 양상 (담즙성)", "keywords": ["구토", "토", "초록", "쓴", "담즙"], "score": 4 },
+      { "category": "A - 배변 여부", "keywords": ["대변", "변", "배변", "못 봄"], "score": 4 },
+      { "category": "O - 발병시기", "keywords": ["언제", "시작", "어제"], "score": 2 },
+      { "category": "C - 통증 양상 (산통)", "keywords": ["쥐어짜", "간헐", "파도", "주기"], "score": 3 }
+    ],
+    "required_tests": ["복부 X-ray", "복부 CT", "전해질 검사"],
+    "required_treatments": ["금식(NPO)", "L-tube 삽입", "수액/전해질 공급"],
+    "expected_skills": [
+      "과거 복부 수술력(PSH) 적극적 문진",
+      "가스 배출 및 배변 여부 확인",
+      "복부 청진 시 금속성 장음 확인"
+    ]
+  }
+}

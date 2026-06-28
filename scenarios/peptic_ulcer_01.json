@@ -1,0 +1,307 @@
+{
+  "scenario_id": "peptic_ulcer_01",
+  "category": "만성복통/소화불량",
+  "hidden_diagnosis": "위궤양 (H. pylori 양성)",
+
+  "patient": {
+    "name": "정대호",
+    "age": 52,
+    "gender": "남",
+    "address": "서울시 동작구 상도동",
+    "vital_signs": {
+      "BP": "132/84",
+      "PR": 78,
+      "RR": 16,
+      "BT": 36.7,
+      "SpO2": 98
+    },
+    "appearance": "[약간 피곤해 보이는 중년 남성. 상복부 쪽을 은근히 신경 쓰는 표정]"
+  },
+
+  "chief_complaint": {
+    "initial_response": "속이 쓰리고 명치 쪽이 아파서요. 한 달 넘게 이러는 것 같아요.",
+    "volunteered_extras": [
+      "밥 먹고 나면 더 심해지는 것 같아요"
+    ]
+  },
+
+  "history": {
+    "O_onset": {
+      "when": "한 달 반 전쯤부터요",
+      "how": "서서히",
+      "situation": "처음에는 그냥 속이 좀 쓴가 했는데 점점 심해졌어요"
+    },
+    "L_location": {
+      "primary": "[명치를 손가락으로 가리키며] 여기요, 명치 쪽이요",
+      "radiation": "없어요",
+      "migration": "없어요"
+    },
+    "D_duration": {
+      "frequency": "거의 매일이요. 밥 먹고 한두 시간 후에 특히 심해요",
+      "duration_each": "한번 시작하면 한두 시간 지속되는 것 같아요",
+      "pattern": "밥 먹고 나서 주로 아파요"
+    },
+    "Co_course": {
+      "progression": "점점 심해짐"
+    },
+    "Ex_experience": {
+      "previous_episode": true,
+      "previous_detail": "한 5년 전에도 비슷한 적 있었는데 그때 위내시경에서 위염이라고 했어요. 약 먹고 나았어요"
+    },
+    "C_character": {
+      "quality": "쓰리고 아파요. 속이 타는 것 같기도 해요",
+      "nrs": 5
+    },
+    "A_associated": {
+      "emergency": {
+        "palpitation": false,
+        "dyspnea": false,
+        "dizziness": false,
+        "decreased_urine": false
+      },
+      "systemic": {
+        "fever": false,
+        "chills": false,
+        "fatigue": true,
+        "fatigue_response": "요즘 피로한 편이에요",
+        "weight_loss": true,
+        "weight_loss_response": "한 달 사이에 2~3kg 정도 빠진 것 같아요. 식욕도 좀 없고",
+        "night_sweats": false
+      },
+      "GI": {
+        "anorexia": true,
+        "anorexia_response": "네, 밥맛이 예전만큼 없어요",
+        "nausea": true,
+        "nausea_response": "식후에 좀 메스껍기도 해요",
+        "vomiting": false,
+        "diarrhea": false,
+        "constipation": false,
+        "hematemesis": false,
+        "melena": false,
+        "melena_response": "검은 변은... 잘 모르겠어요. 확인을 못 했어요",
+        "hematochezia": false,
+        "bloating": true,
+        "bloating_response": "식후에 더부룩한 느낌이 있어요",
+        "jaundice": false,
+        "fatty_stool": false
+      },
+      "urinary": {
+        "dysuria": false,
+        "hematuria": false,
+        "frequency": false
+      }
+    },
+    "F_factor": {
+      "aggravating": ["밥 먹고 나서", "맵거나 자극적인 음식"],
+      "aggravating_response": "밥 먹고 한두 시간 후에 더 심해요. 맵거나 기름진 거 먹으면 더 나쁜 것 같아요",
+      "relieving": ["제산제"],
+      "relieving_response": "약국에서 제산제 사 먹으면 잠깐은 나아요",
+      "posture_effect": "자세는 별로 관계없어요"
+    }
+  },
+
+  "social_history": {
+    "alcohol": {
+      "drinks": true,
+      "amount": "소주 반 병 정도, 일주일에 두세 번이요",
+      "recent_binge": false
+    },
+    "smoking": {
+      "smokes": true,
+      "amount": "하루 한 갑, 25년째예요"
+    },
+    "diet": "불규칙하게 먹어요. 외식 많이 하고 맵고 짠 거 좋아해요. 커피도 하루 서너 잔 마시고",
+    "recent_food": "특별한 건 없어요",
+    "occupation": "건설회사 현장 팀장이에요",
+    "exercise": "거의 못 해요",
+    "stress": "현장 일이 많아서 스트레스 많아요",
+    "travel": "최근 여행 없어요"
+  },
+
+  "past_medical_history": {
+    "conditions": ["고혈압"],
+    "conditions_response": "고혈압 있어요. 3년 됐어요",
+    "surgeries": [],
+    "surgeries_response": "수술은 없어요",
+    "medications": ["암로디핀 (고혈압약)", "이부프로펜 (가끔, 허리 아플 때)"],
+    "medications_response": "고혈압 약 먹고 있고요, 허리가 자주 아파서 진통제를 가끔 사 먹어요",
+    "allergies": "없어요",
+    "vaccinations": {
+      "hep_A": false,
+      "hep_B": true
+    },
+    "health_checkup": "2년 전에 건강검진 했는데 위내시경 안 했어요. 위염 있을 수 있다고 하던데"
+  },
+
+  "family_history": {
+    "relevant": ["아버지 위암으로 돌아가심"],
+    "response": "아버지가 위암으로 돌아가셨어요. 그래서 좀 걱정돼서 왔어요"
+  },
+
+  "physical_exam": {
+    "general": "전반적으로 양호하나 약간 수척해 보임",
+    "eyes": "결막 창백 경미, 공막 황달 없음",
+    "mouth": "탈수 없음",
+    "lymph_nodes": "촉지 안 됨",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "특이소견 없음",
+      "palpation": "명치 (상복부) 압통 있음. 반동 압통 없음",
+      "tenderness_location": "명치 (상복부 중앙)",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "rovsing_sign": false,
+      "mcburney_point": false,
+      "obturator_sign": false,
+      "psoas_sign": false,
+      "CVAT": false
+    },
+    "DRE": "특이소견 없음"
+  },
+
+  "nonverbal_expressions": {
+    "on_entry": "[약간 지쳐 보이는 표정으로 들어옴. 명치 쪽을 은근히 만지작거림]",
+    "on_pain_question": "[명치를 짚으며] 여기가 밥 먹고 나면 특히 아파요",
+    "on_weight_loss_question": "[살짝 걱정스러운 표정] 네, 요즘 살이 좀 빠진 것 같아요",
+    "on_family_history_question": "[표정이 무거워지며] 사실 아버지가 위암으로 돌아가셔서... 저도 걱정돼요",
+    "on_cancer_mention": "[불안해하며] 혹시 저도 암 같은 건 아니죠?",
+    "on_endoscopy_recommendation": "[불안하면서도 수긍하는 표정] 내시경을 해봐야 한다는 거죠?",
+    "baseline_emotion": "불안"
+  },
+
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      {
+        "question_pattern": "흑색변",
+        "response": "검은 변인지는 제가 잘 확인을 안 해봐서 모르겠어요"
+      },
+      {
+        "question_pattern": "헬리코박터",
+        "response": "헬리코박터요? 잘 모르겠어요, 검사해본 적 없어요"
+      }
+    ]
+  },
+
+  "scoring": {
+    "rapport_checklist": [
+      {
+        "item": "인사 및 자기소개",
+        "keywords": ["안녕하세요", "학생의사", "저는"],
+        "score": 2
+      },
+      {
+        "item": "진료 시간 및 동의 안내",
+        "keywords": ["분 동안", "괜찮으시겠어요"],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀해달라 안내",
+        "keywords": ["불편", "말씀해주세요"],
+        "score": 1
+      },
+      {
+        "item": "환자 편의 배려",
+        "keywords": ["오시는 길", "날씨"],
+        "score": 1
+      }
+    ],
+    "history_checklist": [
+      {
+        "category": "O - 발병",
+        "question_example": "언제부터 그러셨나요?",
+        "keywords": ["언제", "시작"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "F - 식후 악화 (핵심!)",
+        "question_example": "밥 드시고 나면 더 아프세요?",
+        "keywords": ["식사", "밥", "먹으면", "식후"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "A - 체중감소 (악성 경고증상!)",
+        "question_example": "최근에 체중이 줄었나요?",
+        "keywords": ["체중", "살", "빠졌"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "A - 흑색변 (악성 경고증상!)",
+        "question_example": "변이 검게 나온 적 있나요?",
+        "keywords": ["흑색변", "검은 변", "melena"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "과거력 - NSAIDs 복용 (핵심!)",
+        "question_example": "진통제 드시는 것 있나요?",
+        "keywords": ["진통제", "소염제", "NSAIDs", "이부프로펜", "약"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "가족력 - 위암",
+        "question_example": "가족 중에 위암 환자 있으신가요?",
+        "keywords": ["가족", "위암", "암"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "C - 양상",
+        "question_example": "어떻게 아프세요?",
+        "keywords": ["양상", "어떻게", "쓰리", "타는"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "사회력 - 흡연",
+        "question_example": "담배 피우시나요?",
+        "keywords": ["담배", "흡연"],
+        "score": 2,
+        "required": false
+      },
+      {
+        "category": "사회력 - 음주",
+        "question_example": "술을 드시나요?",
+        "keywords": ["술", "음주"],
+        "score": 1,
+        "required": false
+      }
+    ],
+    "exam_checklist": [
+      {
+        "item": "복부 촉진 (명치 압통 확인)",
+        "keywords": ["촉진", "눌러", "압통"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "반동 압통 확인 (없음 확인)",
+        "keywords": ["반동", "rebound"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "item": "결막 빈혈 확인",
+        "keywords": ["결막", "눈", "빈혈"],
+        "score": 2,
+        "required": true
+      }
+    ],
+    "diagnosis_score": {
+      "correct_keywords": ["위궤양", "위염", "소화성 궤양", "peptic ulcer"],
+      "score": 10
+    },
+    "treatment_plan_score": {
+      "required_workup": ["위내시경", "요소날숨검사", "신속요소분해효소검사"],
+      "required_treatment": ["PPI", "H.pylori 제균", "제산제", "NSAIDs 중단"],
+      "score": 10
+    },
+    "total_score": 65
+  }
+}

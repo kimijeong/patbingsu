@@ -1,0 +1,203 @@
+{
+  "scenario_id": "chronic_03",
+  "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통)",
+  "category": "소화불량/만성 복통",
+  "hidden_diagnosis": "위염",
+  "top_diagnoses": [
+    "위염",
+    "위암",
+    "위궤양"
+  ],
+  "patient": {
+    "name": "박태민",
+    "age": 50,
+    "gender": "남",
+    "vital_signs": {
+      "BP": "126/84",
+      "PR": 78,
+      "RR": 16,
+      "BT": 36.3
+    },
+    "setting": "외래",
+    "appearance": "[대답 빨리 해줌]"
+  },
+  "chief_complaint": "소화가 되지 않아요",
+  "history": {
+    "O_onset": "3개월 전",
+    "L_location": "통증 없음",
+    "D_duration_course": "밥 먹자마자 더부룩한 느낌",
+    "Co_change": "점점 심해짐, 1달 전 악화",
+    "Ex_prior_episode": "1년 전에도 비슷한 경험",
+    "C_character": "일상생활에 큰 지장은 없음",
+    "A_associated": {
+      "전신": "발열/오한/피로/체중감소(-/-/-/+, 3개월간 75kg→70kg, 5kg 감소), 부종(-)",
+      "소화기": "식욕부진/구역/구토/변비/설사(-/-/-/-/-), 속쓰림(+), 복통(-), 황달(-), 혈변(-)"
+    },
+    "F_factor": "악화(+, 식후 심해짐, 우유에 악화되지 않음), 완화(+, 공복 시 나아짐, 배변 시 완화되지 않음)",
+    "E_prior_exam": "위, 대장내시경 3년 전에 받았음, 정상 소견",
+    "PSH": "-",
+    "PMH": "DM/TB/HTN/간염(-/-/-/-)",
+    "medication": "-",
+    "social": "술/담배/커피(+, 회식 때마다 1병씩/-/+, 하루에 1번), 직업(회사 이사, 스트레스 심함), 식습관(규칙적인 식사)",
+    "family": "아버지(조기 위암)",
+    "female_hx": null
+  },
+  "physical_exam": {
+    "General": "V/S 정상",
+    "HEENT": "결막/공막(-/-), 구강 탈수 소견(-), 경부 림프절(-)",
+    "Abdomen": "복부 시/청/타/촉(-/-/-/-), Murphy's sign(-), CVAT(-)",
+    "Extremity": "피부 긴장도/오목 부종(-/-)"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[대답 빨리 해줌]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+    "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+    "baseline_emotion": "불안",
+    "patient_question": "없음"
+  },
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+  },
+  "scoring": {
+    "required_tests": [
+      "상부위장관내시경",
+      "혈액검사",
+      "복부 CT"
+    ],
+    "required_treatments": [
+      "양성자 펌프 억제제",
+      "스트레스 관리"
+    ],
+    "expected_skills": [],
+    "history_checklist": [
+      {
+        "item": "인사/자기소개",
+        "keywords": [
+          "안녕",
+          "학생의사"
+        ],
+        "score": 2
+      },
+      {
+        "item": "진료시간 안내 및 동의",
+        "keywords": [
+          "분 동안",
+          "괜찮으시겠어요"
+        ],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀 안내",
+        "keywords": [
+          "불편하시면",
+          "말씀해"
+        ],
+        "score": 1
+      },
+      {
+        "item": "O - 발병 시기",
+        "keywords": [
+          "언제",
+          "얼마나"
+        ],
+        "score": 3
+      },
+      {
+        "item": "L - 위치",
+        "keywords": [
+          "어디",
+          "짚어"
+        ],
+        "score": 3
+      },
+      {
+        "item": "C - 통증 양상",
+        "keywords": [
+          "어떻게 아프",
+          "양상"
+        ],
+        "score": 2
+      },
+      {
+        "item": "C - NRS",
+        "keywords": [
+          "몇 점",
+          "10점"
+        ],
+        "score": 2
+      },
+      {
+        "item": "Co - 경과",
+        "keywords": [
+          "심해지",
+          "변화"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 발열/오한",
+        "keywords": [
+          "열",
+          "오한"
+        ],
+        "score": 3
+      },
+      {
+        "item": "A - 구역/구토",
+        "keywords": [
+          "구역",
+          "구토",
+          "토"
+        ],
+        "score": 2
+      },
+      {
+        "item": "F - 악화/완화 요인",
+        "keywords": [
+          "악화",
+          "완화",
+          "먹으면",
+          "자세"
+        ],
+        "score": 3
+      },
+      {
+        "item": "사회력 - 음주/흡연",
+        "keywords": [
+          "술",
+          "담배",
+          "흡연"
+        ],
+        "score": 2
+      },
+      {
+        "item": "과거력/복용약",
+        "keywords": [
+          "수술",
+          "지병",
+          "약"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 체중감소 (악성 감별)",
+        "keywords": [
+          "체중",
+          "살",
+          "빠졌"
+        ],
+        "score": 4
+      },
+      {
+        "item": "A - 혈변/흑색변 (악성 감별)",
+        "keywords": [
+          "혈변",
+          "검은 변",
+          "흑색"
+        ],
+        "score": 4
+      }
+    ]
+  }
+}

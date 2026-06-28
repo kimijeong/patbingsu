@@ -1,0 +1,221 @@
+{
+  "scenario_id": "chronic_04",
+  "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통)",
+  "category": "소화불량/만성 복통",
+  "hidden_diagnosis": "일차성 소화불량",
+  "top_diagnoses": [
+    "일차성 소화불량",
+    "위암",
+    "위궤양"
+  ],
+  "patient": {
+    "name": "박지영",
+    "age": 55,
+    "gender": "여",
+    "vital_signs": {
+      "BP": "125/75",
+      "PR": 72,
+      "RR": 18,
+      "BT": 36.5
+    },
+    "setting": "외래",
+    "appearance": "[SP 순응도 좋고, 대답도 빠름]"
+  },
+  "chief_complaint": "소화가 되지 않아요",
+  "history": {
+    "O_onset": "3개월 전",
+    "L_location": "상복부(명치)",
+    "D_duration_course": "-",
+    "Co_change": "원래 소화 안 되는 편이었는데 3개월 전부터(최근 치킨 먹은 후) 심해짐",
+    "Ex_prior_episode": "30대부터 소화 잘 안 되긴 함",
+    "C_character": "더부룩함, 음식 잘 안 내려가는 느낌, 일상생활 지장(+)",
+    "A_associated": {
+      "전신": "체중감소(+, 주변에서 이야기 많이 들음)",
+      "소화기": "A/N/D/V/C(-/-/-/-/-), 속쓰림(+, 명치쪽 NRS 3~4), 혈변/지방변(-/-), 아랫배 통증(-)"
+    },
+    "F_factor": "식후에 심해짐, 2시간 정도 지나면 호전, 젖당불내증(-), 변 보고 난 뒤 호전(-)",
+    "E_prior_exam": "건강 검진에서 위염 있었음 → 약 먹고 지금은 완치됨(확인 안 됨)",
+    "PSH": "둘째 제왕절개",
+    "PMH": "DM(+, 10년 전, 잘 조절됨), 위궤양(+), 위염(+, 약 잘 먹음)",
+    "medication": "당뇨약(+, 잘 조절됨)",
+    "social": "흡연(-), 음주(+, social), 직업(회사원, 부부가 도장가게 운영), 식사(기름지고 자극적인 식사 월 1회, 나머지는 건강식단), 운동(-), 스트레스(+, 심하지 않음)",
+    "family": "-",
+    "female_hx": "5년 전 폐경(관련하여 심해진 것 같지는 않음), 성관계 안 한 지 오래, 아이 2명, 주산기 포함 별 문제 없었음"
+  },
+  "physical_exam": {
+    "General": "V/S stable",
+    "HEENT": "눈/입/림프절(-/-/-)",
+    "Abdomen": "Epigastric Td(+), Td/rTd(+/±, 반동압통 유무 불확실), Td/rTd 모두 아프게 아니라 불편하다고 함(깊이 누를 때 아파함), DRE/CVAT(-/-)",
+    "Extremity": "-"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[SP 순응도 좋고, 대답도 빠름]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+    "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+    "baseline_emotion": "불안",
+    "patient_question": "-"
+  },
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+  },
+  "scoring": {
+    "required_tests": [
+      "위내시경",
+      "H. pylori 검사",
+      "위배출시간검사"
+    ],
+    "required_treatments": [
+      "생활 습관 교육",
+      "악성인 경우 병기에 따른 치료",
+      "혈당 조절"
+    ],
+    "expected_skills": [],
+    "history_checklist": [
+      {
+        "item": "인사/자기소개",
+        "keywords": [
+          "안녕",
+          "학생의사"
+        ],
+        "score": 2
+      },
+      {
+        "item": "진료시간 안내 및 동의",
+        "keywords": [
+          "분 동안",
+          "괜찮으시겠어요"
+        ],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀 안내",
+        "keywords": [
+          "불편하시면",
+          "말씀해"
+        ],
+        "score": 1
+      },
+      {
+        "item": "O - 발병 시기",
+        "keywords": [
+          "언제",
+          "얼마나"
+        ],
+        "score": 3
+      },
+      {
+        "item": "L - 위치",
+        "keywords": [
+          "어디",
+          "짚어"
+        ],
+        "score": 3
+      },
+      {
+        "item": "C - 통증 양상",
+        "keywords": [
+          "어떻게 아프",
+          "양상"
+        ],
+        "score": 2
+      },
+      {
+        "item": "C - NRS",
+        "keywords": [
+          "몇 점",
+          "10점"
+        ],
+        "score": 2
+      },
+      {
+        "item": "Co - 경과",
+        "keywords": [
+          "심해지",
+          "변화"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 발열/오한",
+        "keywords": [
+          "열",
+          "오한"
+        ],
+        "score": 3
+      },
+      {
+        "item": "A - 구역/구토",
+        "keywords": [
+          "구역",
+          "구토",
+          "토"
+        ],
+        "score": 2
+      },
+      {
+        "item": "F - 악화/완화 요인",
+        "keywords": [
+          "악화",
+          "완화",
+          "먹으면",
+          "자세"
+        ],
+        "score": 3
+      },
+      {
+        "item": "사회력 - 음주/흡연",
+        "keywords": [
+          "술",
+          "담배",
+          "흡연"
+        ],
+        "score": 2
+      },
+      {
+        "item": "과거력/복용약",
+        "keywords": [
+          "수술",
+          "지병",
+          "약"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 체중감소 (악성 감별)",
+        "keywords": [
+          "체중",
+          "살",
+          "빠졌"
+        ],
+        "score": 4
+      },
+      {
+        "item": "A - 혈변/흑색변 (악성 감별)",
+        "keywords": [
+          "혈변",
+          "검은 변",
+          "흑색"
+        ],
+        "score": 4
+      },
+      {
+        "item": "(여) 생리/LMP",
+        "keywords": [
+          "생리",
+          "월경",
+          "LMP"
+        ],
+        "score": 4
+      },
+      {
+        "item": "(여) 임신 가능성",
+        "keywords": [
+          "임신",
+          "피임"
+        ],
+        "score": 4
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "scenario_id": "acute_11",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "담석증(담도산통)",
+  "top_diagnoses": ["담석증(담도산통)", "급성 담낭염(초기)", "기능성 소화불량"],
+  "patient": {
+    "name": "송정자",
+    "age": 56,
+    "gender": "여",
+    "vitals": { "BP": "138/82", "PR": 82, "RR": 16, "BT": 37.8 },
+    "appearance": "[현재는 통증이 가라앉아 편한 자세로 앉아 있음. 약간 피곤해 보임]"
+  },
+  "chief_complaint": "오른쪽 윗배가 아프고 속이 메스꺼워요",
+  "history": {
+    "O_onset": "오늘 새벽 1시경 (어제 저녁 삼겹살 과식 후)",
+    "L_location": "오른쪽 윗배(우상복부) 및 명치",
+    "D_duration_course": "새벽에 시작해 약 3시간 지속되다 새벽 4시부터 서서히 호전됨",
+    "Co_change": "현재는 통증이 많이 가라앉고 둔한 불편감만 남음",
+    "Ex_prior_episode": "수개월 전부터 기름진 음식 먹으면 우상복부가 묵직하게 아프다가 1~2시간 뒤 좋아지곤 했음",
+    "C_character": "쥐어짜는 듯한 묵직한 통증, NRS 5점(새벽에는 7점), 오른쪽 등·어깨 쪽 방사통(+)",
+    "A_associated": "구역(+), 구토(-), 발열(+, 미열), 황달(-), 체중변화(-)",
+    "F_factor": "기름진 음식·고기·튀김 섭취 시 발생. 시간이 지나면 서서히 호전. 타이레놀 효과 없음",
+    "PSH": "없음",
+    "PMH": "고지혈증(+, 3년 전 진단). 1년 전 위내시경 경미한 위염 외 특이사항 없음",
+    "medication": "고지혈증약(Atorvastatin)",
+    "social": "술(-), 흡연(-), 직업(가정주부), 비만(BMI 26.5)",
+    "family": "어머니(담석증으로 담낭절제술 받음)"
+  },
+  "physical_exam": {
+    "general": "현재는 통증 완화, 활력징후 안정적. BT 37.8(미열)",
+    "eyes": "결막 정상, 공막 정상(황달 소견 없음)",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "특이소견 없음",
+      "palpation": "우상복부 깊게 촉진 시 약간의 불편감. 명확한 압통 없음",
+      "tenderness_location": "우상복부(경미)",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": false
+    }
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[약간 피곤해 보이지만 현재는 비교적 편안한 표정으로 앉아 있음]",
+    "on_pain_question": "[우상복부를 가리키며] 새벽에 여기가 너무 아팠는데 지금은 좀 괜찮아요",
+    "on_fat_food_question": "[멋쩍게 웃으며] 기름진 거 좋아해서요... 고기 먹으면 꼭 이래요",
+    "on_family_hx": "[끄덕이며] 어머니도 담석이라고 쓸개 수술 받으셨어요",
+    "on_cancer_concern": "[걱정스러운 표정] 위암 같은 건 아닌 거죠?",
+    "baseline_emotion": "불안(암 걱정), 멋쩍음"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "murphy", "response": "그게 무슨 검사예요?" },
+      { "question_pattern": "담석", "response": "담석이 있는지는 아직 모르고 이번에 처음 검사 받으러 왔어요." }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "F - 기름진 음식 후 발생 (핵심!)", "keywords": ["기름", "고기", "튀김", "지방", "삼겹"], "score": 6 },
+      { "category": "L - 우상복부→등/어깨 방사통 (핵심!)", "keywords": ["등", "어깨", "방사", "퍼지", "뻐근"], "score": 5 },
+      { "category": "D - 지속 시간 (1~5시간 후 호전)", "keywords": ["시간", "지나면", "호전", "나아", "얼마나"], "score": 4 },
+      { "category": "Ex - 반복 에피소드", "keywords": ["이전", "전에도", "반복", "예전"], "score": 4 },
+      { "category": "family - 담석 가족력 (위험인자)", "keywords": ["가족", "어머니", "담석", "쓸개"], "score": 3 },
+      { "category": "PMH - 고지혈증 (위험인자)", "keywords": ["고지혈", "콜레스테롤", "지질"], "score": 2 },
+      { "category": "A - 황달 유무", "keywords": ["황달", "눈 노랗", "소변 노랗"], "score": 3 }
+    ],
+    "required_tests": ["복부 초음파", "간기능 검사(LFT)", "CBC"],
+    "required_treatments": ["저지방 식이", "진통제", "담낭절제술 권유"],
+    "expected_skills": [
+      "기름진 음식과의 연관성 및 지속 시간 문진",
+      "Murphy sign 및 황달 유무 신체진찰",
+      "담낭암 가족력 및 고지혈증 위험인자 확인"
+    ]
+  }
+}

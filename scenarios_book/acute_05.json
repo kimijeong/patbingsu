@@ -1,0 +1,223 @@
+{
+  "scenario_id": "acute_05",
+  "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통)",
+  "category": "급성 복통",
+  "hidden_diagnosis": "만성 췌장염",
+  "top_diagnoses": [
+    "만성 췌장염",
+    "췌장 두부암",
+    "담도암"
+  ],
+  "patient": {
+    "name": "이영자",
+    "age": 80,
+    "gender": "여",
+    "vital_signs": {
+      "BP": "120/82",
+      "PR": 80,
+      "RR": 18,
+      "BT": 36.5
+    },
+    "setting": "외래/응급실",
+    "appearance": "[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]"
+  },
+  "chief_complaint": "배가 아파요",
+  "history": {
+    "O_onset": "3개월 전",
+    "L_location": "명치 부위에서 처음 시작하여 이후 등으로 뻗침",
+    "D_duration_course": "지속적, 일정함",
+    "Co_change": "일정함",
+    "Ex_prior_episode": "이전에는 속만 불편했음",
+    "C_character": "묵직한 통증",
+    "A_associated": {
+      "전신": "발열/오한(-/-), 체중감소/가려움(+/+, 5kg 감소, 밤에 깰 정도의 가려움)",
+      "소화기": "속쓰림/구역/구토(-/-/-), 소화불량/대변의 양상 변화/황달(+/-/+)",
+      "비뇨기": "소변색 변화(+, 색이 진함)"
+    },
+    "F_factor": "식후 심해지는 통증, 우유(-), 소화불량으로 식사량 감소",
+    "E_prior_exam": "6개월 전(-)",
+    "PSH": "수술(-)",
+    "PMH": "DM/TB/HTN/간염(-/-/-/-)",
+    "medication": "-",
+    "social": "술 social(20대에 주 5~6회 소주 1병씩 마심), 담배(-), 직업(전업주부)",
+    "family": "-",
+    "female_hx": "폐경"
+  },
+  "physical_exam": {
+    "General": "V/S 확인",
+    "HEENT": "입/피부 탈수 소견(-/-), 결막/공막(-/+, 노란색), Light reflex/안구 운동검사 정상",
+    "Chest": "흉부 청진 정상",
+    "Abdomen": "Epigastric Td(+)/rTd(-), CVA tenderness(-), DRE 정상",
+    "Extremity": "손가락 노란색(+)"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+    "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+    "baseline_emotion": "불안",
+    "patient_question": "없음"
+  },
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+  },
+  "scoring": {
+    "required_tests": [
+      "복부 CT",
+      "혈중 amylase/lipase",
+      "간기능검사"
+    ],
+    "required_treatments": [],
+    "expected_skills": [
+      "항문 직장 진찰",
+      "조영제 CT 설명동의서 받기",
+      "황달 관련 문진(가려움, 소변색, 대변색)"
+    ],
+    "history_checklist": [
+      {
+        "item": "인사/자기소개",
+        "keywords": [
+          "안녕",
+          "학생의사"
+        ],
+        "score": 2
+      },
+      {
+        "item": "진료시간 안내 및 동의",
+        "keywords": [
+          "분 동안",
+          "괜찮으시겠어요"
+        ],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀 안내",
+        "keywords": [
+          "불편하시면",
+          "말씀해"
+        ],
+        "score": 1
+      },
+      {
+        "item": "O - 발병 시기",
+        "keywords": [
+          "언제",
+          "얼마나"
+        ],
+        "score": 3
+      },
+      {
+        "item": "L - 위치",
+        "keywords": [
+          "어디",
+          "짚어"
+        ],
+        "score": 3
+      },
+      {
+        "item": "C - 통증 양상",
+        "keywords": [
+          "어떻게 아프",
+          "양상"
+        ],
+        "score": 2
+      },
+      {
+        "item": "C - NRS",
+        "keywords": [
+          "몇 점",
+          "10점"
+        ],
+        "score": 2
+      },
+      {
+        "item": "Co - 경과",
+        "keywords": [
+          "심해지",
+          "변화"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 발열/오한",
+        "keywords": [
+          "열",
+          "오한"
+        ],
+        "score": 3
+      },
+      {
+        "item": "A - 구역/구토",
+        "keywords": [
+          "구역",
+          "구토",
+          "토"
+        ],
+        "score": 2
+      },
+      {
+        "item": "F - 악화/완화 요인",
+        "keywords": [
+          "악화",
+          "완화",
+          "먹으면",
+          "자세"
+        ],
+        "score": 3
+      },
+      {
+        "item": "사회력 - 음주/흡연",
+        "keywords": [
+          "술",
+          "담배",
+          "흡연"
+        ],
+        "score": 2
+      },
+      {
+        "item": "과거력/복용약",
+        "keywords": [
+          "수술",
+          "지병",
+          "약"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 응급증상(두근/어지럼/소변감소)",
+        "keywords": [
+          "두근",
+          "어지럼",
+          "소변"
+        ],
+        "score": 4
+      },
+      {
+        "item": "L - 통증 이동",
+        "keywords": [
+          "이동",
+          "처음에는",
+          "옮겼"
+        ],
+        "score": 3
+      },
+      {
+        "item": "(여) 생리/LMP",
+        "keywords": [
+          "생리",
+          "월경",
+          "LMP"
+        ],
+        "score": 4
+      },
+      {
+        "item": "(여) 임신 가능성",
+        "keywords": [
+          "임신",
+          "피임"
+        ],
+        "score": 4
+      }
+    ]
+  }
+}

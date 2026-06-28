@@ -1,0 +1,373 @@
+{
+  "scenario_id": "acute_appendicitis_01",
+  "category": "급성복통",
+  "hidden_diagnosis": "급성 충수염",
+
+  "patient": {
+    "name": "김민준",
+    "age": 24,
+    "gender": "남",
+    "address": "서울시 마포구 연남동",
+    "vital_signs": {
+      "BP": "122/78",
+      "PR": 98,
+      "RR": 18,
+      "BT": 38.2,
+      "SpO2": 98
+    },
+    "appearance": "[오른쪽 아랫배를 살짝 감싸 안듯 앉아 있음. 표정이 굳어 있고 불편해 보임]"
+  },
+[c]
+  "chief_complaint": {
+    "initial_response": "배가 너무 아파서요... 오늘 아침부터 갑자기 시작됐는데 점점 더 심해지는 것 같아서요.",
+    "volunteered_extras": [
+      "처음엔 그냥 체한 건가 싶었는데 지금은 너무 아파서..."
+    ]
+  },
+
+  "history": {
+    "O_onset": {
+      "when": "오늘 아침 9시쯤부터요",
+      "how": "갑자기",
+      "situation": "아침 먹고 나서 갑자기 시작됐어요"
+    },
+    "L_location": {
+      "primary": "[오른쪽 아랫배를 가리키며] 지금은 여기가 제일 아파요",
+      "radiation": "특별히 다른 데로 퍼지진 않는 것 같아요",
+      "migration": "처음엔 여기 명치 쪽이 아팠는데 지금은 오른쪽 아래로 내려온 것 같아요"
+    },
+    "D_duration": {
+      "frequency": "계속 아픈 것 같아요, 좀 들었다 심해졌다 해요",
+      "duration_each": "계속 지속되고 있어요",
+      "pattern": "아침부터 쭉 아파요"
+    },
+    "Co_course": {
+      "progression": "점점 심해짐"
+    },
+    "Ex_experience": {
+      "previous_episode": false,
+      "previous_detail": null
+    },
+    "C_character": {
+      "quality": "콕콕 찌르는 것 같기도 하고 묵직하게 아파요",
+      "nrs": 7
+    },
+    "A_associated": {
+      "emergency": {
+        "palpitation": false,
+        "dyspnea": false,
+        "dizziness": false,
+        "decreased_urine": false
+      },
+      "systemic": {
+        "fever": true,
+        "fever_response": "네, 아까 체온 재봤더니 좀 있다고 하던데요",
+        "chills": true,
+        "chills_response": "아까부터 좀 으슬으슬하긴 해요",
+        "fatigue": true,
+        "weight_loss": false,
+        "night_sweats": false
+      },
+      "GI": {
+        "anorexia": true,
+        "anorexia_response": "네, 밥 생각이 전혀 없어요",
+        "nausea": true,
+        "nausea_response": "네, 속도 좀 메스꺼운 것 같아요",
+        "vomiting": true,
+        "vomiting_response": "아까 한 번 토했어요",
+        "diarrhea": false,
+        "constipation": false,
+        "hematemesis": false,
+        "melena": false,
+        "hematochezia": false,
+        "bloating": false,
+        "jaundice": false,
+        "fatty_stool": false
+      },
+      "urinary": {
+        "dysuria": false,
+        "hematuria": false,
+        "frequency": false
+      }
+    },
+    "F_factor": {
+      "aggravating": ["움직일 때", "걸을 때"],
+      "aggravating_response": "좀 움직이거나 걸으면 더 심하게 아파요",
+      "relieving": [],
+      "relieving_response": "딱히 나아지는 건 없는 것 같아요",
+      "posture_effect": "그냥 가만히 있는 게 그나마 나아요"
+    }
+  },
+
+  "social_history": {
+    "alcohol": {
+      "drinks": true,
+      "amount": "가끔 친구들이랑 맥주 한두 캔 정도요",
+      "recent_binge": false,
+      "recent_binge_response": "어제는 술 안 마셨어요"
+    },
+    "smoking": {
+      "smokes": false,
+      "response": "담배는 안 피워요"
+    },
+    "diet": "불규칙하게 먹는 편이에요, 학생이라 배달 음식 자주 먹어요",
+    "recent_food": "어제 저녁에 치킨 먹었어요. 특별히 이상한 건 없었던 것 같아요",
+    "occupation": "대학교 4학년이에요",
+    "exercise": "가끔 헬스장 가요",
+    "stress": "요즘 취업 준비로 스트레스 좀 받고 있어요",
+    "travel": "최근에 여행은 없었어요"
+  },
+
+  "past_medical_history": {
+    "conditions": [],
+    "conditions_response": "따로 지병은 없어요",
+    "surgeries": [],
+    "surgeries_response": "수술은 한 번도 안 해봤어요",
+    "medications": [],
+    "medications_response": "따로 먹는 약은 없고요",
+    "allergies": "없어요",
+    "vaccinations": {
+      "hep_A": false,
+      "hep_A_response": "A형 간염 예방접종은 잘 모르겠어요",
+      "hep_B": true,
+      "hep_B_response": "B형은 어릴 때 맞은 것 같아요"
+    },
+    "health_checkup": "건강검진은 군대 전역하고 한 번 했는데 특별한 건 없었어요"
+  },
+
+  "family_history": {
+    "relevant": [],
+    "response": "부모님 건강하시고, 특별한 가족력은 없어요"
+  },
+
+  "physical_exam": {
+    "general": "급성 병색. 통증으로 인해 움직임을 최소화하려는 모습",
+    "eyes": "결막 창백 없음, 공막 황달 없음",
+    "mouth": "탈수 소견 경미",
+    "lymph_nodes": "경부 림프절 촉지 안 됨",
+    "abdomen": {
+      "inspection": "편평함, 특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "특이소견 없음",
+      "palpation": "우하복부 압통 있음, 복부 근육 긴장 경미",
+      "tenderness_location": "우하복부 (McBurney point)",
+      "rebound_tenderness": true,
+      "guarding": true,
+      "murphy_sign": false,
+      "rovsing_sign": true,
+      "mcburney_point": true,
+      "obturator_sign": true,
+      "psoas_sign": true,
+      "CVAT": false
+    },
+    "DRE": "직장수지검사 시 우측 압통 있음"
+  },
+
+  "nonverbal_expressions": {
+    "on_entry": "[오른쪽 아랫배를 살짝 감싸 안듯 천천히 들어옴. 앉을 때 살짝 찡그림]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림] 여기요...",
+    "on_RLQ_palpation": "[움찔하며] 아! 거기요, 거기 많이 아파요!",
+    "on_rebound_tenderness": "[표정이 일그러지며] 아... 손 뗄 때 더 아파요",
+    "on_bad_news": "[걱정스러운 표정으로] 수술이요? 꼭 해야 하나요?",
+    "on_walking_test": "[천천히 일어서며 찡그림] 걷는 게 좀 아파요",
+    "baseline_emotion": "불안"
+  },
+
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "specific_unknowns": [
+      {
+        "question_pattern": "복부 대동맥",
+        "response": "그게 뭔지 잘 모르겠어요."
+      },
+      {
+        "question_pattern": "담석",
+        "response": "담석은 없는 것 같아요. 검진에서 얘기 들은 적 없어요."
+      }
+    ]
+  },
+
+  "scoring": {
+    "rapport_checklist": [
+      {
+        "item": "인사 및 자기소개",
+        "keywords": ["안녕하세요", "학생의사", "저는"],
+        "score": 2
+      },
+      {
+        "item": "진료 시간 및 동의 안내",
+        "keywords": ["분 동안", "괜찮으시겠어요"],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀해달라 안내",
+        "keywords": ["불편", "말씀해주세요"],
+        "score": 1
+      },
+      {
+        "item": "환자 편의 배려 (날씨/교통 등)",
+        "keywords": ["오시는 길", "날씨", "괜찮으셨나요"],
+        "score": 1
+      }
+    ],
+    "history_checklist": [
+      {
+        "category": "O - 발병시기",
+        "question_example": "언제부터 아프셨나요?",
+        "keywords": ["언제", "얼마나", "시작"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "O - 발병양상",
+        "question_example": "갑자기 아팠나요, 서서히 아팠나요?",
+        "keywords": ["갑자기", "서서히"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "L - 위치",
+        "question_example": "어디가 아프신지 짚어보시겠어요?",
+        "keywords": ["어디", "위치", "짚어"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "L - 이동",
+        "question_example": "처음부터 거기가 아팠나요?",
+        "keywords": ["이동", "옮겼", "처음에는", "처음엔"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "C - 양상",
+        "question_example": "어떻게 아프세요? 콕콕 찌르는지, 쥐어짜는지",
+        "keywords": ["어떻게 아프", "양상", "콕콕", "쥐어짜", "베이"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "C - NRS",
+        "question_example": "10점 만점에 몇 점 정도 아프세요?",
+        "keywords": ["몇 점", "NRS", "10점"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "A - 발열",
+        "question_example": "열이 나시나요?",
+        "keywords": ["열", "발열", "체온"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "A - 오심/구토",
+        "question_example": "메스껍거나 토하신 적 있나요?",
+        "keywords": ["메스꺼", "구역", "구토", "토"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "A - 식욕감소",
+        "question_example": "밥맛은 어떠세요?",
+        "keywords": ["식욕", "밥맛", "드셨나요"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "Co - 악화 경과",
+        "question_example": "점점 더 심해지고 있나요?",
+        "keywords": ["심해", "악화", "변화"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "F - 악화/완화요인",
+        "question_example": "움직이면 더 아프신가요?",
+        "keywords": ["악화", "완화", "움직이면", "밥 먹으면", "자세"],
+        "score": 2,
+        "required": false
+      },
+      {
+        "category": "사회력 - 음주",
+        "question_example": "술은 드시나요?",
+        "keywords": ["술", "음주"],
+        "score": 1,
+        "required": false
+      },
+      {
+        "category": "과거력 - 수술",
+        "question_example": "수술 받으신 적 있나요?",
+        "keywords": ["수술"],
+        "score": 1,
+        "required": false
+      }
+    ],
+    "exam_checklist": [
+      {
+        "item": "눈 검사 (결막, 황달)",
+        "keywords": ["눈", "결막", "황달"],
+        "score": 1,
+        "required": true
+      },
+      {
+        "item": "복부 시진",
+        "keywords": ["시진", "복부 보"],
+        "score": 1,
+        "required": true
+      },
+      {
+        "item": "복부 청진",
+        "keywords": ["청진", "장음"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "item": "복부 타진",
+        "keywords": ["타진"],
+        "score": 1,
+        "required": true
+      },
+      {
+        "item": "복부 촉진",
+        "keywords": ["촉진", "눌러"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "item": "Rovsing sign",
+        "keywords": ["로브싱", "rovsing", "왼쪽 눌렀을 때"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "McBurney point 압통",
+        "keywords": ["맥버니", "mcburney", "우하복부 압통"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "반동 압통 (Rebound tenderness)",
+        "keywords": ["반동", "rebound", "손 뗄 때"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "CVAT",
+        "keywords": ["CVAT", "등 두드려", "신장"],
+        "score": 1,
+        "required": false
+      }
+    ],
+    "diagnosis_score": {
+      "correct_keywords": ["충수염", "맹장염", "appendicitis", "맹장"],
+      "score": 10
+    },
+    "treatment_plan_score": {
+      "required_workup": ["복부 초음파", "CT", "혈액검사", "CBC"],
+      "required_treatment": ["충수 절제술", "항생제", "수술"],
+      "score": 10
+    },
+    "total_score": 60
+  }
+}

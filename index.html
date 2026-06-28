@@ -1,0 +1,3540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CPX LLM — 복통 환자 시뮬레이터</title>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0f1117; color:#e2e8f0; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── SETUP BAR ── */
+.setup-bar { background:#1a1d27; border-bottom:1px solid #2d3148; padding:8px 14px; display:flex; gap:10px; align-items:center; flex-shrink:0; flex-wrap:wrap; }
+.setup-bar .field { display:flex; flex-direction:column; gap:2px; }
+.setup-bar label { font-size:10px; color:#64748b; text-transform:uppercase; letter-spacing:.05em; }
+.setup-bar input, .setup-bar select { background:#0f1117; border:1px solid #334155; border-radius:6px; color:#e2e8f0; padding:5px 9px; font-size:12px; }
+.setup-bar input { width:280px; }
+.setup-bar select { width:340px; }
+.btn-start { background:#1d4ed8; border:none; color:#fff; border-radius:6px; padding:6px 16px; font-size:13px; cursor:pointer; white-space:nowrap; }
+.btn-start:hover { background:#2563eb; }
+.btn-start:disabled { background:#334155; cursor:not-allowed; }
+.btn-guide { background:#1e293b; border:1px solid #334155; color:#94a3b8; border-radius:6px; padding:6px 14px; font-size:13px; cursor:pointer; white-space:nowrap; }
+.btn-guide:hover { background:#2d3f5e; color:#e2e8f0; }
+
+/* ── GUIDE OVERLAY ── */
+.guide-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200; display:flex; align-items:center; justify-content:center; }
+.guide-overlay.hidden { display:none; }
+.guide-box { background:#1a1d27; border:1px solid #3b82f6; border-radius:20px; padding:36px 40px; max-width:660px; width:95vw; max-height:90vh; overflow-y:auto; display:flex; flex-direction:column; gap:18px; }
+.guide-box h1 { font-size:22px; color:#60a5fa; font-weight:700; text-align:center; }
+.guide-box h2 { font-size:14px; color:#fbbf24; font-weight:700; margin-bottom:6px; }
+.guide-section { background:#0f1117; border-radius:12px; padding:14px 18px; }
+.guide-step { display:flex; gap:12px; align-items:flex-start; margin-bottom:10px; }
+.guide-step:last-child { margin-bottom:0; }
+.step-num { background:#1d4ed8; color:#fff; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; margin-top:1px; }
+.step-txt { font-size:13px; color:#cbd5e1; line-height:1.6; }
+.step-txt b { color:#93c5fd; }
+.guide-badge-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.guide-badge { background:#1e293b; border:1px solid #334155; border-radius:8px; padding:4px 10px; font-size:12px; color:#94a3b8; }
+.btn-guide-start { background:#1d4ed8; border:none; color:#fff; border-radius:10px; padding:12px 32px; font-size:15px; font-weight:700; cursor:pointer; align-self:center; margin-top:4px; }
+.btn-guide-start:hover { background:#2563eb; }
+
+/* ── MAIN AREA ── */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* ── LEFT PANEL ── */
+.left-panel { width:210px; min-width:210px; background:#1a1d27; border-right:1px solid #2d3148; display:flex; flex-direction:column; padding:14px 12px; gap:12px; overflow-y:auto; }
+.pt-meta small { color:#64748b; font-size:10px; }
+.pt-meta h2 { font-size:21px; font-weight:700; margin-top:2px; }
+.pt-meta p { color:#94a3b8; font-size:13px; }
+.section-label { font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#475569; margin-bottom:5px; }
+.vitals-grid { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; font-size:13px; }
+.vitals-grid .key { color:#64748b; }
+.vitals-grid .val { text-align:right; font-weight:600; }
+.val.warn { color:#f97316; }
+.chief-badge { background:#1e293b; border-left:3px solid #f97316; padding:8px 10px; font-size:12px; line-height:1.5; color:#fbbf24; border-radius:0 6px 6px 0; }
+.exam-tags { display:flex; flex-wrap:wrap; gap:5px; }
+.tag { background:#1e293b; border:1px solid #334155; border-radius:6px; padding:4px 7px; font-size:11px; color:#94a3b8; cursor:pointer; transition:all .15s; user-select:none; }
+.tag:hover { background:#2d3f5e; border-color:#3b82f6; color:#93c5fd; }
+.timer-box { margin-top:auto; background:#1e293b; border-radius:10px; padding:10px 12px; display:flex; align-items:center; gap:8px; }
+.timer-val { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.timer-val.warn { color:#ef4444; }
+.timer-sub { font-size:10px; color:#475569; }
+
+/* ── AVATAR PANEL ── */
+.avatar-panel { width:340px; min-width:340px; background:#13151f; border-right:1px solid #2d3148; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; position:relative; overflow:hidden; padding-bottom:28px; }
+.avatar-panel::before { content:''; position:absolute; bottom:0; left:0; right:0; height:70px; background:linear-gradient(to top,#1a1d27,transparent); pointer-events:none; z-index:1; }
+
+/* WEBCAM PIP */
+.webcam-pip { position:absolute; top:14px; right:14px; z-index:20; width:180px; height:135px; border-radius:14px; overflow:hidden; border:2px solid #3b82f6; box-shadow:0 0 22px rgba(59,130,246,.4); background:#0d1117; cursor:pointer; transition:transform .2s; }
+.webcam-pip:hover { transform:scale(1.03); }
+.webcam-pip video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
+.pip-label { position:absolute; bottom:4px; left:6px; font-size:10px; color:#93c5fd; background:rgba(0,0,0,.5); padding:1px 5px; border-radius:4px; }
+.student-emo { position:absolute; top:4px; right:5px; font-size:14px; background:rgba(0,0,0,.5); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.pip-off-msg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#475569; font-size:11px; text-align:center; }
+.pip-off-msg span { font-size:22px; }
+
+/* BODY STATE BADGE */
+.state-badge { position:absolute; top:14px; left:14px; z-index:10; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:4px 10px; font-size:11px; color:#64748b; transition:all .3s; }
+.state-badge.changed { border-color:#3b82f6; color:#93c5fd; }
+
+/* SPEECH BUBBLE */
+.avatar-speech { position:absolute; bottom:440px; left:50%; transform:translateX(-50%); background:#1e3a5f; border:1.5px solid #3b82f6; border-radius:12px; padding:8px 14px; font-size:12px; color:#93c5fd; max-width:220px; line-height:1.5; text-align:center; opacity:0; transition:opacity .25s; pointer-events:none; white-space:normal; box-shadow:0 4px 20px rgba(59,130,246,.2); z-index:10; }
+.avatar-speech::after { content:''; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); border:7px solid transparent; border-top-color:#1e3a5f; border-bottom:none; }
+.avatar-speech.show { opacity:1; }
+
+/* EMOTION ROW */
+.emotion-row { position:absolute; bottom:8px; left:0; right:0; z-index:2; display:flex; justify-content:center; }
+.emotion-badge { background:#1e293b; border:1px solid #334155; border-radius:20px; padding:4px 16px; font-size:12px; color:#94a3b8; transition:all .3s; }
+
+/* SVG CHARACTER */
+.char-svg { display:block; transition:all 0.5s ease; }
+.char-svg.sitting { width:290px; height:420px; }
+.char-svg.lying   { width:320px; height:160px; }
+
+/* ── BODY ANIMATIONS ── */
+@keyframes breathe { 0%,100%{transform:scaleY(1) translateY(0);}50%{transform:scaleY(1.018) translateY(-3px);} }
+@keyframes shake-hard { 0%,100%{transform:translateX(0)rotate(0);}15%{transform:translateX(-8px)rotate(-2.5deg);}30%{transform:translateX(8px)rotate(2.5deg);}50%{transform:translateX(-6px)rotate(-1.5deg);}70%{transform:translateX(6px)rotate(1.5deg);}85%{transform:translateX(-3px)rotate(-.5deg);} }
+@keyframes flinch-up { 0%{transform:translateY(0)scale(1)rotate(0);}25%{transform:translateY(-14px)scale(.96)rotate(-1.5deg);}60%{transform:translateY(6px)scale(1.02)rotate(.5deg);}100%{transform:translateY(0)scale(1)rotate(0);} }
+@keyframes hunch { 0%,100%{transform:translateY(0)rotate(0);}50%{transform:translateY(8px)rotate(4deg);} }
+@keyframes nod-worry { 0%,100%{transform:rotate(0)translateX(0);}30%{transform:rotate(-5deg)translateX(-3px);}70%{transform:rotate(3deg)translateX(2px);} }
+
+.body-anim { transform-origin:140px 380px; }
+.body-anim.idle   { animation:breathe 3.5s ease-in-out infinite; }
+.body-anim.pain   { animation:shake-hard .5s ease-in-out 1; }
+.body-anim.flinch { animation:flinch-up .4s cubic-bezier(.36,.07,.19,.97) 1; }
+.body-anim.hunch  { animation:hunch 1.2s ease-in-out 2; }
+.body-anim.worry  { animation:nod-worry 1s ease-in-out 2; }
+
+/* ── CHAT PANEL ── */
+.chat-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat-header { padding:12px 20px; border-bottom:1px solid #2d3148; display:flex; align-items:center; justify-content:space-between; }
+.chat-header h3 { font-size:14px; color:#94a3b8; }
+.btn-end { background:#7f1d1d; border:none; color:#fca5a5; padding:5px 14px; border-radius:6px; font-size:12px; cursor:pointer; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+.msg { display:flex; align-items:flex-start; gap:8px; }
+.msg.doctor { flex-direction:row-reverse; }
+.avatar-chip { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0; }
+.avatar-chip.patient{background:#1e3a5f;color:#60a5fa;}
+.avatar-chip.doctor{background:#14532d;color:#4ade80;}
+.bubble { max-width:75%; padding:9px 13px; border-radius:12px; font-size:13px; line-height:1.55; }
+.msg.patient .bubble { background:#1e293b; color:#e2e8f0; border-radius:2px 12px 12px 12px; }
+.msg.doctor  .bubble { background:#1d4ed8; color:#fff; border-radius:12px 2px 12px 12px; }
+.bubble.exam-bubble { background:#0f2f1a; border:1px dashed #16a34a; color:#4ade80; font-size:12px; }
+.bubble.exam-result { background:#1a2744; border:1px solid #1e40af; color:#93c5fd; font-size:12px; }
+.bubble.system-msg  { background:#1e2030; border:1px solid #334155; color:#64748b; font-size:11px; font-style:italic; }
+.chat-input-area { border-top:1px solid #2d3148; padding:12px 16px; background:#13151f; }
+.input-row { display:flex; gap:8px; align-items:flex-end; }
+.chat-input { flex:1; background:#1e293b; border:1px solid #334155; border-radius:10px; padding:10px 14px; color:#e2e8f0; font-size:13px; resize:none; max-height:100px; line-height:1.5; outline:none; transition:border-color .15s; }
+.chat-input:focus{border-color:#3b82f6;}
+.chat-input::placeholder{color:#475569;}
+.send-btn { width:38px;height:38px;background:#1d4ed8;border:none;border-radius:10px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.send-btn:hover{background:#2563eb;}
+.send-btn:disabled{background:#334155;cursor:not-allowed;}
+.hint-text{font-size:11px;color:#475569;margin-top:6px;}
+.exam-quick{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.eq-btn{background:#0f2f1a;border:1px solid #166534;border-radius:6px;padding:3px 9px;font-size:11px;color:#4ade80;cursor:pointer;}
+.eq-btn:hover{background:#14532d;}
+.typing-dots{display:flex;gap:4px;padding:10px 14px;background:#1e293b;border-radius:2px 12px 12px 12px;width:fit-content;}
+.typing-dots span{width:6px;height:6px;background:#475569;border-radius:50%;animation:dot-bounce .9s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:.15s;}
+.typing-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dot-bounce{0%,80%,100%{transform:translateY(0);opacity:.5;}40%{transform:translateY(-5px);opacity:1;}}
+
+/* ── FEEDBACK MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:#1a1d27;border:1px solid #334155;border-radius:16px;padding:28px 32px;width:580px;max-width:95vw;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.modal h2{font-size:18px;color:#e2e8f0;}
+.modal-section{background:#0f1117;border-radius:10px;padding:14px 16px;}
+.modal-section h4{font-size:12px;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid #1e293b;}
+.score-row:last-child{border-bottom:none;}
+.score-val{font-weight:700;color:#60a5fa;}
+.score-bar-wrap{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:3px;}
+.score-bar{height:100%;background:#3b82f6;border-radius:3px;transition:width .8s ease;}
+.diagnosis-box{background:#0f2f1a;border:1px solid #166534;border-radius:8px;padding:10px 14px;font-size:13px;color:#4ade80;}
+.face-report{display:flex;gap:12px;align-items:flex-start;}
+.face-snap{width:100px;height:75px;border-radius:8px;object-fit:cover;border:1px solid #334155;transform:scaleX(-1);}
+.face-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
+.emo-bar-row{display:flex;align-items:center;gap:6px;font-size:11px;}
+.emo-bar-track{flex:1;height:6px;background:#1e293b;border-radius:3px;overflow:hidden;}
+.emo-bar-fill{height:100%;border-radius:3px;transition:width .6s;}
+.btn-close{background:#1d4ed8;border:none;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;align-self:flex-end;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.feedback-text{font-size:13px;color:#94a3b8;line-height:1.7;white-space:pre-wrap;}
+</style>
+</head>
+<body>
+
+<!-- GUIDE OVERLAY -->
+<div class="guide-overlay" id="guide-overlay">
+  <div class="guide-box">
+    <h1>🩺 CPX 환자 시뮬레이터</h1>
+    <div class="guide-section">
+      <h2>📌 시험 개요</h2>
+      <div class="step-txt">총 <b>23개 증례</b> (급성복통 11 + 만성복통 8 + 추가 4) · 제한시간 <b>12분</b> · 100점 만점 자동채점</div>
+    </div>
+    <div class="guide-section">
+      <h2>🚀 진행 순서</h2>
+      <div class="guide-step"><div class="step-num">1</div><div class="step-txt">상단 드롭다운에서 <b>증례</b>를 선택합니다. (왼쪽 패널에 환자 정보와 바이탈이 표시됩니다)</div></div>
+      <div class="guide-step"><div class="step-num">2</div><div class="step-txt"><b>진료 시작</b>을 클릭하면 케이스가 확정됩니다. 첫 메시지를 보내는 순간 타이머가 시작됩니다.</div></div>
+      <div class="guide-step"><div class="step-num">3</div><div class="step-txt">채팅창에서 환자에게 질문하거나 신체진찰을 수행합니다. 신체진찰은 <b>(복부 촉진 시작하겠습니다)</b> 처럼 괄호로 입력하세요.</div></div>
+      <div class="guide-step"><div class="step-num">4</div><div class="step-txt">왼쪽 <b>빠른 검진 버튼</b>으로 자세 전환 및 검진을 빠르게 입력할 수 있습니다.</div></div>
+      <div class="guide-step"><div class="step-num">5</div><div class="step-txt"><b>종료 및 채점</b>을 누르면 병력청취·신체진찰·PPI·임상추론 영역별 AI 채점 결과가 나옵니다.</div></div>
+    </div>
+    <div class="guide-section">
+      <h2>⌨️ 입력 팁</h2>
+      <div class="guide-badge-row">
+        <span class="guide-badge">Enter → 전송</span>
+        <span class="guide-badge">Shift+Enter → 줄바꿈</span>
+        <span class="guide-badge">(괄호) → 신체진찰</span>
+        <span class="guide-badge">누워주세요 → 자세 전환</span>
+        <span class="guide-badge">📷 카메라 → 표정 분석</span>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h2>🏥 채점 영역</h2>
+      <div class="step-txt"><b>병력청취</b> 40점 · <b>신체진찰</b> 20점 · <b>PPI(의사소통)</b> 20점 · <b>임상추론</b> 20점</div>
+    </div>
+    <div style="margin:16px 0 8px;text-align:left">
+      <label style="color:#aaa;font-size:13px;display:block;margin-bottom:6px">🔑 Anthropic API Key</label>
+      <input id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off"
+        style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid #444;background:#1a1a2e;color:#fff;font-size:13px;box-sizing:border-box"/>
+      <div id="api-key-hint" style="color:#e55;font-size:11px;margin-top:4px;display:none">API 키를 입력하세요</div>
+    </div>
+        <button class="btn-guide-start" onclick="closeGuideWithKey()">시작하기 →</button>
+  </div>
+</div>
+
+<!-- SETUP BAR -->
+<div class="setup-bar">
+  <div class="field">
+    <label>증례 선택</label>
+    <select id="caseSelect"><option>로딩 중...</option></select>
+  </div>
+  <button class="btn-start" id="startBtn" onclick="startSession()">진료 시작</button>
+  <button class="btn-guide" onclick="showGuide()">📖 사용 가이드</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="pt-meta">
+    <small id="pt-location">—</small>
+    <h2 id="pt-name">환자 선택</h2>
+    <p id="pt-age"></p>
+  </div>
+  <div>
+    <div class="section-label">바이탈</div>
+    <div class="vitals-grid">
+      <span class="key">BP</span><span class="val" id="v-bp">—</span>
+      <span class="key">PR</span><span class="val" id="v-pr">—</span>
+      <span class="key">RR</span><span class="val" id="v-rr">—</span>
+      <span class="key">BT</span><span class="val" id="v-bt">—</span>
+    </div>
+  </div>
+  <div>
+    <div class="section-label">주소</div>
+    <div class="chief-badge" id="chief-badge">—</div>
+  </div>
+  <div>
+    <div class="section-label">신체검진</div>
+    <div class="exam-tags">
+      <div class="tag" onclick="insertExam('복부 시진')">시진</div>
+      <div class="tag" onclick="insertExam('복부 청진')">청진</div>
+      <div class="tag" onclick="insertExam('복부 타진')">타진</div>
+      <div class="tag" onclick="insertExam('복부 촉진')">촉진</div>
+      <div class="tag" onclick="insertExam('압통/반발통')">반발통</div>
+      <div class="tag" onclick="insertExam('Murphy\'s sign')">머피징후</div>
+      <div class="tag" onclick="insertExam('CVAT')">CVAT</div>
+      <div class="tag" onclick="insertExam('Psoas sign')">Psoas</div>
+      <div class="tag" onclick="insertExam('Obturator sign')">Obturator</div>
+      <div class="tag" onclick="insertExam('DRE(직장수지검사)')">DRE</div>
+    </div>
+  </div>
+  <div class="timer-box">
+    <span>⏱</span>
+    <div>
+      <div class="timer-val" id="timer-display">12:00</div>
+      <div class="timer-sub">남은 시간</div>
+    </div>
+  </div>
+</div>
+
+<!-- AVATAR PANEL -->
+<div class="avatar-panel">
+  <div class="state-badge" id="state-badge">🪑 앉은 자세</div>
+
+  <div class="webcam-pip" id="webcam-pip" onclick="togglePip()" title="클릭해서 카메라 켜기">
+    <div class="pip-off-msg" id="pip-off"><span>📷</span>내 카메라</div>
+    <video id="webcam-video" autoplay muted playsinline style="display:none"></video>
+    <div class="pip-label">나</div>
+    <div class="student-emo" id="student-emo">😐</div>
+  </div>
+
+  <div class="avatar-speech" id="avatar-speech"></div>
+
+  <!-- PATIENT SVG -->
+  <svg class="char-svg sitting" id="char-svg" viewBox="0 0 280 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="g-face" cx="50%" cy="38%" r="62%">
+        <stop offset="0%" stop-color="#fce4c8"/><stop offset="65%" stop-color="#f0b98a"/><stop offset="100%" stop-color="#d9895a"/>
+      </radialGradient>
+      <radialGradient id="g-skin" cx="50%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#f9d5b5"/><stop offset="100%" stop-color="#e8a97c"/>
+      </radialGradient>
+      <radialGradient id="g-shirt" cx="50%" cy="20%" r="80%">
+        <stop offset="0%" stop-color="#3b5bdb"/><stop offset="100%" stop-color="#1e3a8a"/>
+      </radialGradient>
+      <radialGradient id="g-blush" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#f87171" stop-opacity=".7"/><stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- SITTING GROUP -->
+    <g id="group-sitting">
+      <g class="body-anim idle" id="body-group">
+        <path d="M65 200 Q46 228 44 290 L196 290 Q194 228 175 200 Q148 188 120 189 Q92 188 65 200Z" fill="url(#g-shirt)"/>
+        <path d="M105 200 L120 220 L135 200" fill="none" stroke="#93c5fd" stroke-width="1.3" opacity=".35"/>
+        <path id="s-armL" d="M65 200 Q44 232 46 272" fill="none" stroke="url(#g-skin)" stroke-width="22" stroke-linecap="round"/>
+        <path id="s-armR" d="M175 200 Q196 232 194 272" fill="none" stroke="url(#g-skin)" stroke-width="22" stroke-linecap="round"/>
+        <ellipse cx="46" cy="277" rx="13" ry="10" fill="url(#g-skin)"/>
+        <ellipse cx="194" cy="277" rx="13" ry="10" fill="url(#g-skin)"/>
+        <path d="M105 163 Q103 185 120 186 Q137 185 135 163" fill="url(#g-skin)"/>
+        <ellipse cx="120" cy="128" rx="52" ry="56" fill="url(#g-face)"/>
+        <ellipse cx="120" cy="176" rx="30" ry="6" fill="#c47a45" opacity=".25"/>
+        <path id="s-hair-main" id="s-hair-main" d="M68 115 Q73 66 120 62 Q167 66 172 115 Q167 80 120 76 Q73 80 68 115Z" fill="#1c0f05"/>
+        <path id="s-hair-sL" id="s-hair-sL" d="M68 115 Q64 102 70 88 Q74 78 82 72" fill="none" stroke="#1c0f05" stroke-width="12" stroke-linecap="round"/>
+        <path id="s-hair-sR" id="s-hair-sR" d="M172 115 Q176 102 170 88 Q166 78 158 72" fill="none" stroke="#1c0f05" stroke-width="12" stroke-linecap="round"/>
+        <path id="s-hair-long" d="M68 115 Q50 165 55 240 Q58 285 65 305" fill="none" stroke="#1c0f05" stroke-width="14" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+        <path id="s-hair-longR" d="M172 115 Q190 165 185 240 Q182 285 175 305" fill="none" stroke="#1c0f05" stroke-width="14" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+        <path id="s-hair-long" d="M68 115 Q50 165 55 240 Q58 285 65 305" fill="none" stroke="#1c0f05" stroke-width="14" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+        <path id="s-hair-longR" d="M172 115 Q190 165 185 240 Q182 285 175 305" fill="none" stroke="#1c0f05" stroke-width="14" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+        <path d="M100 68 Q120 63 140 70" fill="none" stroke="#3d1f08" stroke-width="3.5" opacity=".4" stroke-linecap="round"/>
+        <ellipse cx="68" cy="130" rx="9" ry="13" fill="#e8a97c"/>
+        <ellipse cx="172" cy="130" rx="9" ry="13" fill="#e8a97c"/>
+        <ellipse id="s-blushL" cx="96" cy="144" rx="19" ry="11" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+        <ellipse id="s-blushR" cx="144" cy="144" rx="19" ry="11" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+        <path id="s-browL" d="M88 106 Q102 99 116 104" fill="none" stroke="#3d1f08" stroke-width="3.2" stroke-linecap="round"/>
+        <path id="s-browR" d="M124 104 Q138 99 152 106" fill="none" stroke="#3d1f08" stroke-width="3.2" stroke-linecap="round"/>
+        <ellipse cx="102" cy="122" rx="14" ry="15" fill="white"/>
+        <path id="s-elidL" d="M88 122 Q102 110 116 122" fill="#f0b98a"/>
+        <ellipse cx="102" cy="125" rx="8.5" ry="9.5" fill="#3d2810"/>
+        <ellipse cx="102" cy="124" rx="5" ry="5.5" fill="#0d0805"/>
+        <ellipse cx="105" cy="120" rx="2.5" ry="2.5" fill="white"/>
+        <ellipse cx="138" cy="122" rx="14" ry="15" fill="white"/>
+        <path id="s-elidR" d="M124 122 Q138 110 152 122" fill="#f0b98a"/>
+        <ellipse cx="138" cy="125" rx="8.5" ry="9.5" fill="#3d2810"/>
+        <ellipse cx="138" cy="124" rx="5" ry="5.5" fill="#0d0805"/>
+        <ellipse cx="141" cy="120" rx="2.5" ry="2.5" fill="white"/>
+        <path d="M116 138 Q120 148 124 138" fill="none" stroke="#c4845a" stroke-width="2" stroke-linecap="round"/>
+        <path id="s-lipU" d="M106 158 Q113 153 120 155 Q127 153 134 158" fill="none" stroke="#a0522d" stroke-width="1.8" stroke-linecap="round"/>
+        <path id="s-mouth" d="M105 159 Q120 170 135 159" fill="none" stroke="#a0522d" stroke-width="2.5" stroke-linecap="round"/>
+        <path id="s-teeth" d="M109 160 L131 160 Q133 169 120 172 Q107 169 109 160Z" fill="white" opacity="0" style="transition:opacity .2s"/>
+        <ellipse id="s-tongue" cx="120" cy="169" rx="9" ry="5" fill="#e07070" opacity="0" style="transition:opacity .2s"/>
+        <g id="s-sweat1" opacity="0" style="transition:opacity .3s"><ellipse cx="160" cy="108" rx="5" ry="7" fill="#60a5fa" opacity=".75"/><path d="M160 102 Q164 98 160 100" fill="none" stroke="#60a5fa" stroke-width="1.2"/></g>
+        <g id="s-sweat2" opacity="0" style="transition:opacity .3s"><ellipse cx="168" cy="122" rx="4" ry="5.5" fill="#93c5fd" opacity=".6"/></g>
+        <g id="s-pain-zone" opacity="0" style="transition:opacity .4s">
+          <circle cx="120" cy="248" r="26" fill="#ef4444" opacity=".1"/>
+          <circle cx="120" cy="248" r="26" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" opacity=".5">
+            <animate attributeName="r" values="20;30;20" dur="1.3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".5;.15;.5" dur="1.3s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      </g>
+    </g>
+
+    <!-- LYING GROUP -->
+    <g id="group-lying" opacity="0" style="pointer-events:none">
+      <rect x="0" y="148" width="480" height="16" rx="4" fill="#1e3a5f"/>
+      <rect x="0" y="160" width="480" height="6" rx="2" fill="#162040"/>
+      <rect x="10" y="112" width="80" height="38" rx="13" fill="#2d3a52"/>
+      <line x1="18" y1="122" x2="82" y2="122" stroke="#384d70" stroke-width="1.5"/>
+      <ellipse cx="52" cy="126" rx="40" ry="34" fill="url(#g-face)"/>
+      <path id="l-hair-main" id="l-hair-main" d="M14 112 Q18 84 52 82 Q86 84 90 112 Q86 92 52 90 Q18 92 14 112Z" fill="#1c0f05"/>
+      <path id="l-hair-side" id="l-hair-side" d="M14 112 Q10 104 16 94" fill="none" stroke="#1c0f05" stroke-width="10" stroke-linecap="round"/>
+      <path id="l-hair-long" d="M13 130 Q6 158 9 185 Q10 205 14 220" fill="none" stroke="#1c0f05" stroke-width="10" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+      <path id="l-hair-long" d="M13 130 Q6 158 9 185 Q10 205 14 220" fill="none" stroke="#1c0f05" stroke-width="10" stroke-linecap="round" opacity="0" style="transition:opacity .4s"/>
+      <rect x="88" y="113" width="24" height="26" rx="10" fill="url(#g-skin)"/>
+      <rect x="108" y="100" width="240" height="50" rx="18" fill="url(#g-shirt)"/>
+      <path d="M138 100 L150 125 L138 150" fill="none" stroke="#93c5fd" stroke-width="1.2" opacity=".3"/>
+      <path d="M160 100 Q180 82 225 80" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <ellipse cx="233" cy="80" rx="13" ry="9" fill="url(#g-skin)"/>
+      <path d="M160 150 Q180 162 225 164" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <ellipse cx="233" cy="164" rx="13" ry="9" fill="url(#g-skin)"/>
+      <rect x="342" y="100" width="110" height="50" rx="12" fill="#2d3748"/>
+      <line x1="397" y1="100" x2="397" y2="150" stroke="#1a2535" stroke-width="1.5"/>
+      <path id="l-legFar"  d="M370 108 Q425 106 456 108" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round" opacity=".75"/>
+      <path id="l-legNear" d="M370 122 Q425 122 456 124" fill="none" stroke="url(#g-skin)" stroke-width="24" stroke-linecap="round"/>
+      <ellipse id="l-footFar"  cx="460" cy="108" rx="10" ry="17" fill="url(#g-skin)" opacity=".8"/>
+      <ellipse id="l-footNear" cx="460" cy="124" rx="10" ry="18" fill="url(#g-skin)"/>
+      <ellipse id="l-blushL" cx="36" cy="124" rx="14" ry="9" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+      <ellipse id="l-blushR" cx="68" cy="124" rx="14" ry="9" fill="url(#g-blush)" opacity="0" style="transition:opacity .4s"/>
+      <path id="l-browL" d="M26 112 Q38 106 50 110" fill="none" stroke="#3d1f08" stroke-width="2.5" stroke-linecap="round"/>
+      <path id="l-browR" d="M54 110 Q66 106 78 112" fill="none" stroke="#3d1f08" stroke-width="2.5" stroke-linecap="round"/>
+      <ellipse cx="38" cy="120" rx="10" ry="9" fill="white"/>
+      <path id="l-elidL" d="M28 120 Q38 116 48 120" fill="#f0b98a"/>
+      <ellipse cx="38" cy="122" rx="6" ry="5" fill="#3d2810"/>
+      <ellipse cx="38" cy="121" rx="3.5" ry="3" fill="#0d0805"/>
+      <ellipse cx="40.5" cy="119" rx="1.5" ry="1.5" fill="white"/>
+      <!-- 반쯤 감긴 눈 (편안한 상태) -->
+      <path d="M28 118 Q38 115 48 118" fill="#f0b98a" opacity=".85"/>
+      <ellipse cx="62" cy="120" rx="10" ry="9" fill="white"/>
+      <path id="l-elidR" d="M52 120 Q62 116 72 120" fill="#f0b98a"/>
+      <ellipse cx="62" cy="122" rx="6" ry="5" fill="#3d2810"/>
+      <ellipse cx="62" cy="121" rx="3.5" ry="3" fill="#0d0805"/>
+      <ellipse cx="64.5" cy="119" rx="1.5" ry="1.5" fill="white"/>
+      <!-- 반쯤 감긴 눈 (편안한 상태) -->
+      <path d="M52 118 Q62 115 72 118" fill="#f0b98a" opacity=".85"/>
+      <path d="M48 133 Q52 137 56 133" fill="none" stroke="#c4845a" stroke-width="1.5" stroke-linecap="round"/>
+      <path id="l-mouth" d="M37 142 Q52 147 67 142" fill="none" stroke="#a0522d" stroke-width="2" stroke-linecap="round"/>
+      <path id="l-teeth" d="M39 145 L65 145 Q67 153 52 156 Q37 153 39 145Z" fill="white" opacity="0" style="transition:opacity .2s"/>
+      <g id="l-sweat1" opacity="0" style="transition:opacity .3s"><ellipse cx="82" cy="110" rx="4" ry="5.5" fill="#60a5fa" opacity=".75"/></g>
+      <g id="l-pain-zone" opacity="0" style="transition:opacity .4s">
+        <ellipse cx="230" cy="124" rx="38" ry="20" fill="#ef4444" opacity=".1"/>
+        <ellipse cx="230" cy="124" rx="38" ry="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" opacity=".5">
+          <animate attributeName="rx" values="30;46;30" dur="1.3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".5;.15;.5" dur="1.3s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+    </g>
+
+    <!-- LEG RAISE -->
+    <g id="group-leg-raise" opacity="0" style="pointer-events:none">
+      <path d="M370 122 Q385 90 395 55" fill="none" stroke="#2d3748" stroke-width="26" stroke-linecap="round"/>
+      <path d="M370 122 Q385 90 395 55" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <circle cx="387" cy="90" r="13" fill="url(#g-skin)"/>
+      <path d="M395 55 Q410 30 418 16" fill="none" stroke="url(#g-skin)" stroke-width="18" stroke-linecap="round"/>
+      <ellipse cx="420" cy="12" rx="10" ry="17" fill="url(#g-skin)" transform="rotate(-40,420,12)"/>
+    </g>
+
+    <!-- KNEE BEND -->
+    <g id="group-knee-bend" opacity="0" style="pointer-events:none">
+      <path d="M370 124 Q382 96 394 72" fill="none" stroke="#2d3748" stroke-width="26" stroke-linecap="round"/>
+      <path d="M370 124 Q382 96 394 72" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <path d="M394 72 Q414 92 422 118" fill="none" stroke="url(#g-skin)" stroke-width="20" stroke-linecap="round"/>
+      <path d="M370 110 Q382 84 393 62" fill="none" stroke="url(#g-skin)" stroke-width="16" stroke-linecap="round" opacity=".75"/>
+      <path d="M393 62 Q412 80 420 106" fill="none" stroke="url(#g-skin)" stroke-width="16" stroke-linecap="round" opacity=".75"/>
+    </g>
+  </svg>
+
+  <div class="emotion-row">
+    <span class="emotion-badge" id="emotion-badge">😐 안정</span>
+  </div>
+</div>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel">
+  <div class="chat-header">
+    <h3>CPX 환자 시뮬레이션</h3>
+    <button class="btn-end" onclick="endSession()">종료 및 채점</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-area">
+    <div class="exam-quick">
+      <span style="font-size:11px;color:#475569;align-self:center">빠른검진:</span>
+      <button class="eq-btn" onclick="quickExam('복부 청진')">청진</button>
+      <button class="eq-btn" onclick="quickExam('복부 촉진')">촉진</button>
+      <button class="eq-btn" onclick="quickExam('압통/반발통')">반발통</button>
+      <button class="eq-btn" onclick="quickExam('CVAT')">CVAT</button>
+      <button class="eq-btn" onclick="quickExam('Murphy\'s sign')">머피</button>
+      <button class="eq-btn" onclick="quickCmd('누워주세요.')">눕기</button>
+      <button class="eq-btn" onclick="quickCmd('다리를 들어올려 보세요.')">다리올리기</button>
+      <button class="eq-btn" onclick="quickCmd('무릎을 구부려 주세요.')">무릎굽히기</button>
+    </div>
+    <div class="input-row">
+      <textarea class="chat-input" id="chat-input" rows="1"
+        placeholder="질문하거나, (신체검진) 형태로 검진 입력"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+    <div class="hint-text">신체검진: 〈(복부 촉진 시작하겠습니다)〉 / 자세: 〈누워주세요〉</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>📋 CPX 채점 결과</h2>
+    <div class="modal-section" id="modal-diagnosis" style="display:none">
+      <h4>🔍 정답 진단</h4>
+      <div class="diagnosis-box" id="diagnosis-text"></div>
+    </div>
+    <div class="modal-section">
+      <h4>채점 (100점 만점)</h4>
+      <div id="score-rows"><span class="spinner"></span>채점 중...</div>
+    </div>
+    <div class="modal-section">
+      <h4>🎥 수험자 표정 분석</h4>
+      <div class="face-report">
+        <video id="face-snap" class="face-snap" autoplay muted playsinline></video>
+        <div class="face-bars" id="face-bars">
+          <div style="font-size:12px;color:#475569">카메라가 꺼져 있어 표정 분석을 할 수 없습니다.</div>
+        </div>
+      </div>
+      <div id="face-comment" style="font-size:12px;color:#94a3b8;margin-top:10px;line-height:1.7"></div>
+    </div>
+    <button class="btn-close" onclick="closeModal()">닫기</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// ── API 설정 ─────────────────────────────────────────────────────────────
+let ANTHROPIC_API_KEY = sessionStorage.getItem('cpx_api_key') || '';
+const ANTHROPIC_MODEL = 'claude-haiku-4-5-20251001';
+
+// ── CASE BANK ─────────────────────────────────────────────────────────────
+const CASE_BANK = {"cases":[{"case_id":"acute_01","category":"급성 복통","hidden_diagnosis":"급성 충수돌기염 천공","top_diagnoses":["급성 충수돌기염 천공","급성 게실염 천공","난소 염전"],"patient":{"name":"서수민","age":38,"vital_signs":{"BP":"144/90","PR":90,"RR":22,"BT":38.2},"setting":"응급실, 오전 7시","appearance":"[많이 아파서 침대 오고갈 때 많이 느림]","sex":"여"},"chief_complaint":"배가 아파요","history":{"O_onset":"3일 전","L_location":"오른쪽 아랫배","D_duration_course":"3일 전부터 간헐적 통증, 1일 전부터 계속 아픔","Co_change":"심해짐","Ex_prior_episode":"1년 전에 복부 전체가 아팠음","C_character":"쥐어짜는듯한 통증, NRS 6점, 진통제 먹으면 나아짐, 방사통(-), 처음에는 배꼽 주변이 아프다가 점점 우하복부로 이동","A_associated":{"전신":"발열/오한/피로/체중감소/부종(+/-/-/-/-)","소화기":"식욕부진/구역/구토/변비/설사(-/-/-/-/+, 어제 한 번 무른 변), 황달/혈변(-/-)","비뇨":"빈뇨/절박뇨/야간뇨/배뇨통(-/-/-/-)"},"F_factor":"악화(+, 걸을 때/누울 때/차렷 자세로 있을 때 심해짐), 완화(+, 앞으로 숙이거나 가만히 있으면 나아짐)","E_prior_exam":"2년 전 내시경 모두 받음, 정상","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"타이레놀","social":"술(+, 일주일에 소주 1병/-매일 1~2잔)/담배(+)/커피(+), 직업(교사, 스트레스 많지 않은 편), 식습관(-, 맵고 짜고 기름진 음식)","family":"-","female_hx":"LMP 3주 전, 주기 양 모두 정상, 임신 가능성 c없음"},"physical_exam":{"General":"혈압 144/90으로 상승, 호흡수 22회/분으로 상승, 38.2도의 고열","HEENT":"결막/공막(-/-), 구강 탈수 소견(-), 경부 림프절(-)","Abdomen":"복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/+), Psoas sign/Obturator sign(+/+), DRE/골반 내진/CVAT(-/-/-)","Extremity":"피부 긴장도/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[많이 아파서 침대 오고갈 때 많이 느림]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"없음"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["흉부 X-ray","복부 CT","혈액검사"],"required_treatments":["응급 수술","수액 공급","예방적 항생제"],"expected_skills":["Psoas sign/Obturator sign 시행","비협조적일 수 있는 환자 배려"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"acute_02","category":"급성 복통","hidden_diagnosis":"담낭염","top_diagnoses":["담낭염","담도염","위염"],"patient":{"name":"박남용","age":42,"vital_signs":{"BP":"126/80","PR":80,"RR":17,"BT":37.5},"setting":"응급실","appearance":"[응급실로 내원, 현재 시간 오후 6시, 환자가 배 부여잡고 그냥 앉아 있으나 지금은 조금 나아졌다고 함. 올 때 너무 아팠는데 지금은 좀 괜찮아졌다고 함. 언제든 불편하면 바로 말씀+진통제+수액 멘트하면 반응 좋음. 담낭이 어떤 장기인지 물어볼 때 '쓸개라고 알고 있다'고 대답함]","sex":"남"},"chief_complaint":"배가 아파요","history":{"O_onset":"3일 전 or 어제","L_location":"3일 전과 어제는 명치쪽, 오늘은 RUQ로 이동","D_duration_course":"점심 식후 6시간 동안(현재 오후 6시)","Co_change":"3일 전부터 아팠다가 안 아팠다가 했는데 오늘 너무 아파서 응급실 옴","Ex_prior_episode":"이전부터 기름진 음식 먹거나 과식하면 잘 체하고 배 아팠음","C_character":"쥐어 짜는 듯한 통증, NRS 6~8점, 방사통(-), NRS 7(엄청 아플 때) → 지금은 4~5","A_associated":{"전신":"열/오한(-/+), 체중증가(+, 3년 동안 10kg, 발목 삐어서 운동 잘 못했음), 피로(-)","소화기":"A/N/V/C/D(-/±/+/-/-, 살짝 울렁인다고도 함), 속쓰림(+), 배 뻥뻥(±)","호흡":"호흡곤란/흉통(-/-)","탈수":"어지럼/갈증/소변량 저하(-/-/-)"},"F_factor":"5일 전 짜장면 곱빼기 먹었을 때 복통 있었음. 악화(식후+, 기침시+, 뛸 때), 완화(앞으로 숙이면 완화)","E_prior_exam":"내시경 안 해봄(피검사 포함), 건강 검진 정상, 간염 백신 모름","PSH":"-","PMH":"고혈압/당뇨(-/-)","medication":"진통제(+, 어제 회사 근처 응급실에서 진통제 주사하여 나았다가 오늘 다시 아픔)","social":"흡연(현재 금연), 음주(+, 3회/주, 하루 소주 한 병), 운동(-, 발목 다친 뒤 운동 못함), 스트레스(-), 직업(법무사)","family":"-","female_hx":null},"physical_exam":{"General":"V/S stable","HEENT":"눈/입/림프절(-/-/-)","Abdomen":"Murphy sign(+), Epigastric(+), RUQ Td/rTd/불편감(+/+/+), Obturator/Psoas sign(-/-), CVAT(+, 올린다고 말함), DRE(-)","Extremity":"-"},"nonverbal_expressions":{"on_entry":"[응급실로 내원, 현재 시간 오후 6시, 환자가 배 부여잡고 그냥 앉아 있으나 지금은 조금 나아졌다고 함. 올 때 너무 아팠는데 지금은 좀 괜찮아졌다고 함. 언제든 불편하면 바로 말씀+진통제+수액 멘트하면 반응 좋음. 담낭이 어떤 장기인지 물어볼 때 '쓸개라고 알고 있다'고 대답함]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"빨리 치료해 주세요"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부초음파","복부 CT","혈액검사"],"required_treatments":["금식","복강경쓸개절제술","생활 습관 교육"],"expected_skills":["Murphy's sign 시행","황달/가려움증/소변색 변화 문진"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3}]}},{"case_id":"acute_03","category":"급성 복통","hidden_diagnosis":"만성 췌장염","top_diagnoses":["만성 췌장염","급성 췌장염","위궤양"],"patient":{"name":"정민성","age":51,"vital_signs":{"BP":"124/82","PR":88,"RR":17,"BT":37.3},"setting":"응급실","appearance":"[응급실에서 진료 진행]","sex":"남"},"chief_complaint":"배가 아파요","history":{"O_onset":"오늘 아침","L_location":"명치 부위","D_duration_course":"지속","Co_change":"큰 차이 없음","Ex_prior_episode":"이전에도 2차례","C_character":"쥐어 짜는듯한 통증, NRS 6~8점, 방사통(+, 등)","A_associated":{"전신":"발열/식은땀/체중감소/오한/피로감(-/-/+/-/+, 2달간 8kg 감소)","소화기":"구역/구토/식욕부진/변비/설사(-/-/+/-/-), 지방변(+), 황달(-), 혈변(-)","비뇨":"빈뇨/절박뇨/야간뇨/배뇨통(+, 소변이 자주 마려움/-/-/-)","내분비":"다음(+)/다뇨(+)/다갈(+)"},"F_factor":"식후/음주 후 심해지는 통증, 통증으로 인해 식사량 감소, 자세에 따른 변화(+, 앞으로 숙이면 완화), 어제 저녁 회식에서 음주함","E_prior_exam":"2년 전 내시경 모두 받음, 위염 있어 약 처방 받음","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-), 전립선 비대증(+)","medication":"전립선 비대증약","social":"술(+, 1주일 3~4번, 하루 소주 2병, 최근 줄였음), 담배(+, 30갑년, 최근 금연), 직업(회사원)","family":"-","female_hx":null},"physical_exam":{"General":"V/S 확인","HEENT":"구강 탈수 소견(-), 결막/공막 정상","Abdomen":"복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/-), DRE/CVAT(-/-)","Extremity":"피부 긴장도/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[응급실에서 진료 진행]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"심각한 병일까요?"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부 CT","복부초음파","혈중 amylase/lipase 농도"],"required_treatments":["진통제","수분 공급 및 안정","소화효소 보충"],"expected_skills":["체중감소/지방변/다음다뇨다갈 등 췌장 기능 관련 문진"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3}]}},{"case_id":"acute_04","category":"급성 복통","hidden_diagnosis":"소화성궤양 천공","top_diagnoses":["소화성궤양 천공","급성 췌장염","췌장 농양"],"patient":{"name":"강오석","age":51,"vital_signs":{"BP":"116/82","PR":88,"RR":16,"BT":37.2},"setting":"응급실","appearance":"[응급실에서 진료 진행]","sex":"남"},"chief_complaint":"배가 아파요","history":{"O_onset":"어제 점심","L_location":"명치 부위","D_duration_course":"지속","Co_change":"심해짐","Ex_prior_episode":"이전에도 3차례, 통증은 이번보다 약했음","C_character":"칼로 찢기는 듯한 통증, NRS 8점, 방사통(+, 등으로 퍼짐)","A_associated":{"전신":"발열/식은땀/체중감소/오한/피로감(-/-/-/-/-)","소화기":"구역/구토/식욕부진/변비/설사(-/+, 2회 흰 물만 나옴/-/-/-), 속쓰림(+), 혈변(-)","응급":"어지럼/갈증/소변량 감소/호흡곤란(+/+/+/-)"},"F_factor":"자세에 따른 변화(+, 오른쪽으로 돌아 누우면 완화, 반듯이 누우면 악화)","E_prior_exam":"-","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"-","social":"술(+, 1주일 6~7번, 하루 소주 2~3병), 담배(+, 30갑년), 식사(매우 불규칙), 직업(포크레인 조종수)","family":"-","female_hx":null},"physical_exam":{"General":"V/S 확인","HEENT":"구강 탈수 소견(-), 결막/공막 정상","Abdomen":"복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/+), DRE(-)","Extremity":"피부 긴장도/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[응급실에서 진료 진행]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"없음"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["흉부 X-ray","복부 X-ray","복부 CT"],"required_treatments":[],"expected_skills":["항문 직장 진찰(종양 감별)","조영제 CT 설명동의서 받기"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3}]}},{"case_id":"acute_05","category":"급성 복통","hidden_diagnosis":"만성 췌장염","top_diagnoses":["만성 췌장염","췌장 두부암","담도암"],"patient":{"name":"이영자","age":80,"vital_signs":{"BP":"120/82","PR":80,"RR":18,"BT":36.5},"setting":"외래/응급실","appearance":"[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]","sex":"여"},"chief_complaint":"배가 아파요","history":{"O_onset":"3개월 전","L_location":"명치 부위에서 처음 시작하여 이후 등으로 뻗침","D_duration_course":"지속적, 일정함","Co_change":"일정함","Ex_prior_episode":"이전에는 속만 불편했음","C_character":"묵직한 통증","A_associated":{"전신":"발열/오한(-/-), 체중감소/가려움(+/+, 5kg 감소, 밤에 깰 정도의 가려움)","소화기":"속쓰림/구역/구토(-/-/-), 소화불량/대변의 양상 변화/황달(+/-/+)","비뇨기":"소변색 변화(+, 색이 진함)"},"F_factor":"식후 심해지는 통증, 우유(-), 소화불량으로 식사량 감소","E_prior_exam":"6개월 전(-)","PSH":"수술(-)","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"-","social":"술 social(20대에 주 5~6회 소주 1병씩 마심), 담배(-), 직업(전업주부)","family":"-","female_hx":"폐경"},"physical_exam":{"General":"V/S 확인","HEENT":"입/피부 탈수 소견(-/-), 결막/공막(-/+, 노란색), Light reflex/안구 운동검사 정상","Chest":"흉부 청진 정상","Abdomen":"Epigastric Td(+)/rTd(-), CVA tenderness(-), DRE 정상","Extremity":"손가락 노란색(+)"},"nonverbal_expressions":{"on_entry":"[진통제 여부 물어보았으나 복용 과거력 없음, 만성 복통으로 접근]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"없음"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부 CT","혈중 amylase/lipase","간기능검사"],"required_treatments":[],"expected_skills":["항문 직장 진찰","조영제 CT 설명동의서 받기","황달 관련 문진(가려움, 소변색, 대변색)"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"acute_06","category":"급성 복통","hidden_diagnosis":"급성 충수돌기염","top_diagnoses":["급성 충수돌기염","급성 게실염","난소 염전"],"patient":{"name":"김한빛","age":27,"vital_signs":{"BP":"100/72","PR":79,"RR":16,"BT":37.5},"setting":"외래","appearance":"[충수돌기염 가능성이 높기 때문에 응급 수술의 가능성에 대해 설명하였음]","sex":"여"},"chief_complaint":"배가 아파요","history":{"O_onset":"3일 전","L_location":"우하복부(처음에는 명치가 아프다가 현재 우하복부로 이동)","D_duration_course":"3일 전 저녁부터 계속","Co_change":"점점 심해짐","Ex_prior_episode":"처음","C_character":"아리는 듯한 통증, VAS 6점, 방사통(+, 옆구리), 일상생활에 지장(+, 회사 조퇴하고 병원 옴)","A_associated":{"소화기":"식욕감소/구역질/구토/설사/변비(+/+/-/-/-), 복부팽만감/속쓰림/혈변/흑색변/지방변/황달(-/-/-/-/-/-)","여성":"질출혈/질분비물/생리 주기 변화/임신 가능성(-/-/-/-)","전신":"발열/오한/식은땀/체중감소(+/+/-/-)","비뇨기":"배뇨통/소변색 변화/혈뇨/빈뇨(-/-/-/-)"},"F_factor":"날 것/상한 음식/여행력/위험한 성관계(-/-/-/-), 자세에 따른 변화(+, 앞으로 숙이면 완화, 허리 펴면 악화)","E_prior_exam":"-","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-), 소화기 질환/부인과 질환(-/-)","medication":"어제 소화제 복용","social":"술 social, 담배/커피(-/-)","family":"가족 중 소화기 질환/부인과 질환(-/-)","female_hx":null},"physical_exam":{"General":"V/S 확인","HEENT":"입/피부 탈수 소견(-/-), 결막/공막(-/-), 경부 LN(-)","Abdomen":"시/청/타/촉, RLQ Td/rTd(+/+), Rovsing(+), Obturator(+), Psoas(+), DRE/pelvic exam 정상","Extremity":"피부 긴장도 확인"},"nonverbal_expressions":{"on_entry":"[충수돌기염 가능성이 높기 때문에 응급 수술의 가능성에 대해 설명하였음]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"검사 결과는 오늘 다 나오나요?"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부 CT","골반초음파","혈중 염증 수치(ESR, CRP)"],"required_treatments":[],"expected_skills":["Rovsing/Obturator/Psoas sign 시행","항문 직장 진찰","조영제 CT 설명동의서 받기"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3}]}},{"case_id":"acute_07","category":"급성 복통","hidden_diagnosis":"요로결석","top_diagnoses":["요로결석","신우신염","난소 염전"],"patient":{"name":"양지희","age":29,"vital_signs":{"BP":"130/80","PR":76,"RR":20,"BT":36.8},"setting":"외래","appearance":"[불편한 표정으로 들어옴]","sex":"여"},"chief_complaint":"배가 아프다","history":{"O_onset":"3시간 전","L_location":"오른쪽 옆구리","D_duration_course":"통증의 강도가 계속 변함","Co_change":"-","Ex_prior_episode":"처음","C_character":"쥐어짜는 듯한 통증, 등으로 방사되는 통증, 평소 NRS 5점, 심하면 NRS 9점","A_associated":{"전신":"체중변화/피로/발열/오한(-/-/-/-)","소화기":"식욕감소/구역질/구토/토혈/복부팽만감/복부종괴(-/-/-/-/-/-), 변비/설사/혈변/흑색변/지방변/황달(-/-/-/-/-/-)","비뇨기":"배뇨통/소변색 변화/혈뇨/빈뇨(-/-/-/-)","부인과":"질출혈/질분비물/생리주기변화/임신 가능성(-/-/-/-)"},"F_factor":"전날 특별히 먹은 것 없음, 자세 변화/운동에 영향 없음","E_prior_exam":"-","PSH":"-","PMH":"DM/HTN/Dyslipidemia/Tb/Hepatitis(-/-/-/-/-)","medication":"혈압약 복용 중","social":"음주력(-), 흡연력(-)","family":"-","female_hx":null},"physical_exam":{"General":"키, 체중, 허리둘레 측정(BMI)","HEENT":"눈(공막) 시진(황달 확인)","Chest":"흉부 청진","Abdomen":"복부 시/청/타/촉(-/-/-/-), CVA tenderness(+), DRE/골반 진찰","Extremity":"피부 긴장도 확인"},"nonverbal_expressions":{"on_entry":"[불편한 표정으로 들어옴]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"-"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부 X-ray","복부초음파","복부 CT"],"required_treatments":[],"expected_skills":["CVA tenderness 확인을 빠뜨리지 말 것"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 응급증상(두근/어지럼/소변감소)","keywords":["두근","어지럼","소변"],"score":4},{"item":"L - 통증 이동","keywords":["이동","처음에는","옮겼"],"score":3}]}},{"case_id":"acute_08","category":"급성복통","hidden_diagnosis":"자궁외 임신 파열","top_diagnoses":["자궁외 임신 파열","난소 낭종 파열","급성 충수돌기염"],"patient":{"name":"이지은","age":28,"appearance":"[아랫배를 움켜쥐고 다리를 구부린 채 누워 있음. 안색이 창백하고 식은땀을 흘림]","sex":"여","vital_signs":{"BP":"105/65","PR":96,"RR":20,"BT":36.9},"setting":""},"chief_complaint":"아랫배가 갑자기 너무 아파요","history":{"O_onset":"6시간 전, 갑자기 시작됨","L_location":"우하복부 및 골반 전반","D_duration_course":"갑자기 시작되어 지속되며 칼로 찌르는 듯 점점 심해짐","Co_change":"급격히 악화됨, 어지러움 동반","Ex_prior_episode":"처음 발생함","C_character":"칼로 찌르는 듯 찢어지는 극심한 통증, NRS 8점, 오른쪽 어깨로 퍼지는 방사통(+)","A_associated":"식욕부진/구역(+/+), 질출혈(+, 3일 전부터 소량의 갈색 혈 지속), 생리 예정일보다 10일 이상 지연, 어지러움(+), 발열(-)","F_factor":"움직이거나 자세 바꿀 때 극심해짐. 어떤 자세도 완화 없음","PSH":"없음","PMH":"골반염 치료력(+, 2년 전 약물치료)","medication":"없음","social":"음주(-), 흡연(-), 직업(디자이너), 커피(하루 1잔)","family":"없음","female_hx":"LMP 6주 전(평소 28일 주기로 매우 규칙적), 피임 안 함, 임신 가능성 있음, 아이 없음"},"physical_exam":{"general":"안색 창백, 식은땀, 급성 병색. BP 105/65(저혈압 경향), PR 96(빈맥 경향)","eyes":"결막 창백(+, 빈혈 소견), 공막 정상","abdomen":{"inspection":"특이소견 없음","auscultation":"장음 감소","percussion":"특이소견 없음","palpation":"우하복부 압통(+)","tenderness_location":"우하복부","rebound_tenderness":true,"guarding":false,"murphy_sign":false,"CVAT":false},"pelvic":"자궁목 유동 압통(CMT, +)"},"nonverbal_expressions":{"on_entry":"[아랫배를 움켜쥐고 다리를 구부린 채 천천히 들어옴. 안색이 매우 창백하고 식은땀을 흘림]","on_pain_question":"[찡그리며] 여기가 너무 아파요... [아랫배를 가리킴]","on_palpation":"[아! 하며 움찔하고 눈물이 맺힘] 거기 누르니까 너무 아파요","on_rebound":"[표정이 일그러지며] 손 뗄 때 더 아파요","on_lmp_question":"[잠시 생각하다가] 6주 전이요... 생리가 좀 늦나 했는데...","on_pregnancy_question":"[불안해하며] 임신인가요? 왜 이렇게 아픈 거예요?","baseline_emotion":"극심한 불안과 통증"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"hcg","response":"그게 뭔지 잘 몰라요."},{"question_pattern":"자궁외","response":"자궁외 임신이요? 그게 뭔가요..."}]},"scoring":{"history_checklist":[{"category":"female_hx - LMP 확인 (핵심!)","keywords":["생리","마지막 생리","lmp","월경","생리일"],"score":6},{"category":"female_hx - 임신 가능성/피임 여부 (핵심!)","keywords":["임신","피임","임신 가능"],"score":5},{"category":"A - 질 출혈 (핵심!)","keywords":["질 출혈","출혈","피가","하혈","혈"],"score":4},{"category":"C - 어깨 방사통 (복강내출혈 징후)","keywords":["어깨","방사","퍼지"],"score":4},{"category":"A - 어지러움 (쇼크 징후)","keywords":["어지러","핑","실신","쓰러"],"score":4},{"category":"O - 발병시기/양상","keywords":["언제","시작","갑자기"],"score":2},{"category":"PMH - 골반염 과거력 (위험인자)","keywords":["골반염","pid","난관","과거"],"score":3}],"required_tests":["Urine hCG","골반 초음파","CBC"],"required_treatments":["응급 수술","수액","수혈"],"expected_skills":["마지막 생리 시작일(LMP) 및 임신 가능성 확인","골반 내진 및 자궁목 유동 압통(CMT) 확인","실혈 및 쇼크 징후(맥박, 결막) 평가"]}},{"case_id":"acute_09","category":"급성복통","hidden_diagnosis":"수술 후 유착성 장폐색","top_diagnoses":["수술 후 유착성 장폐색","장중첩증","대장암에 의한 폐색"],"patient":{"name":"최영수","age":45,"appearance":"[복부가 눈에 띄게 부풀어 있음. 잦은 구역질로 대화 중 구토할 것 같은 표정을 지음]","sex":"남","vital_signs":{"BP":"130/85","PR":84,"RR":18,"BT":37.1},"setting":""},"chief_complaint":"배가 아프고 가스가 차서 터질 것 같아요","history":{"O_onset":"어제 저녁 식사 후","L_location":"복부 전반, 배꼽 주변이 특히 심함","D_duration_course":"어제 저녁부터 점차 심해지며 간헐적으로 쥐어짜듯 아프다가 현재는 계속 더부룩함","Co_change":"시간이 갈수록 배가 더 부풀어 오르고 통증 주기가 짧아짐","Ex_prior_episode":"이전에도 과식하면 배가 빵빵했으나 이 정도는 처음","C_character":"파도치듯 쥐어짜는 듯한 통증, NRS 6점, 방사통(-)","A_associated":"구역/구토(+/+, 초록색 쓴 물을 두 차례 구토), 변비(+, 어제 아침 이후 대변 못 봄), 방귀(-,  어젯밤부터 전혀 안 나옴), 발열(-)","F_factor":"음식/물 마시면 바로 구역질 심해짐. 토하면 잠깐 편하나 다시 아픔","PSH":"3년 전 급성 충수염으로 개복 충수절제술 시행","PMH":"특이사항 없음","medication":"없음","social":"술(소주 주 1회 1병), 흡연(-), 직업(사무직)","family":"없음"},"physical_exam":{"general":"활력징후 비교적 안정적이나 복부 팽만으로 힘들어함. 구강 탈수 소견(혀와 입술이 말라 있음)","eyes":"결막/공막 정상","abdomen":{"inspection":"복부 전반 팽만(Distension +), 우하복부 수술 흉터 확인됨","auscultation":"금속성 장음(Metallic tinkling sound) 및 장음 항진","percussion":"고장음(Tympany) 전반","palpation":"복부 전반 경미한 압통","tenderness_location":"전반적","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":false}},"nonverbal_expressions":{"on_entry":"[배가 눈에 띄게 불러 있고 불편한 표정. 움직일 때마다 신음소리를 냄]","on_pain_question":"[배를 가리키며] 배 전체가 빵빵하고 쥐어짜는 것처럼 아파요","on_psh_question":"[아, 맞다는 표정으로] 3년 전에 맹장 수술했어요","on_nausea":"[대화 중 갑자기 구토할 것 같은 표정을 지으며 입을 막음]","on_flatus_question":"[당황한 표정] 방귀가 어젯밤부터 전혀 안 나와요","baseline_emotion":"불안, 불편함"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"유착","response":"유착이요? 그게 뭔가요?"},{"question_pattern":"L-tube","response":"그게 뭔지 모르겠어요."}]},"scoring":{"history_checklist":[{"category":"PSH - 복부 수술력 (핵심!)","keywords":["수술","맹장","충수","개복","수술력"],"score":7},{"category":"A - 방귀/가스 배출 여부 (핵심!)","keywords":["방귀","가스","배출","안 나와"],"score":6},{"category":"A - 구토물 양상 (담즙성)","keywords":["구토","토","초록","쓴","담즙"],"score":4},{"category":"A - 배변 여부","keywords":["대변","변","배변","못 봄"],"score":4},{"category":"O - 발병시기","keywords":["언제","시작","어제"],"score":2},{"category":"C - 통증 양상 (산통)","keywords":["쥐어짜","간헐","파도","주기"],"score":3}],"required_tests":["복부 X-ray","복부 CT","전해질 검사"],"required_treatments":["금식(NPO)","L-tube 삽입","수액/전해질 공급"],"expected_skills":["과거 복부 수술력(PSH) 적극적 문진","가스 배출 및 배변 여부 확인","복부 청진 시 금속성 장음 확인"]}},{"case_id":"acute_10","category":"급성복통","hidden_diagnosis":"요관결석","top_diagnoses":["요관결석","급성 신우신염","급성 충수돌기염"],"patient":{"name":"김명진","age":34,"appearance":"[침대에 가만히 눕지 못하고 앉았다 일어났다 하며 몸을 비틂. 식은땀을 흘림]","sex":"남","vital_signs":{"BP":"135/85","PR":92,"RR":20,"BT":36.6},"setting":""},"chief_complaint":"옆구리가 끊어질 것처럼 아파요","history":{"O_onset":"2시간 전, 자다가 갑자기 깸","L_location":"오른쪽 옆구리에서 시작해 아랫배 및 음낭 쪽으로 뻗침","D_duration_course":"통증이 가라앉았다 갑자기 미칠 듯이 아픈 증상이 반복됨","Co_change":"통증이 올 때 NRS 9점에 달하는 극심한 강도","Ex_prior_episode":"처음 느껴보는 통증","C_character":"쥐어짜고 찌르는 듯한 격심한 통증, 우측 하복부·음낭 방사통(+)","A_associated":"혈뇨(+, 소변이 붉고 탁함), 빈뇨(+), 배뇨통(+, 소변볼 때 찌릿함), 구역/구토(+/+), 식은땀(+), 발열/오한(-/-)","F_factor":"자세를 어떻게 바꿔도 통증이 줄어들지 않음","PSH":"없음","PMH":"특이사항 없음","medication":"없음","social":"술(주 2~3회 과음), 흡연(10갑년), 직업(IT 개발자, 하루 종일 앉아 물을 거의 안 마심)","family":"아버지(요로결석으로 쇄석술 받은 적 있음)"},"physical_exam":{"general":"통증으로 안절부절못하며 몸을 비틂. Tossing and turning 소견.","eyes":"결막/공막 정상. 식은땀.","abdomen":{"inspection":"특이소견 없음","auscultation":"장음 정상","percussion":"특이소견 없음","palpation":"복부 부드러움. 뚜렷한 압통 없음","tenderness_location":"없음","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":true,"CVAT_side":"우측(++, 극심한 통증 호소)"}},"nonverbal_expressions":{"on_entry":"[침대 위에서 앉았다 누웠다 하며 가만히 있지 못함. 매우 괴로워함]","on_pain_question":"[옆구리를 가리키며 몸을 비틂] 여기가 죽을 것 같이 아파요","on_cvat":"[악 소리를 내며] 아!! 거기 너무 아파요!","on_hematuria_question":"[당황한 표정] 네, 소변이 빨갛게 나왔어요","on_analgesia_request":"진통제 주사 좀 먼저 빨리 놓아주시면 안 되나요? 죽을 것 같아요.","baseline_emotion":"극심한 통증, 초조함"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"쇄석술","response":"아버지가 그 치료 받으셨어요."},{"question_pattern":"요산","response":"요산 수치는 재본 적이 없어요."}]},"scoring":{"history_checklist":[{"category":"L - 옆구리→사타구니 방사통 (핵심!)","keywords":["옆구리","사타구니","음낭","방사","뻗치"],"score":6},{"category":"C - 산통 양상 (핵심!)","keywords":["간헐","반복","파도","왔다갔다","쥐어짜"],"score":5},{"category":"A - 혈뇨 (핵심!)","keywords":["혈뇨","소변","붉","빨갛","탁"],"score":5},{"category":"A - 비뇨기 증상","keywords":["빈뇨","배뇨통","찌릿","소변볼 때"],"score":4},{"category":"A - 발열 없음 (신우신염 감별)","keywords":["열","발열","오한"],"score":3},{"category":"family - 가족력","keywords":["가족","아버지","결석","가족력"],"score":3},{"category":"social - 수분 섭취 부족 (위험인자)","keywords":["물","수분","커피"],"score":2}],"required_tests":["소변 검사","비조영 CT","KUB"],"required_treatments":["진통제(NSAIDs/마약성)","수액 공급","체외충격파쇄석술(ESWL)"],"expected_skills":["늑골척추각 압통(CVAT) 검사 시행","Colicky pain 양상과 비뇨기계 증상 연계 문진","진통제 우선 투여로 환자 안심"]}},{"case_id":"acute_11","category":"급성복통","hidden_diagnosis":"담석증(담도산통)","top_diagnoses":["담석증(담도산통)","급성 담낭염(초기)","기능성 소화불량"],"patient":{"name":"송정자","age":56,"appearance":"[현재는 통증이 가라앉아 편한 자세로 앉아 있음. 약간 피곤해 보임]","sex":"여","vital_signs":{"BP":"138/82","PR":82,"RR":16,"BT":37.8},"setting":""},"chief_complaint":"오른쪽 윗배가 아프고 속이 메스꺼워요","history":{"O_onset":"오늘 새벽 1시경 (어제 저녁 삼겹살 과식 후)","L_location":"오른쪽 윗배(우상복부) 및 명치","D_duration_course":"새벽에 시작해 약 3시간 지속되다 새벽 4시부터 서서히 호전됨","Co_change":"현재는 통증이 많이 가라앉고 둔한 불편감만 남음","Ex_prior_episode":"수개월 전부터 기름진 음식 먹으면 우상복부가 묵직하게 아프다가 1~2시간 뒤 좋아지곤 했음","C_character":"쥐어짜는 듯한 묵직한 통증, NRS 5점(새벽에는 7점), 오른쪽 등·어깨 쪽 방사통(+)","A_associated":"구역(+), 구토(-), 발열(+, 미열), 황달(-), 체중변화(-)","F_factor":"기름진 음식·고기·튀김 섭취 시 발생. 시간이 지나면 서서히 호전. 타이레놀 효과 없음","PSH":"없음","PMH":"고지혈증(+, 3년 전 진단). 1년 전 위내시경 경미한 위염 외 특이사항 없음","medication":"고지혈증약(Atorvastatin)","social":"술(-), 흡연(-), 직업(가정주부), 비만(BMI 26.5)","family":"어머니(담석증으로 담낭절제술 받음)"},"physical_exam":{"general":"현재는 통증 완화, 활력징후 안정적. BT 37.8(미열)","eyes":"결막 정상, 공막 정상(황달 소견 없음)","abdomen":{"inspection":"특이소견 없음","auscultation":"장음 정상","percussion":"특이소견 없음","palpation":"우상복부 깊게 촉진 시 약간의 불편감. 명확한 압통 없음","tenderness_location":"우상복부(경미)","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":false}},"nonverbal_expressions":{"on_entry":"[약간 피곤해 보이지만 현재는 비교적 편안한 표정으로 앉아 있음]","on_pain_question":"[우상복부를 가리키며] 새벽에 여기가 너무 아팠는데 지금은 좀 괜찮아요","on_fat_food_question":"[멋쩍게 웃으며] 기름진 거 좋아해서요... 고기 먹으면 꼭 이래요","on_family_hx":"[끄덕이며] 어머니도 담석이라고 쓸개 수술 받으셨어요","on_cancer_concern":"[걱정스러운 표정] 위암 같은 건 아닌 거죠?","baseline_emotion":"불안(암 걱정), 멋쩍음"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"murphy","response":"그게 무슨 검사예요?"},{"question_pattern":"담석","response":"담석이 있는지는 아직 모르고 이번에 처음 검사 받으러 왔어요."}]},"scoring":{"history_checklist":[{"category":"F - 기름진 음식 후 발생 (핵심!)","keywords":["기름","고기","튀김","지방","삼겹"],"score":6},{"category":"L - 우상복부→등/어깨 방사통 (핵심!)","keywords":["등","어깨","방사","퍼지","뻐근"],"score":5},{"category":"D - 지속 시간 (1~5시간 후 호전)","keywords":["시간","지나면","호전","나아","얼마나"],"score":4},{"category":"Ex - 반복 에피소드","keywords":["이전","전에도","반복","예전"],"score":4},{"category":"family - 담석 가족력 (위험인자)","keywords":["가족","어머니","담석","쓸개"],"score":3},{"category":"PMH - 고지혈증 (위험인자)","keywords":["고지혈","콜레스테롤","지질"],"score":2},{"category":"A - 황달 유무","keywords":["황달","눈 노랗","소변 노랗"],"score":3}],"required_tests":["복부 초음파","간기능 검사(LFT)","CBC"],"required_treatments":["저지방 식이","진통제","담낭절제술 권유"],"expected_skills":["기름진 음식과의 연관성 및 지속 시간 문진","Murphy sign 및 황달 유무 신체진찰","담낭암 가족력 및 고지혈증 위험인자 확인"]}},{"case_id":"acute_12","category":"급성복통","hidden_diagnosis":"난소 낭종 염전","top_diagnoses":["난소 낭종 염전","자궁외 임신","급성 충수돌기염"],"patient":{"name":"한수빈","age":22,"appearance":"[오른쪽 아랫배를 감싸 안고 앉아 있음. 통증으로 얼굴을 찡그리고 있음]","sex":"여","vital_signs":{"BP":"118/74","PR":102,"RR":20,"BT":37.2},"setting":""},"chief_complaint":"오른쪽 아랫배가 갑자기 너무 아파요","history":{"O_onset":"3시간 전, 체육 수업 중 갑자기 시작됨","L_location":"오른쪽 아랫배","D_duration_course":"갑자기 시작되어 지속적으로 아픔. 처음에 잠깐 나아지는 듯했으나 다시 심해짐","Co_change":"점차 악화됨","Ex_prior_episode":"1년 전에도 비슷하게 갑자기 오른쪽이 아팠다가 저절로 나은 적 있음","C_character":"쥐어짜고 비트는 듯한 극심한 통증, NRS 8점, 방사통 없음","A_associated":"구역/구토(+/+), 발열(-), 질출혈(-), 어지러움(경미)","F_factor":"움직일 때 심해짐. 쉬면 조금 나아지는 듯하나 큰 변화 없음","PSH":"없음","PMH":"난소 낭종(+, 6개월 전 초음파에서 우측 4cm 낭종 발견됨, 경과관찰 중)","medication":"없음","social":"음주(-), 흡연(-), 직업(대학생)","family":"없음","female_hx":"LMP 2주 전(28일 주기 규칙적), 성경험(-), 임신 가능성 없음"},"physical_exam":{"general":"급성 통증 병색. PR 102(빈맥, 통증/미주신경성)","eyes":"결막 정상, 공막 정상","abdomen":{"inspection":"특이소견 없음","auscultation":"장음 정상","percussion":"특이소견 없음","palpation":"우하복부 압통(+), 복부 전반 근육 긴장 경미","tenderness_location":"우하복부","rebound_tenderness":true,"guarding":false,"murphy_sign":false,"CVAT":false},"pelvic":"우측 부속기 압통(+) 및 종물 촉지됨. CMT(-)"},"nonverbal_expressions":{"on_entry":"[오른쪽 아랫배를 감싸 안고 허리를 약간 구부린 채 들어옴]","on_pain_question":"[찡그리며] 여기가 갑자기 너무 아파요 [오른쪽 아랫배를 가리킴]","on_activity_question":"[체육 수업 떠올리며] 줄넘기 하다가 갑자기 시작됐어요","on_palpation":"[움찔하며] 아, 거기 누르면 너무 아파요","on_pmh_question":"[기억하며] 아, 낭종이라고 경과 보자고 했는데...","baseline_emotion":"통증과 불안"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"염전","response":"염전이요? 그게 뭔가요?"},{"question_pattern":"낭종","response":"네, 6개월 전에 초음파에서 낭종이 있다고 했어요."}]},"scoring":{"history_checklist":[{"category":"PMH - 난소 낭종 과거력 (핵심!)","keywords":["낭종","난소","초음파","혹","과거"],"score":7},{"category":"O - 활동 중 갑작스러운 발병 (핵심!)","keywords":["갑자기","운동","체육","활동","움직"],"score":5},{"category":"female_hx - LMP/임신 가능성","keywords":["생리","lmp","임신","피임"],"score":4},{"category":"A - 질출혈 없음 (자궁외임신 감별)","keywords":["질출혈","출혈","피","하혈"],"score":4},{"category":"Ex - 이전 유사 에피소드 (간헐적 염전 의심)","keywords":["이전","전에도","예전","반복"],"score":4},{"category":"C - 통증 양상","keywords":["어떻게","양상","쥐어짜","비트"],"score":3}],"required_tests":["골반 초음파(도플러 포함)","소변 hCG","CBC"],"required_treatments":["응급 복강경 수술(염전 해소/낭종 제거)","수액 공급","진통제"],"expected_skills":["난소 낭종 과거력 적극 문진","LMP 및 임신 가능성 확인(자궁외임신 감별)","골반 초음파(도플러) 신속 시행 안내"]}},{"case_id":"acute_13","category":"급성복통","hidden_diagnosis":"복부 대동맥류 파열","top_diagnoses":["복부 대동맥류 파열","급성 심근경색(하벽)","장간막 허혈"],"patient":{"name":"오병철","age":72,"appearance":"[창백한 안색으로 등과 배를 동시에 감싸며 앉아 있음. 극심한 통증으로 표정이 일그러짐]","sex":"남","vital_signs":{"BP":"90/60","PR":110,"RR":22,"BT":36.8},"setting":""},"chief_complaint":"배랑 등이 갑자기 찢어질 것 같이 아파요","history":{"O_onset":"1시간 전, 갑자기 시작됨","L_location":"배꼽 주위 및 등 허리 쪽으로 동시에 퍼짐","D_duration_course":"갑자기 시작된 이후 지속적으로 극심하게 아픔","Co_change":"시작부터 극심하고 점점 어지럽고 기운이 없어짐","Ex_prior_episode":"없음","C_character":"찢어지는 듯한 극심한 통증, NRS 9점, 등 허리로 방사(+)","A_associated":"어지러움(+, 일어서려 하면 핑 돔), 식은땀(+), 구역(+), 발열(-), 혈뇨(-)","F_factor":"어떤 자세도 완화 없음","PSH":"없음","PMH":"고혈압(+, 15년, 약 불규칙 복용), 흡연(40갑년), 고지혈증(+)","medication":"혈압약(불규칙 복용), 고지혈증약","social":"술(소주 주 3회), 흡연(40갑년, 현재도 흡연 중), 직업(은퇴)","family":"형(심장 수술 받은 적 있음)"},"physical_exam":{"general":"급성 병색. 창백하고 식은땀. BP 90/60(저혈압), PR 110(빈맥). 쇼크 징후.","eyes":"결막 창백(+)","abdomen":{"inspection":"복부 약간 팽만","auscultation":"장음 감소","percussion":"특이소견 없음","palpation":"배꼽 주위 박동성 종물 촉지(+), 압통(+)","tenderness_location":"배꼽 주위(전반)","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":false,"pulsatile_mass":true}},"nonverbal_expressions":{"on_entry":"[창백한 얼굴로 배와 등을 동시에 감싸며 천천히 들어옴. 극심한 통증으로 표정이 일그러짐]","on_pain_question":"[힘겹게] 배도 아프고... 등도 같이 찢어지는 것 같아요","on_bp_drop":"[어지럽다는 표정으로] 좀 어지러워요... 기운이 없어요","on_htn_question":"[민망한 표정] 혈압약을 가끔 빠뜨렸어요...","on_palpation":"[움찔하며] 거기 뭔가 뛰는 것 같지 않아요?","baseline_emotion":"극심한 통증, 공포"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"대동맥","response":"대동맥이 어딘가요?"},{"question_pattern":"동맥류","response":"그게 뭔지 잘 모르겠어요."}]},"scoring":{"history_checklist":[{"category":"C - 찢어지는 등 방사통 (핵심! AAA 전형 증상)","keywords":["등","허리","방사","찢어","퍼지"],"score":7},{"category":"O - 갑작스러운 발병","keywords":["갑자기","시작","갑작스럽"],"score":4},{"category":"A - 저혈압/어지러움 (쇼크 징후)","keywords":["어지러","핑","기운 없","쓰러"],"score":5},{"category":"PMH - 고혈압 (위험인자)","keywords":["고혈압","혈압","혈압약"],"score":4},{"category":"social - 장기 흡연 (위험인자)","keywords":["담배","흡연","갑년"],"score":3},{"category":"PMH - 고지혈증 (위험인자)","keywords":["고지혈","콜레스테롤","지질"],"score":2}],"required_tests":["복부 CT(조영)","복부 초음파(응급)","CBC/혈액형/교차시험"],"required_treatments":["응급 수술(혈관 재건)","대량 수액/수혈","혈압 유지"],"expected_skills":["배꼽 주위 박동성 종물 촉지 확인","저혈압+복통+등 방사통 → AAA 파열 즉시 의심","혈압 조절 불량 및 흡연 위험인자 파악"]}},{"case_id":"acute_14","category":"급성복통","hidden_diagnosis":"급성 A형 간염","top_diagnoses":["급성 A형 간염","급성 담낭염","약인성 간손상"],"patient":{"name":"임도현","age":26,"appearance":"[전반적으로 피곤해 보이고 피부와 눈 흰자가 약간 노랗게 보임]","sex":"남","vital_signs":{"BP":"118/76","PR":80,"RR":16,"BT":38.1},"setting":""},"chief_complaint":"오른쪽 윗배가 아프고 몸이 너무 피곤해요. 눈도 노래진 것 같아요","history":{"O_onset":"1주일 전부터 피로감과 식욕부진, 3일 전부터 황달","L_location":"오른쪽 윗배(우상복부), 전반적 피로감","D_duration_course":"처음에는 몸살인 줄 알았는데 점점 피부/눈이 노래지고 소변이 진해짐","Co_change":"점점 황달이 심해지고 소변 색이 진한 갈색(콜라색)으로 변함","Ex_prior_episode":"없음","C_character":"우상복부 둔한 불편감, NRS 3점. 날카로운 통증은 아님","A_associated":"황달(+, 3일 전부터), 진한 갈색 소변(+), 회색 변(+), 발열(+, 38.1도), 식욕부진(+), 구역(+), 구토(+), 심한 피로감(+)","F_factor":"특별한 악화/완화 요인 없음","PSH":"없음","PMH":"없음","medication":"없음","social":"술(주 2~3회 회식), 흡연(-), 직업(직장인 1년차)","family":"없음","travel_food":"3~4주 전 동남아 배낭여행, 현지 길거리 음식 자주 섭취"},"physical_exam":{"general":"급성 피로 병색. BT 38.1(발열). 피부 및 공막 황달 뚜렷.","eyes":"공막 황달(+, 뚜렷), 결막 정상","abdomen":{"inspection":"특이소견 없음","auscultation":"장음 정상","percussion":"간 타진 시 간비대 소견(간 탁음 범위 증가)","palpation":"우상복부 간 촉진 시 압통 및 간비대(+). 반동압통(-)","tenderness_location":"우상복부(간)","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":false}},"nonverbal_expressions":{"on_entry":"[기운 없이 천천히 들어옴. 눈 흰자가 노랗게 보임]","on_jaundice_question":"[본인 손을 보며] 피부도 노랗게 된 것 같아요. 친구들도 그러더라고요","on_urine_question":"[당황한 표정] 소변이 콜라색으로 나와서 놀랐어요","on_travel_question":"[기억하며] 아, 한 달 전에 베트남 여행 갔다 왔어요. 길거리 음식 많이 먹었는데...","on_alcohol_question":"[머뭇거리며] 회식이 좀 잦긴 했어요...","baseline_emotion":"피로, 불안"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"A형 간염","response":"A형 간염 예방접종은 안 맞은 것 같아요."},{"question_pattern":"예방접종","response":"A형 간염 예방접종은 안 맞았어요."}]},"scoring":{"history_checklist":[{"category":"A - 황달 (핵심!)","keywords":["황달","노래","눈","피부","공막"],"score":6},{"category":"A - 소변 색 변화 (콜라색)","keywords":["소변","진한","갈색","콜라","소변색"],"score":5},{"category":"travel - 해외여행/오염 음식 (역학)","keywords":["여행","해외","동남아","길거리","음식"],"score":6},{"category":"A - 회색 변 (폐색성 황달 감별)","keywords":["변","회색","흰색","색","대변"],"score":4},{"category":"A - 피로감/식욕부진/발열 (전구증상)","keywords":["피로","피곤","식욕","밥맛","열"],"score":3},{"category":"PMH - 간염 예방접종 여부","keywords":["예방접종","간염","백신","맞은"],"score":3},{"category":"social - 음주 (악화 인자)","keywords":["술","음주","회식"],"score":2}],"required_tests":["간기능 검사(AST/ALT/Bilirubin)","HAV IgM 항체","복부 초음파"],"required_treatments":["절대 금주","충분한 수분/영양 공급","안정 가료(입원)"],"expected_skills":["황달 3종 세트 확인(황달/진한 소변/회색 변)","해외여행력 및 오염 음식 섭취 역학 문진","A형 간염 예방접종 여부 확인"]}},{"case_id":"acute_15","category":"급성복통","hidden_diagnosis":"급성 장간막 허혈","top_diagnoses":["급성 장간막 허혈","장폐색","허혈성 대장염"],"patient":{"name":"권말순","age":75,"appearance":"[심한 통증을 호소하지만 복부 진찰 소견에 비해 불균형하게 아파 보임]","sex":"여","vital_signs":{"BP":"155/92","PR":98,"RR":20,"BT":37.3},"setting":""},"chief_complaint":"배가 갑자기 너무 아파요. 죽을 것 같아요","history":{"O_onset":"2시간 전, 식사 후 갑자기 시작됨","L_location":"배 전체, 특히 배꼽 주위","D_duration_course":"갑자기 시작된 이후 지속적으로 극심하게 아픔","Co_change":"점점 심해짐. 진통제(타이레놀) 먹었으나 전혀 효과 없음","Ex_prior_episode":"식사 후 30분~1시간 뒤에 배가 아픈 일이 3개월 전부터 가끔 있었음(식후 통증 반복)","C_character":"극심한 통증, NRS 9점. 지속적이고 쥐어짜는 듯함. 방사통 없음","A_associated":"구역/구토(+/+), 혈변(+, 검붉은 점액 변), 발열(-), 어지러움(경미)","F_factor":"어떤 자세도 완화 없음. 식사 후 발생","PSH":"없음","PMH":"심방세동(+, 5년, 항응고제 복용 불규칙), 고혈압(+), 고지혈증(+)","medication":"항응고제(와파린, 불규칙 복용), 혈압약, 고지혈증약","social":"음주(-), 흡연(-), 직업(은퇴)","family":"없음"},"physical_exam":{"general":"고령 여성, 통증을 극심하게 호소하나 복부 진찰 소견이 생각보다 경미함(Pain out of proportion)","eyes":"결막 약간 창백, 공막 정상","abdomen":{"inspection":"약간 팽만","auscultation":"장음 감소 또는 소실","percussion":"특이소견 없음","palpation":"복부 전반 경미한 압통(호소하는 통증에 비해 진찰 소견 경미)","tenderness_location":"전반적(경미)","rebound_tenderness":false,"guarding":false,"murphy_sign":false,"CVAT":false}},"nonverbal_expressions":{"on_entry":"[심한 통증으로 얼굴을 찡그리며 들어옴. 배를 감싸고 있음]","on_pain_question":"[매우 고통스러운 표정으로] 배가 죽을 것 같이 아파요. 이렇게 아픈 건 처음이에요","on_palpation":"[의외로 진찰 시 반응이 덜함] 음... 아프긴 한데 아까보다는...","on_afib_question":"[끄덕이며] 심장이 불규칙하다고 해서 약을 받았는데 깜빡할 때가 있어요","on_stool_question":"[당황한 표정] 아까 화장실에 갔더니 검붉은 변이 나왔어요","baseline_emotion":"극심한 공포와 통증"},"unknown_responses":{"default_unknown":"잘 모르겠어요.","specific_unknowns":[{"question_pattern":"와파린","response":"피 묽게 하는 약이라고 해서 먹고 있어요."},{"question_pattern":"장간막","response":"그게 뭔가요?"}]},"scoring":{"history_checklist":[{"category":"PMH - 심방세동/항응고제 (핵심!)","keywords":["심방세동","부정맥","심장","와파린","항응고"],"score":7},{"category":"A - 통증-진찰 불일치 인지 (Pain out of proportion)","keywords":["심하게","극심","9점","죽을 것"],"score":5},{"category":"A - 혈변/점액변","keywords":["혈변","검붉","피","점액","변"],"score":5},{"category":"Ex - 식후 반복 통증 (장간막 협심증)","keywords":["식사 후","밥 먹고","식후","먹으면","전에도"],"score":5},{"category":"O - 갑작스러운 발병 + 고령","keywords":["갑자기","시작","처음"],"score":3},{"category":"PMH - 항응고제 복용 불규칙","keywords":["불규칙","깜빡","가끔","빠뜨"],"score":3}],"required_tests":["복부 CT 혈관조영(CTA)","CBC/응고검사(PT-INR)","혈중 젖산(Lactate)"],"required_treatments":["응급 수술 또는 혈관 중재술","항응고 요법","수액/수혈"],"expected_skills":["심방세동 과거력 및 항응고제 복용 여부 반드시 문진","통증-진찰 불일치(Pain out of proportion) 인지","식후 반복 복통(장간막 협심증) 패턴 문진"]}},{"case_id":"chronic_01","category":"소화불량/만성 복통","hidden_diagnosis":"십이지장궤양","top_diagnoses":["십이지장궤양","위염/위궤양","기능성 소화불량"],"patient":{"name":"이상혁","age":42,"vital_signs":{"BP":"131/79","PR":80,"RR":19,"BT":36.5},"setting":"외래","appearance":"[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]","sex":"남"},"chief_complaint":"배가 아파요","history":{"O_onset":"2개월","L_location":"명치","D_duration_course":"계속, 2주 전부터 심해짐","Co_change":"2주 전부터 심해짐","Ex_prior_episode":"-","C_character":"양상: 아리는 듯한 느낌, 약간 쓰리기도 함, 방사통(-), 통증 부위 이동(-) / 정도: NRS 5~6점","A_associated":{"전신":"발열/오한/피로/체중변화(-/-/-/+, 2달 동안 4kg 감소)","소화기":"A/N/V/C/D(+/+/-/-/-), 황달/복부팽만(-/-), 소화불량/속쓰림/신물 올라옴/삼킴곤란(+/+/-/-), 토혈/혈변/흑색변/지방변/점액변(-/-/-/-/-)","기타":"흉통/기침(-/-), 추위불내성(-)"},"F_factor":"악화(+, 식전에 특히 심함, 공복 시 악화, 스트레스/우유에 의한 악화-/-), 완화(+, 식후 괜찮아짐, 배변에 의한 완화-)","E_prior_exam":"-","PSH":"-","PMH":"1년 전 위염이라고 들었으나 치료하지 않음, DM/HTN/Tb/Hepatitis(-/-/-/-)","medication":"홍삼 복용 중","social":"음주(-), 흡연(+, 20갑년), 스트레스(+, 아프기 전부터 원래 있었음), 식사 불규칙/고른 식단, 직업(택시 운전사)","family":"아버지(간암)","female_hx":null},"physical_exam":{"General":"V/S 정상","HEENT":"결막/공막 정상, 갑상샘 정상, 림프절 정상, 입술/피부 긴장도 감소(-/-)","Abdomen":"Epigastric Td/rTd(+/-), 간비대/비장비대/Murphy's sign(-/-/-)","Extremity":"복부 시/청(-/-), DRE 정상, 피부 긴장도 감소/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"-"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["상부위장관내시경","요소날숨검사"],"required_treatments":["약물 치료","생활 습관 교정"],"expected_skills":["H. pylori에 대한 진단과 치료 설명"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4}]}},{"case_id":"chronic_02","category":"소화불량/만성 복통","hidden_diagnosis":"만성 췌장염","top_diagnoses":["만성 췌장염","위궤양/위염","기능성 소화불량"],"patient":{"name":"차순혁","age":42,"vital_signs":{"BP":"124/82","PR":81,"RR":17,"BT":36.4},"setting":"외래","appearance":"[불편한 표정으로 들어옴]","sex":"남"},"chief_complaint":"소화가 되지 않아요","history":{"O_onset":"4개월 전","L_location":"명치쪽이 불편한 느낌이 지속됨, 최근 1주 전부터 윗배와 등쪽 통증","D_duration_course":"저녁 식사 후 불편","Co_change":"비슷함","Ex_prior_episode":"1년 전에도 윗배가 아팠음","C_character":"4개월 전부터 저녁 식후 1~2시간 정도 명치가 불편함, NRS 2점 / 1주 전 윗배, 등쪽 짓누르는 듯한 통증, NRS 7점","A_associated":{"전신":"발열/오한/피로/체중감소/부종(-/-/-/+/-, 3달 전 다이어트로 10kg 감량)","소화기":"식욕부진/구역/구토/변비/설사(-/-/-/-/-), 복통(+), 황달(-), 혈변(-)"},"F_factor":"악화(+, 저녁 식후 심해짐, 우유에 악화되지 않음), 완화(+, 공복 시 나아짐, 배변 시 완화되지 않음)","E_prior_exam":"-","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"소화제","social":"술/담배(+, 주 2~3회, 맥주 2캔+, 10갑년), 커피(-), 직업(회사원, 스트레스 많지 않은 편), 식습관(야식으로 피자 치킨 즐겨 먹음, 기름진 음식 좋아함)","family":"아버지(알코올성 췌장염), 큰아버지(담낭암)","female_hx":null},"physical_exam":{"General":"V/S 정상","HEENT":"결막/공막(-/-), 구강 탈수 소견(-), 경부 림프절(-)","Abdomen":"복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/-), Murphy's sign(-), CVAT(-)","Extremity":"피부 긴장도/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[불편한 표정으로 들어옴]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"큰아버지가 담낭암이라서 걱정돼요"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["복부영상검사","혈액검사","상부위장내시경"],"required_treatments":["생활 습관 교정","췌장소화효소제","진경제"],"expected_skills":[],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4}]}},{"case_id":"chronic_03","category":"소화불량/만성 복통","hidden_diagnosis":"위염","top_diagnoses":["위염","위암","위궤양"],"patient":{"name":"박태민","age":50,"vital_signs":{"BP":"126/84","PR":78,"RR":16,"BT":36.3},"setting":"외래","appearance":"[대답 빨리 해줌]","sex":"남"},"chief_complaint":"소화가 되지 않아요","history":{"O_onset":"3개월 전","L_location":"통증 없음","D_duration_course":"밥 먹자마자 더부룩한 느낌","Co_change":"점점 심해짐, 1달 전 악화","Ex_prior_episode":"1년 전에도 비슷한 경험","C_character":"일상생활에 큰 지장은 없음","A_associated":{"전신":"발열/오한/피로/체중감소(-/-/-/+, 3개월간 75kg→70kg, 5kg 감소), 부종(-)","소화기":"식욕부진/구역/구토/변비/설사(-/-/-/-/-), 속쓰림(+), 복통(-), 황달(-), 혈변(-)"},"F_factor":"악화(+, 식후 심해짐, 우유에 악화되지 않음), 완화(+, 공복 시 나아짐, 배변 시 완화되지 않음)","E_prior_exam":"위, 대장내시경 3년 전에 받았음, 정상 소견","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"-","social":"술/담배/커피(+, 회식 때마다 1병씩/-/+, 하루에 1번), 직업(회사 이사, 스트레스 심함), 식습관(규칙적인 식사)","family":"아버지(조기 위암)","female_hx":null},"physical_exam":{"General":"V/S 정상","HEENT":"결막/공막(-/-), 구강 탈수 소견(-), 경부 림프절(-)","Abdomen":"복부 시/청/타/촉(-/-/-/-), Murphy's sign(-), CVAT(-)","Extremity":"피부 긴장도/오목 부종(-/-)"},"nonverbal_expressions":{"on_entry":"[대답 빨리 해줌]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"없음"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["상부위장관내시경","혈액검사","복부 CT"],"required_treatments":["양성자 펌프 억제제","스트레스 관리"],"expected_skills":[],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4}]}},{"case_id":"chronic_04","category":"소화불량/만성 복통","hidden_diagnosis":"일차성 소화불량","top_diagnoses":["일차성 소화불량","위암","위궤양"],"patient":{"name":"박지영","age":55,"vital_signs":{"BP":"125/75","PR":72,"RR":18,"BT":36.5},"setting":"외래","appearance":"[SP 순응도 좋고, 대답도 빠름]","sex":"여"},"chief_complaint":"소화가 되지 않아요","history":{"O_onset":"3개월 전","L_location":"상복부(명치)","D_duration_course":"-","Co_change":"원래 소화 안 되는 편이었는데 3개월 전부터(최근 치킨 먹은 후) 심해짐","Ex_prior_episode":"30대부터 소화 잘 안 되긴 함","C_character":"더부룩함, 음식 잘 안 내려가는 느낌, 일상생활 지장(+)","A_associated":{"전신":"체중감소(+, 주변에서 이야기 많이 들음)","소화기":"A/N/D/V/C(-/-/-/-/-), 속쓰림(+, 명치쪽 NRS 3~4), 혈변/지방변(-/-), 아랫배 통증(-)"},"F_factor":"식후에 심해짐, 2시간 정도 지나면 호전, 젖당불내증(-), 변 보고 난 뒤 호전(-)","E_prior_exam":"건강 검진에서 위염 있었음 → 약 먹고 지금은 완치됨(확인 안 됨)","PSH":"둘째 제왕절개","PMH":"DM(+, 10년 전, 잘 조절됨), 위궤양(+), 위염(+, 약 잘 먹음)","medication":"당뇨약(+, 잘 조절됨)","social":"흡연(-), 음주(+, social), 직업(회사원, 부부가 도장가게 운영), 식사(기름지고 자극적인 식사 월 1회, 나머지는 건강식단), 운동(-), 스트레스(+, 심하지 않음)","family":"-","female_hx":"5년 전 폐경(관련하여 심해진 것 같지는 않음), 성관계 안 한 지 오래, 아이 2명, 주산기 포함 별 문제 없었음"},"physical_exam":{"General":"V/S stable","HEENT":"눈/입/림프절(-/-/-)","Abdomen":"Epigastric Td(+), Td/rTd(+/±, 반동압통 유무 불확실), Td/rTd 모두 아프게 아니라 불편하다고 함(깊이 누를 때 아파함), DRE/CVAT(-/-)","Extremity":"-"},"nonverbal_expressions":{"on_entry":"[SP 순응도 좋고, 대답도 빠름]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"-"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["위내시경","H. pylori 검사","위배출시간검사"],"required_treatments":["생활 습관 교육","악성인 경우 병기에 따른 치료","혈당 조절"],"expected_skills":[],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"chronic_05","category":"소화불량/만성 복통","hidden_diagnosis":"과민성 대장증후군(IBS)","top_diagnoses":["과민성 대장증후군(IBS)","감염성 장염","난소 염전"],"patient":{"name":"김소린","age":51,"vital_signs":{"BP":"125/70","PR":82,"RR":19,"BT":36.3},"setting":"외래","appearance":"[제시문 상 '복통'이라고만 적혀 있어 급성/만성 유무 모른 상태로 들어감]","sex":"여"},"chief_complaint":"배가 아파요","history":{"O_onset":"2주 전","L_location":"아랫배(좌우 구분 X, 이동 X), 자세히 물어보면 배꼽 아래만 아픔","D_duration_course":"한 달에 4번 복통이 있다가 없다가 함, 식사할 때마다 아픔","Co_change":"2~3일 전 악화, 6개월 전부터 시작해 달마다 한 번씩 아픔","Ex_prior_episode":"6개월 전부터 그랬으나 이런 통증은 처음, 병원 가서 진찰받은 적 있으나 어떤 병인지 모르고 그냥 진통제 처방받아 먹었고 효과 있었음","C_character":"쥐어짜는 듯한 통증, 찌르듯이, NRS 3~4점","A_associated":{"전신":"발열/오한/피로/체중변화(-/-/-/±/-)","소화기":"A/N/V/C/D(-/-/-/-/+, 물 같은 설사), 혈변/흑색변/지방변/점액변(-/-/-/-), 황달/복부팽만(-/-), 소화불량(+, 속에 가스가 찬 것처럼 불편), 항문 통증(-)","신장비뇨":"빈뇨/혈뇨/배뇨통(-/-/-)","정신":"우울/불안(-/-)","여성":"질출혈/질분비물(-/-)"},"F_factor":"악화(식후, 찬 음식 먹은 후), 호전(밥 먹고 조금 있으면, 설사하면 괜찮음), 생리주기와 상관없음, 자세와 관계없음, 스트레스로 심해지는지는 모르겠음","E_prior_exam":"건강 검진 상 이상 없음","PSH":"어릴 적 맹장 수술","PMH":"HTN/DM/Tb/Hepatitis(-/-/-/-), 생선 알레르기(+)","medication":"항히스타민제(+)","social":"흡연/음주(-/-), 커피(2~3잔/day), 스트레스(+, 자녀 관련 문제, 6개월 전 이사로 인해 아들이 전학간 학교에 잘 적응 못하고 성적이 떨어져 고민이 많음)","family":"아버지(HTN), 어머니(위암), 동생(+, 비슷한 증상)","female_hx":"LMP 2주 전, 생리통 심하지 않음, 생리량 많지 않음, 임신 가능성(-), 성관계 잘 안 함"},"physical_exam":{"General":"V/S stable","HEENT":"눈/입/림프절/pitting edema(-/-/-/-)","Abdomen":"Td/rTd(-/-), 아랫배 누를 때 불편감(+), CVAT(-), 골반 내진(정상, 종이 줌), DRE(-)","Extremity":"-"},"nonverbal_expressions":{"on_entry":"[제시문 상 '복통'이라고만 적혀 있어 급성/만성 유무 모른 상태로 들어감]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"-"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["대장내시경","대변배양검사","복부영상검사"],"required_treatments":["스트레스 조절 방법과 생활 습관 교육","수액 치료","지사제"],"expected_skills":[],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"chronic_06","category":"소화불량/만성 복통","hidden_diagnosis":"위염/위궤양","top_diagnoses":["위염/위궤양","기능성 소화불량"],"patient":{"name":"김지현","age":23,"vital_signs":{"BP":"112/83","PR":87,"RR":16,"BT":36.7},"setting":"외래","appearance":"[말이 느려서 빠르게 진행해야 함]","sex":"여"},"chief_complaint":"소화가 되지 않아요","history":{"O_onset":"1년 전부터 증상 있었고, 2주 전부터 증상 악화","L_location":"명치 부위","D_duration_course":"계속","Co_change":"2주 전부터 심해짐","Ex_prior_episode":"고등학생 때와 대학교 졸업 때도 아팠으나 소화제 안 듣는 경우는 이번이 처음","C_character":"배가 전체적으로 불편한 느낌, 명치에 통증(+, NRS 2점), 변을 보면 복통이 조금 완화되는 듯","A_associated":{"전신":"발열(-), 체중감소(-), 피로감(-), 추위불내성(-)","소화기":"A/N/V/C/D(-/-/-/-/-), 혈변(-), 황달(-), 복수(-)"},"F_factor":"악화(+, 식후, 기름진 음식 먹을 때, 스트레스에 악화), 완화(+, 공복에 완화)","E_prior_exam":"위내시경(-)","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"소화제(이전엔 효과 있었으나 2주 전부터는 효과 없음)","social":"술(+, social), 담배(-), 커피(+, 4~5잔), 직업(임용고시 준비생, 스트레스 많음), 운동(요즘에 식후 20분씩 산책), 식사(불규칙, 배고플 때만 편의점 도시락/빵)","family":"-","female_hx":"월경과의 관련성(-), 임신 가능성(-)"},"physical_exam":{"General":"V/S 정상","HEENT":"갑상샘 정상, 림프절 정상","Abdomen":"Epigastric Td(+)/rTd(-), 타진 시 배가 울린다고 함, 복부 시/청 정상, DRE 정상","Extremity":"피부 긴장도 정상, 오목 부종(-)"},"nonverbal_expressions":{"on_entry":"[말이 느려서 빠르게 진행해야 함]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"큰 병이 아닐까 걱정돼요"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["위내시경","복부영상검사"],"required_treatments":["생활 습관 교정","약물 치료"],"expected_skills":[],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"chronic_07","category":"소화불량/만성 복통","hidden_diagnosis":"위염","top_diagnoses":["위염","위궤양","위암"],"patient":{"name":"김숙영","age":40,"vital_signs":{"BP":"148/88","PR":102,"RR":20,"BT":36.7},"setting":"외래","appearance":"[복용 약제에 대해 항생제, 소염제 등 구체적으로 물어볼 것]","sex":"여"},"chief_complaint":"속이 불편해요","history":{"O_onset":"2주 전","L_location":"명치 부근","D_duration_course":"계속","Co_change":"처음과 비슷","Ex_prior_episode":"-","C_character":"얽힌 듯 불편, 일상생활에 지장 없음","A_associated":{"전신":"발열/오한/피로/체중변화(-/-/-/+, 1~2kg 감소)","소화기":"소화불량/식욕저하/구역(+/+/+), 복통/혈변/흑색변/설사/변비(-/-/-/-/-), 구토(-)"},"F_factor":"식후 악화(+)","E_prior_exam":"2년 전 이상 없음","PSH":"-","PMH":"DM/TB/HTN/간염(-/-/-/-)","medication":"종합감기약 1달 전","social":"술(-), 담배(-), 커피(+, 하루 1잔), 스트레스(+), 자극적 음식(-)","family":"오빠(조기 위암)","female_hx":"규칙적, 월경량 보통, LMP 3주 전"},"physical_exam":{"General":"V/S 확인","HEENT":"입/피부 탈수 소견(-), 결막/공막(-/-)","Chest":"흉부 청진 정상","Abdomen":"Epigastric Td(+)/rTd(-), CVAT(-), DRE 정상","Extremity":"피부 긴장도/오목 부종 정상"},"nonverbal_expressions":{"on_entry":"[복용 약제에 대해 항생제, 소염제 등 구체적으로 물어볼 것]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"없음"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["위내시경","신속요소분해효소검사","전체혈구검사"],"required_treatments":[],"expected_skills":["항문 직장 진찰(혈변 감별)","위내시경/조직생검/조영제 CT 설명동의서 받기"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4},{"item":"(여) 생리/LMP","keywords":["생리","월경","LMP"],"score":4},{"item":"(여) 임신 가능성","keywords":["임신","피임"],"score":4}]}},{"case_id":"chronic_08","category":"소화불량/만성 복통","hidden_diagnosis":"당뇨병성 위마비","top_diagnoses":["당뇨병성 위마비","기능성 소화불량","만성 위염"],"patient":{"name":"김혜선","age":54,"vital_signs":{"BP":"130/90","PR":72,"RR":15,"BT":36.5},"setting":"외래","appearance":"[당뇨약 잘 먹고 있는지, 당 수치 잘 조절되고 있는지 구체적으로 물어봐야 함]","sex":"여"},"chief_complaint":"속이 안 좋아서","history":{"O_onset":"3개월","L_location":"상복부 전반적으로 불편함","D_duration_course":"식후 10분~1시간","Co_change":"점점 심해짐","Ex_prior_episode":"이렇게 소화 안 되는 건 처음, 젊을 때부터 소화 잘 안 되었음","C_character":"더부룩하고 음식물이 막혀서 안 내려가는 느낌, 걸린 듯한 느낌, 일상생활 지장(+)","A_associated":{"소화기":"식욕감소/구역질/구토/설사/변비/복통(-/-/-/-/-/-), 소화불량/속쓰림/혈변/흑색변/지방변/황달(+/-/-/-/-/-)","전신":"발열/오한/식은땀/체중감소(-/-/-/+, 1년 동안 3kg)"},"F_factor":"과식 후/기름진 음식 섭취 시 악화","E_prior_exam":"3년 전 내시경 만성 위염 진단받음, 심하지 않아 치료받지 않음","PSH":"복부 외상(-)","PMH":"DM(+)/TB(-)/HTN(-)/간염(-), 고지혈증(+), 최근 당뇨 조절 잘 안 되어 약 바꿀 계획, 소화기 질환/부인과 질환(+, 만성 위염/-)","medication":"당뇨약, 고지혈증약","social":"술/담배/커피(-/-/-), 직업(가정주부), 식사(한식 위주, 과식하지 않음), 운동(주 3회 수영), 스트레스(없음)","family":"어머니(담도암), 아버지(당뇨)","female_hx":null},"physical_exam":{"General":"V/S 확인","HEENT":"입/피부 탈수 소견(-/-), 결막/공막(-/-), 경부 LN(-), 갑상샘(-)","Chest":"-","Abdomen":"시/청/타/촉(-/-/-/-), DRE/pelvic exam 정상","Extremity":"피부 긴장도 확인"},"nonverbal_expressions":{"on_entry":"[당뇨약 잘 먹고 있는지, 당 수치 잘 조절되고 있는지 구체적으로 물어봐야 함]","on_pain_question":"[아픈 부위를 가리키며 눈살을 찌푸림]","on_bad_news":"[걱정스러운 표정으로] 많이 심각한 건가요?","baseline_emotion":"불안","patient_question":"큰 병일까봐 걱정돼요"},"unknown_responses":{"default_unknown":"글쎄요, 잘 모르겠어요.","rule":"시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."},"scoring":{"required_tests":["상부위장관내시경","혈중 HbA1c","경구혈당검사","복부 X-ray"],"required_treatments":[],"expected_skills":["항문 직장 진찰","위내시경/조직생검/조영제 CT 설명동의서 받기"],"history_checklist":[{"item":"인사/자기소개","keywords":["안녕","학생의사"],"score":2},{"item":"진료시간 안내 및 동의","keywords":["분 동안","괜찮으시겠어요"],"score":2},{"item":"불편 시 말씀 안내","keywords":["불편하시면","말씀해"],"score":1},{"item":"O - 발병 시기","keywords":["언제","얼마나"],"score":3},{"item":"L - 위치","keywords":["어디","짚어"],"score":3},{"item":"C - 통증 양상","keywords":["어떻게 아프","양상"],"score":2},{"item":"C - NRS","keywords":["몇 점","10점"],"score":2},{"item":"Co - 경과","keywords":["심해지","변화"],"score":2},{"item":"A - 발열/오한","keywords":["열","오한"],"score":3},{"item":"A - 구역/구토","keywords":["구역","구토","토"],"score":2},{"item":"F - 악화/완화 요인","keywords":["악화","완화","먹으면","자세"],"score":3},{"item":"사회력 - 음주/흡연","keywords":["술","담배","흡연"],"score":2},{"item":"과거력/복용약","keywords":["수술","지병","약"],"score":2},{"item":"A - 체중감소 (악성 감별)","keywords":["체중","살","빠졌"],"score":4},{"item":"A - 혈변/흑색변 (악성 감별)","keywords":["혈변","검은 변","흑색"],"score":4}]}}]};
+
+// ── KEY ITEMS (채점 체크리스트) ─────────────────────────────────────────
+const KEY_ITEMS = {
+  "acute_01": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "acute_02": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_03": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_04": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_05": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "acute_06": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_07": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 응급증상(두근/어지럼/소변감소)",
+      "keywords": [
+        "두근",
+        "어지럼",
+        "소변"
+      ],
+      "score": 4
+    },
+    {
+      "item": "L - 통증 이동",
+      "keywords": [
+        "이동",
+        "처음에는",
+        "옮겼"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_08": [
+    {
+      "category": "female_hx - LMP 확인 (핵심!)",
+      "keywords": [
+        "생리",
+        "마지막 생리",
+        "lmp",
+        "월경",
+        "생리일"
+      ],
+      "score": 6
+    },
+    {
+      "category": "female_hx - 임신 가능성/피임 여부 (핵심!)",
+      "keywords": [
+        "임신",
+        "피임",
+        "임신 가능"
+      ],
+      "score": 5
+    },
+    {
+      "category": "A - 질 출혈 (핵심!)",
+      "keywords": [
+        "질 출혈",
+        "출혈",
+        "피가",
+        "하혈",
+        "혈"
+      ],
+      "score": 4
+    },
+    {
+      "category": "C - 어깨 방사통 (복강내출혈 징후)",
+      "keywords": [
+        "어깨",
+        "방사",
+        "퍼지"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 어지러움 (쇼크 징후)",
+      "keywords": [
+        "어지러",
+        "핑",
+        "실신",
+        "쓰러"
+      ],
+      "score": 4
+    },
+    {
+      "category": "O - 발병시기/양상",
+      "keywords": [
+        "언제",
+        "시작",
+        "갑자기"
+      ],
+      "score": 2
+    },
+    {
+      "category": "PMH - 골반염 과거력 (위험인자)",
+      "keywords": [
+        "골반염",
+        "pid",
+        "난관",
+        "과거"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_09": [
+    {
+      "category": "PSH - 복부 수술력 (핵심!)",
+      "keywords": [
+        "수술",
+        "맹장",
+        "충수",
+        "개복",
+        "수술력"
+      ],
+      "score": 7
+    },
+    {
+      "category": "A - 방귀/가스 배출 여부 (핵심!)",
+      "keywords": [
+        "방귀",
+        "가스",
+        "배출",
+        "안 나와"
+      ],
+      "score": 6
+    },
+    {
+      "category": "A - 구토물 양상 (담즙성)",
+      "keywords": [
+        "구토",
+        "토",
+        "초록",
+        "쓴",
+        "담즙"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 배변 여부",
+      "keywords": [
+        "대변",
+        "변",
+        "배변",
+        "못 봄"
+      ],
+      "score": 4
+    },
+    {
+      "category": "O - 발병시기",
+      "keywords": [
+        "언제",
+        "시작",
+        "어제"
+      ],
+      "score": 2
+    },
+    {
+      "category": "C - 통증 양상 (산통)",
+      "keywords": [
+        "쥐어짜",
+        "간헐",
+        "파도",
+        "주기"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_10": [
+    {
+      "category": "L - 옆구리→사타구니 방사통 (핵심!)",
+      "keywords": [
+        "옆구리",
+        "사타구니",
+        "음낭",
+        "방사",
+        "뻗치"
+      ],
+      "score": 6
+    },
+    {
+      "category": "C - 산통 양상 (핵심!)",
+      "keywords": [
+        "간헐",
+        "반복",
+        "파도",
+        "왔다갔다",
+        "쥐어짜"
+      ],
+      "score": 5
+    },
+    {
+      "category": "A - 혈뇨 (핵심!)",
+      "keywords": [
+        "혈뇨",
+        "소변",
+        "붉",
+        "빨갛",
+        "탁"
+      ],
+      "score": 5
+    },
+    {
+      "category": "A - 비뇨기 증상",
+      "keywords": [
+        "빈뇨",
+        "배뇨통",
+        "찌릿",
+        "소변볼 때"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 발열 없음 (신우신염 감별)",
+      "keywords": [
+        "열",
+        "발열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "category": "family - 가족력",
+      "keywords": [
+        "가족",
+        "아버지",
+        "결석",
+        "가족력"
+      ],
+      "score": 3
+    },
+    {
+      "category": "social - 수분 섭취 부족 (위험인자)",
+      "keywords": [
+        "물",
+        "수분",
+        "커피"
+      ],
+      "score": 2
+    }
+  ],
+  "acute_11": [
+    {
+      "category": "F - 기름진 음식 후 발생 (핵심!)",
+      "keywords": [
+        "기름",
+        "고기",
+        "튀김",
+        "지방",
+        "삼겹"
+      ],
+      "score": 6
+    },
+    {
+      "category": "L - 우상복부→등/어깨 방사통 (핵심!)",
+      "keywords": [
+        "등",
+        "어깨",
+        "방사",
+        "퍼지",
+        "뻐근"
+      ],
+      "score": 5
+    },
+    {
+      "category": "D - 지속 시간 (1~5시간 후 호전)",
+      "keywords": [
+        "시간",
+        "지나면",
+        "호전",
+        "나아",
+        "얼마나"
+      ],
+      "score": 4
+    },
+    {
+      "category": "Ex - 반복 에피소드",
+      "keywords": [
+        "이전",
+        "전에도",
+        "반복",
+        "예전"
+      ],
+      "score": 4
+    },
+    {
+      "category": "family - 담석 가족력 (위험인자)",
+      "keywords": [
+        "가족",
+        "어머니",
+        "담석",
+        "쓸개"
+      ],
+      "score": 3
+    },
+    {
+      "category": "PMH - 고지혈증 (위험인자)",
+      "keywords": [
+        "고지혈",
+        "콜레스테롤",
+        "지질"
+      ],
+      "score": 2
+    },
+    {
+      "category": "A - 황달 유무",
+      "keywords": [
+        "황달",
+        "눈 노랗",
+        "소변 노랗"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_12": [
+    {
+      "category": "PMH - 난소 낭종 과거력 (핵심!)",
+      "keywords": [
+        "낭종",
+        "난소",
+        "초음파",
+        "혹",
+        "과거"
+      ],
+      "score": 7
+    },
+    {
+      "category": "O - 활동 중 갑작스러운 발병 (핵심!)",
+      "keywords": [
+        "갑자기",
+        "운동",
+        "체육",
+        "활동",
+        "움직"
+      ],
+      "score": 5
+    },
+    {
+      "category": "female_hx - LMP/임신 가능성",
+      "keywords": [
+        "생리",
+        "lmp",
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 질출혈 없음 (자궁외임신 감별)",
+      "keywords": [
+        "질출혈",
+        "출혈",
+        "피",
+        "하혈"
+      ],
+      "score": 4
+    },
+    {
+      "category": "Ex - 이전 유사 에피소드 (간헐적 염전 의심)",
+      "keywords": [
+        "이전",
+        "전에도",
+        "예전",
+        "반복"
+      ],
+      "score": 4
+    },
+    {
+      "category": "C - 통증 양상",
+      "keywords": [
+        "어떻게",
+        "양상",
+        "쥐어짜",
+        "비트"
+      ],
+      "score": 3
+    }
+  ],
+  "acute_13": [
+    {
+      "category": "C - 찢어지는 등 방사통 (핵심! AAA 전형 증상)",
+      "keywords": [
+        "등",
+        "허리",
+        "방사",
+        "찢어",
+        "퍼지"
+      ],
+      "score": 7
+    },
+    {
+      "category": "O - 갑작스러운 발병",
+      "keywords": [
+        "갑자기",
+        "시작",
+        "갑작스럽"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 저혈압/어지러움 (쇼크 징후)",
+      "keywords": [
+        "어지러",
+        "핑",
+        "기운 없",
+        "쓰러"
+      ],
+      "score": 5
+    },
+    {
+      "category": "PMH - 고혈압 (위험인자)",
+      "keywords": [
+        "고혈압",
+        "혈압",
+        "혈압약"
+      ],
+      "score": 4
+    },
+    {
+      "category": "social - 장기 흡연 (위험인자)",
+      "keywords": [
+        "담배",
+        "흡연",
+        "갑년"
+      ],
+      "score": 3
+    },
+    {
+      "category": "PMH - 고지혈증 (위험인자)",
+      "keywords": [
+        "고지혈",
+        "콜레스테롤",
+        "지질"
+      ],
+      "score": 2
+    }
+  ],
+  "acute_14": [
+    {
+      "category": "A - 황달 (핵심!)",
+      "keywords": [
+        "황달",
+        "노래",
+        "눈",
+        "피부",
+        "공막"
+      ],
+      "score": 6
+    },
+    {
+      "category": "A - 소변 색 변화 (콜라색)",
+      "keywords": [
+        "소변",
+        "진한",
+        "갈색",
+        "콜라",
+        "소변색"
+      ],
+      "score": 5
+    },
+    {
+      "category": "travel - 해외여행/오염 음식 (역학)",
+      "keywords": [
+        "여행",
+        "해외",
+        "동남아",
+        "길거리",
+        "음식"
+      ],
+      "score": 6
+    },
+    {
+      "category": "A - 회색 변 (폐색성 황달 감별)",
+      "keywords": [
+        "변",
+        "회색",
+        "흰색",
+        "색",
+        "대변"
+      ],
+      "score": 4
+    },
+    {
+      "category": "A - 피로감/식욕부진/발열 (전구증상)",
+      "keywords": [
+        "피로",
+        "피곤",
+        "식욕",
+        "밥맛",
+        "열"
+      ],
+      "score": 3
+    },
+    {
+      "category": "PMH - 간염 예방접종 여부",
+      "keywords": [
+        "예방접종",
+        "간염",
+        "백신",
+        "맞은"
+      ],
+      "score": 3
+    },
+    {
+      "category": "social - 음주 (악화 인자)",
+      "keywords": [
+        "술",
+        "음주",
+        "회식"
+      ],
+      "score": 2
+    }
+  ],
+  "acute_15": [
+    {
+      "category": "PMH - 심방세동/항응고제 (핵심!)",
+      "keywords": [
+        "심방세동",
+        "부정맥",
+        "심장",
+        "와파린",
+        "항응고"
+      ],
+      "score": 7
+    },
+    {
+      "category": "A - 통증-진찰 불일치 인지 (Pain out of proportion)",
+      "keywords": [
+        "심하게",
+        "극심",
+        "9점",
+        "죽을 것"
+      ],
+      "score": 5
+    },
+    {
+      "category": "A - 혈변/점액변",
+      "keywords": [
+        "혈변",
+        "검붉",
+        "피",
+        "점액",
+        "변"
+      ],
+      "score": 5
+    },
+    {
+      "category": "Ex - 식후 반복 통증 (장간막 협심증)",
+      "keywords": [
+        "식사 후",
+        "밥 먹고",
+        "식후",
+        "먹으면",
+        "전에도"
+      ],
+      "score": 5
+    },
+    {
+      "category": "O - 갑작스러운 발병 + 고령",
+      "keywords": [
+        "갑자기",
+        "시작",
+        "처음"
+      ],
+      "score": 3
+    },
+    {
+      "category": "PMH - 항응고제 복용 불규칙",
+      "keywords": [
+        "불규칙",
+        "깜빡",
+        "가끔",
+        "빠뜨"
+      ],
+      "score": 3
+    }
+  ],
+  "chronic_01": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_02": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_03": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_04": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_05": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_06": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_07": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 생리/LMP",
+      "keywords": [
+        "생리",
+        "월경",
+        "LMP"
+      ],
+      "score": 4
+    },
+    {
+      "item": "(여) 임신 가능성",
+      "keywords": [
+        "임신",
+        "피임"
+      ],
+      "score": 4
+    }
+  ],
+  "chronic_08": [
+    {
+      "item": "인사/자기소개",
+      "keywords": [
+        "안녕",
+        "학생의사"
+      ],
+      "score": 2
+    },
+    {
+      "item": "진료시간 안내 및 동의",
+      "keywords": [
+        "분 동안",
+        "괜찮으시겠어요"
+      ],
+      "score": 2
+    },
+    {
+      "item": "불편 시 말씀 안내",
+      "keywords": [
+        "불편하시면",
+        "말씀해"
+      ],
+      "score": 1
+    },
+    {
+      "item": "O - 발병 시기",
+      "keywords": [
+        "언제",
+        "얼마나"
+      ],
+      "score": 3
+    },
+    {
+      "item": "L - 위치",
+      "keywords": [
+        "어디",
+        "짚어"
+      ],
+      "score": 3
+    },
+    {
+      "item": "C - 통증 양상",
+      "keywords": [
+        "어떻게 아프",
+        "양상"
+      ],
+      "score": 2
+    },
+    {
+      "item": "C - NRS",
+      "keywords": [
+        "몇 점",
+        "10점"
+      ],
+      "score": 2
+    },
+    {
+      "item": "Co - 경과",
+      "keywords": [
+        "심해지",
+        "변화"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 발열/오한",
+      "keywords": [
+        "열",
+        "오한"
+      ],
+      "score": 3
+    },
+    {
+      "item": "A - 구역/구토",
+      "keywords": [
+        "구역",
+        "구토",
+        "토"
+      ],
+      "score": 2
+    },
+    {
+      "item": "F - 악화/완화 요인",
+      "keywords": [
+        "악화",
+        "완화",
+        "먹으면",
+        "자세"
+      ],
+      "score": 3
+    },
+    {
+      "item": "사회력 - 음주/흡연",
+      "keywords": [
+        "술",
+        "담배",
+        "흡연"
+      ],
+      "score": 2
+    },
+    {
+      "item": "과거력/복용약",
+      "keywords": [
+        "수술",
+        "지병",
+        "약"
+      ],
+      "score": 2
+    },
+    {
+      "item": "A - 체중감소 (악성 감별)",
+      "keywords": [
+        "체중",
+        "살",
+        "빠졌"
+      ],
+      "score": 4
+    },
+    {
+      "item": "A - 혈변/흑색변 (악성 감별)",
+      "keywords": [
+        "혈변",
+        "검은 변",
+        "흑색"
+      ],
+      "score": 4
+    }
+  ]
+};
+
+// ── STATE ───────────────────────────────────────────────────────────────
+let allCases=[], currentCase=null, chatHistory=[], transcript=[];
+let timerInterval=null, totalSeconds=720, sessionActive=false, sessionEnded=false;
+let timerStarted=false;
+let bodyState='sitting', animTO=null, spTO=null;
+let webcamStream=null, faceDetectInterval=null, emotionLog=[];
+let faceApiReady=false, curEmotion='neutral';
+
+// ── GUIDE ───────────────────────────────────────────────────────────────
+function showGuide(){$('guide-overlay').classList.remove('hidden');}
+function closeGuide(){$('guide-overlay').classList.add('hidden');}
+function closeGuideWithKey(){
+  const inp=$('api-key-input');
+  const key=inp?inp.value.trim():'';
+  if(!key){if($('api-key-hint'))$('api-key-hint').style.display='block';return;}
+  ANTHROPIC_API_KEY=key;
+  sessionStorage.setItem('cpx_api_key',key);
+  closeGuide();
+}
+
+// ── LOAD CASES ──────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  showGuide();
+  const saved=sessionStorage.getItem('cpx_api_key');
+  if(saved&&$('api-key-input')){$('api-key-input').value=saved;ANTHROPIC_API_KEY=saved;}
+  allCases=CASE_BANK.cases;
+  const sel=$('caseSelect'); sel.innerHTML='';
+  allCases.forEach((c,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=`[${c.case_id}] ${c.category} — ${c.patient.name}(${c.patient.age}${c.patient.sex})`;
+    sel.appendChild(opt);
+  });
+  previewCase(0);
+  sel.addEventListener('change',()=>previewCase(parseInt(sel.value)));
+  setFace('neutral');
+});
+
+function previewCase(idx){
+  const c=allCases[idx]; if(!c)return;
+  const p=c.patient, v=p.vital_signs||{};
+  $('pt-name').textContent=p.name;
+  $('pt-age').textContent=`${p.sex==='여'?'여':'남'} · ${p.age}세`;
+  $('pt-location').textContent=p.setting||'';
+  $('chief-badge').textContent=`"${c.chief_complaint}"`;
+  ['v-bp','v-pr','v-rr','v-bt'].forEach(id=>{const e=$(id);e.textContent='—';e.classList.remove('warn');});
+  $('v-bp').textContent=v.BP||'—';
+  const pr=v.PR; $('v-pr').textContent=pr||'—';
+  if(pr&&pr>100)$('v-pr').classList.add('warn');
+  $('v-rr').textContent=v.RR||'—';
+  const bt=v.BT; $('v-bt').textContent=bt?`${bt}°C`:'—';
+  if(bt&&bt>37.5)$('v-bt').classList.add('warn');
+  applyPatientAppearance(c);
+}
+
+function applyPatientAppearance(c){
+  const age=c.patient.age, sex=c.patient.sex, isF=sex==='여';
+  let hairFill, hairStroke;
+  if(age>=65){hairFill='#8a8a8a';hairStroke='#7a7a7a';}
+  else if(age>=45){hairFill='#2e1a0e';hairStroke='#2e1a0e';}
+  else{hairFill='#1c0f05';hairStroke='#1c0f05';}
+  const hm=$('s-hair-main'); if(hm)hm.setAttribute('fill',hairFill);
+  const hL=$('s-hair-sL');   if(hL)hL.setAttribute('stroke',hairStroke);
+  const hR=$('s-hair-sR');   if(hR)hR.setAttribute('stroke',hairStroke);
+  const lm=$('l-hair-main'); if(lm)lm.setAttribute('fill',hairFill);
+  const ls=$('l-hair-side'); if(ls)ls.setAttribute('stroke',hairStroke);
+  [$('s-hair-long'),$('s-hair-longR'),$('l-hair-long')].forEach(el=>{
+    if(!el)return;
+    el.style.opacity=isF?'1':'0';
+    el.setAttribute('stroke',hairStroke);
+  });
+  [$('s-lipU'),$('s-mouth'),$('l-mouth')].forEach(el=>{
+    if(el)el.setAttribute('stroke',isF?'#c0527a':'#a0522d');
+  });
+}
+
+// ── START SESSION ───────────────────────────────────────────────────────
+function startSession(){
+  const idx=parseInt($('caseSelect').value||'0');
+  currentCase=allCases[idx]; if(!currentCase)return;
+  chatHistory=[]; transcript=[];
+  sessionActive=true; sessionEnded=false; timerStarted=false;
+  totalSeconds=720;
+  $('timer-display').textContent='12:00'; $('timer-display').classList.remove('warn');
+  clearInterval(timerInterval); $('chat-messages').innerHTML='';
+  setBodyState(null); setFace('neutral');
+  const p=currentCase.patient;
+  addMsg(`[시작] ${p.name} 환자 (${p.age}세 ${p.sex==='여'?'여성':'남성'}) · ${currentCase.category}`,'system');
+  if(p.appearance)addMsg(p.appearance,'system');
+  addMsg('[안내] 첫 메시지를 보내면 12분 타이머가 시작됩니다.','system');
+  $('startBtn').textContent='재시작';
+}
+
+// ── TIMER ───────────────────────────────────────────────────────────────
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    if(sessionEnded)return;
+    if(--totalSeconds<=0){
+      $('timer-display').textContent='00:00'; $('timer-display').classList.add('warn');
+      clearInterval(timerInterval);
+      addMsg('[시스템] 시험 시간이 종료되었습니다.','system');
+      sessionEnded=true; return;
+    }
+    const m=String(Math.floor(totalSeconds/60)).padStart(2,'0');
+    const s=String(totalSeconds%60).padStart(2,'0');
+    $('timer-display').textContent=`${m}:${s}`;
+    if(totalSeconds<=120)$('timer-display').classList.add('warn');
+  },1000);
+}
+
+// ── BODY POSITION ───────────────────────────────────────────────────────
+const POS_RULES=[
+  {re:/누워|눕|바로 누|드러누/, state:'lying',     badge:'🛏 누운 자세',     viewBox:'0 0 480 200'},
+  {re:/앉[아으]|일어나|다시 앉/, state:'sitting',  badge:'🪑 앉은 자세',    viewBox:'0 0 280 400'},
+  {re:/다리.*(들|올려|올리|들어주)|직거상|slr/i,   state:'leg-raise', badge:'🦵 다리 올리기', viewBox:'0 0 480 200'},
+  {re:/무릎.*(구부|접어|굽혀)|양 무릎/,            state:'knee-bend', badge:'🦴 무릎 구부리기', viewBox:'0 0 480 200'},
+];
+function detectPosition(text){for(const r of POS_RULES){if(r.re.test(text))return r;}return null;}
+function setBodyState(rule){
+  if(!rule){
+    $('char-svg').setAttribute('viewBox','0 0 280 400'); $('char-svg').className='char-svg sitting';
+    $('group-sitting').style.opacity='1';
+    ['group-lying','group-leg-raise','group-knee-bend'].forEach(id=>$(id).style.opacity='0');
+    $('state-badge').textContent='🪑 앉은 자세'; $('avatar-speech').style.bottom='440px';
+    bodyState='sitting'; return;
+  }
+  const{state,badge,viewBox}=rule; bodyState=state;
+  $('char-svg').setAttribute('viewBox',viewBox);
+  $('char-svg').className=`char-svg ${state==='sitting'?'sitting':'lying'}`;
+  $('group-sitting').style.opacity=state==='sitting'?'1':'0';
+  $('group-lying').style.opacity=(state==='lying'||state==='leg-raise'||state==='knee-bend')?'1':'0';
+  $('group-leg-raise').style.opacity=state==='leg-raise'?'1':'0';
+  $('group-knee-bend').style.opacity=state==='knee-bend'?'1':'0';
+  ['group-sitting','group-lying','group-leg-raise','group-knee-bend'].forEach(id=>$(id).style.pointerEvents='none');
+  const b=$('state-badge'); b.textContent=badge; b.classList.add('changed');
+  setTimeout(()=>b.classList.remove('changed'),1500);
+  $('avatar-speech').style.bottom=state==='sitting'?'440px':'220px';
+}
+
+// ── ANIMATIONS ──────────────────────────────────────────────────────────
+function triggerAnim(cls,ms=600){
+  const bg=$('body-group'); if(!bg)return;
+  bg.className=`body-anim ${cls}`; clearTimeout(animTO);
+  animTO=setTimeout(()=>{bg.className='body-anim idle';},ms);
+}
+function triggerFlinch(){triggerAnim('flinch',460);}
+
+// ── FACE EXPRESSIONS ────────────────────────────────────────────────────
+function setFace(emotion,intensity='low'){
+  const s={browL:$('s-browL'),browR:$('s-browR'),elidL:$('s-elidL'),elidR:$('s-elidR'),
+    mouth:$('s-mouth'),lipU:$('s-lipU'),teeth:$('s-teeth'),tongue:$('s-tongue'),
+    blL:$('s-blushL'),blR:$('s-blushR'),sw1:$('s-sweat1'),sw2:$('s-sweat2'),pz:$('s-pain-zone')};
+  const l={browL:$('l-browL'),browR:$('l-browR'),elidL:$('l-elidL'),elidR:$('l-elidR'),
+    mouth:$('l-mouth'),teeth:$('l-teeth'),blL:$('l-blushL'),blR:$('l-blushR'),
+    sw1:$('l-sweat1'),pz:$('l-pain-zone')};
+  const badge=$('emotion-badge');
+  const rst=e=>{if(!e)return;[e.sw1,e.sw2,e.pz].forEach(x=>{if(x)x.style.opacity='0';});
+    if(e.teeth)e.teeth.style.opacity='0';if(e.tongue)e.tongue.style.opacity='0';
+    if(e.blL)e.blL.style.opacity='0';if(e.blR)e.blR.style.opacity='0';};
+  rst(s);rst(l);
+  if(emotion==='pain'){
+    s.browL?.setAttribute('d','M88 111 Q102 99 116 106');s.browR?.setAttribute('d','M124 106 Q138 99 152 111');
+    l.browL?.setAttribute('d','M26 116 Q38 108 50 113');l.browR?.setAttribute('d','M54 113 Q66 108 78 116');
+    if(intensity==='high'){
+      s.elidL?.setAttribute('d','M88 122 Q102 117 116 122');s.elidR?.setAttribute('d','M124 122 Q138 117 152 122');
+      l.elidL?.setAttribute('d','M28 120 Q38 115 48 120');l.elidR?.setAttribute('d','M52 120 Q62 115 72 120');
+      s.mouth?.setAttribute('d','M107 162 Q120 176 133 162');s.lipU?.setAttribute('d','M107 157 Q114 150 120 153 Q126 150 133 157');
+      l.mouth?.setAttribute('d','M36 146 Q52 154 68 146');
+      if(s.teeth)s.teeth.style.opacity='1';if(s.tongue)s.tongue.style.opacity='0.7';if(l.teeth)l.teeth.style.opacity='1';
+      if(s.sw1)s.sw1.style.opacity='1';if(s.sw2)s.sw2.style.opacity='1';if(l.sw1)l.sw1.style.opacity='1';
+      if(s.pz)s.pz.style.opacity='1';if(l.pz)l.pz.style.opacity='1';
+      if(s.blL)s.blL.style.opacity='.5';if(s.blR)s.blR.style.opacity='.5';
+      if(l.blL)l.blL.style.opacity='.5';if(l.blR)l.blR.style.opacity='.5';
+      badge.textContent='😣 극심한 통증';triggerAnim('hunch',1500);
+    }else if(intensity==='mid'){
+      s.elidL?.setAttribute('d','M88 122 Q102 113 116 122');s.elidR?.setAttribute('d','M124 122 Q138 113 152 122');
+      l.elidL?.setAttribute('d','M28 120 Q38 113 48 120');l.elidR?.setAttribute('d','M52 120 Q62 113 72 120');
+      s.mouth?.setAttribute('d','M107 160 Q120 172 133 160');s.lipU?.setAttribute('d','M107 157 Q114 152 120 154 Q126 152 133 157');
+      l.mouth?.setAttribute('d','M36 145 Q52 152 68 145');
+      if(s.sw1)s.sw1.style.opacity='0.8';if(l.sw1)l.sw1.style.opacity='0.8';
+      if(s.pz)s.pz.style.opacity='0.7';if(l.pz)l.pz.style.opacity='0.7';
+      if(s.blL)s.blL.style.opacity='.4';if(s.blR)s.blR.style.opacity='.4';
+      if(l.blL)l.blL.style.opacity='.4';if(l.blR)l.blR.style.opacity='.4';
+      badge.textContent='😖 통증';triggerAnim('pain',600);
+    }else{
+      s.elidL?.setAttribute('d','M88 122 Q102 115 116 122');s.elidR?.setAttribute('d','M124 122 Q138 115 152 122');
+      s.mouth?.setAttribute('d','M108 160 Q120 169 132 160');l.mouth?.setAttribute('d','M36 144 Q52 150 68 144');
+      badge.textContent='😣 통증';triggerAnim('pain',500);
+    }
+  }else if(emotion==='worry'){
+    s.browL?.setAttribute('d','M88 108 Q99 99 116 105');s.browR?.setAttribute('d','M124 105 Q141 99 152 108');
+    l.browL?.setAttribute('d','M26 114 Q37 107 50 112');l.browR?.setAttribute('d','M54 112 Q67 107 78 114');
+    s.elidL?.setAttribute('d','M88 122 Q102 111 116 122');s.elidR?.setAttribute('d','M124 122 Q138 111 152 122');
+    s.mouth?.setAttribute('d','M108 162 Q120 155 132 162');l.mouth?.setAttribute('d','M37 144 Q52 139 67 144');
+    badge.textContent='😟 걱정';triggerAnim('worry',1300);
+  }else if(emotion==='nausea'){
+    s.elidL?.setAttribute('d','M88 122 Q102 113 116 122');s.elidR?.setAttribute('d','M124 122 Q138 113 152 122');
+    s.mouth?.setAttribute('d','M108 162 Q114 156 120 159 Q126 156 132 162');
+    if(s.blL)s.blL.style.opacity='.2';if(s.blR)s.blR.style.opacity='.2';
+    badge.textContent='🤢 구역감';triggerAnim('hunch',1100);
+  }else{
+    s.browL?.setAttribute('d','M88 106 Q102 99 116 104');s.browR?.setAttribute('d','M124 104 Q138 99 152 106');
+    l.browL?.setAttribute('d','M26 112 Q38 106 50 110');l.browR?.setAttribute('d','M54 110 Q66 106 78 112');
+    s.elidL?.setAttribute('d','M88 122 Q102 110 116 122');s.elidR?.setAttribute('d','M124 122 Q138 110 152 122');
+    l.elidL?.setAttribute('d','M28 120 Q38 111 48 120');l.elidR?.setAttribute('d','M52 120 Q62 111 72 120');
+    s.mouth?.setAttribute('d','M105 159 Q120 170 135 159');s.lipU?.setAttribute('d','M106 158 Q113 153 120 155 Q127 153 134 158');
+    l.mouth?.setAttribute('d','M35 143 Q52 150 69 143');badge.textContent='😐 안정';
+  }
+  curEmotion=emotion;
+}
+
+// ── SPEECH ──────────────────────────────────────────────────────────────
+function showSpeech(text){
+  const el=$('avatar-speech');
+  el.textContent=text.replace(/\[.*?\]\s*/g,'').trim().slice(0,55);
+  el.classList.add('show');clearTimeout(spTO);
+  spTO=setTimeout(()=>el.classList.remove('show'),3200);
+}
+
+// ── CHAT ────────────────────────────────────────────────────────────────
+function addMsg(text,role,type='normal'){
+  const w=$('chat-messages'),d=document.createElement('div');
+  d.className=`msg ${role==='system'?'patient':role}`;
+  if(role!=='system'){const ch=document.createElement('div');ch.className=`avatar-chip ${role}`;ch.textContent=role==='patient'?'환':'학';d.appendChild(ch);}
+  const b=document.createElement('div');b.className='bubble';
+  if(type==='exam')b.classList.add('exam-bubble');
+  if(type==='result')b.classList.add('exam-result');
+  if(role==='system')b.classList.add('system-msg');
+  b.textContent=text;d.appendChild(b);w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function showTyping(){
+  const w=$('chat-messages'),d=document.createElement('div');d.className='msg patient';d.id='typing-ind';
+  const ch=document.createElement('div');ch.className='avatar-chip patient';ch.textContent='환';
+  const dots=document.createElement('div');dots.className='typing-dots';dots.innerHTML='<span></span><span></span><span></span>';
+  d.appendChild(ch);d.appendChild(dots);w.appendChild(d);w.scrollTop=w.scrollHeight;
+}
+function removeTyping(){const e=$('typing-ind');if(e)e.remove();}
+
+// ── EXAM DETECTION ──────────────────────────────────────────────────────
+function detectExam(text){
+  if(/청진/.test(text))return '복부 청진';
+  if(/타진/.test(text))return '복부 타진';
+  if(/촉진/.test(text))return '복부 촉진';
+  if(/반발|반동/.test(text))return '압통/반발통';
+  if(/murphy|머피/i.test(text))return "Murphy's sign";
+  if(/cvat|등 두드/i.test(text))return 'CVAT';
+  if(/시진/.test(text))return '복부 시진';
+  if(/psoas/i.test(text))return 'Psoas sign';
+  if(/obturator/i.test(text))return 'Obturator sign';
+  if(/dre|직장수지/i.test(text))return 'DRE';
+  return null;
+}
+
+// ── CLAUDE API ──────────────────────────────────────────────────────────
+async function callClaude(system,messages,maxTokens=600){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_API_KEY,
+      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:ANTHROPIC_MODEL,max_tokens:maxTokens,system,messages}),
+  });
+  if(!res.ok){const e=await res.text();throw new Error(`API ${res.status}: ${e.slice(0,120)}`);}
+  return(await res.json()).content[0].text;
+}
+
+// ── PATIENT SYSTEM PROMPT ────────────────────────────────────────────────
+function buildPatientSystemPrompt(){
+  const c=currentCase,p=c.patient;
+  return `당신은 CPX 시험 환자 역할을 합니다.
+
+[환자 기본정보]
+이름: ${p.name} | 나이: ${p.age}세 | 성별: ${p.sex==='여'?'여성':'남성'}
+주소(CC): ${c.chief_complaint}
+장소: ${p.setting||''}
+
+[병력 - 학생이 질문할 때만 해당 정보 제공]
+${JSON.stringify(c.history,null,2)}
+
+[신체진찰 결과 - 진찰 요청 시만 제공]
+${JSON.stringify(c.physical_exam,null,2)}
+
+[비언어적 표현]
+${JSON.stringify(c.nonverbal_expressions,null,2)}
+
+[규칙]
+1. ${(c.unknown_responses&&c.unknown_responses.rule)||'시나리오에 없는 정보는 모른다고 답할 것'}
+2. 신체진찰은 "(XXX 시작하겠습니다)" 형태 요청 시 physical_exam 결과를 안내
+3. 환자 감정과 비언어적 표현 자연스럽게 표현
+4. 의학 용어 사용 금지, 일반 환자처럼 말하기
+5. 답변은 1~3문장으로 간결하게
+6. 한국어로만 응답`;
+}
+
+// ── SEND MESSAGE ────────────────────────────────────────────────────────
+async function sendMessage(){
+  if(sessionEnded||!currentCase||!sessionActive)return;
+  const inp=$('chat-input');const text=inp.value.trim();if(!text)return;
+  inp.value='';autoResize(inp);
+  if(!timerStarted){timerStarted=true;startTimer();}
+  const isExam=/^\(/.test(text)||!!detectExam(text);
+  addMsg(text,'doctor',isExam?'exam':'normal');
+  transcript.push(text);chatHistory.push({role:'user',content:text});
+  const posRule=detectPosition(text);
+  if(posRule){setBodyState(posRule);if(posRule.state!=='sitting')addMsg(`[${posRule.badge}으로 전환됩니다]`,'system');}
+  setLoading(true);showTyping();
+  try{
+    const reply=await callClaude(buildPatientSystemPrompt(),chatHistory,600);
+    removeTyping();chatHistory.push({role:'assistant',content:reply});
+    const emo=detectEmoFromReply(reply);setFace(emo.emotion,emo.intensity);
+    if(isExam)triggerFlinch();
+    addMsg(reply,'patient');showSpeech(reply);
+    const tag=reply.match(/\(([^)]+)\)\s*$/);
+    if(tag)setTimeout(()=>addMsg(`📋 ${tag[1]}`,'patient','result'),400);
+  }catch(e){removeTyping();addMsg(`[오류] ${e.message}`,'system');}
+  finally{setLoading(false);}
+}
+function detectEmoFromReply(text){
+  if(/아파|아프|통증|쥐어|찌르|죽을|식은땀|움찔|아!/.test(text))
+    return{emotion:'pain',intensity:/극심|8점|9점|너무너무|못 참/.test(text)?'high':'mid'};
+  if(/메스|구역|토할|울렁/.test(text))return{emotion:'nausea',intensity:'mid'};
+  if(/걱정|무서|불안|혹시|큰 병/.test(text))return{emotion:'worry',intensity:'low'};
+  return{emotion:'neutral',intensity:'low'};
+}
+function setLoading(on){$('send-btn').disabled=on;}
+
+// ── SCORING ─────────────────────────────────────────────────────────────
+async function endSession(){
+  if(sessionEnded&&$('modal').classList.contains('show')){closeModal();return;}
+  if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
+  if(sessionEnded){$('modal').classList.add('show');return;}
+  sessionEnded=true;clearInterval(timerInterval);clearInterval(faceDetectInterval);
+  $('modal').classList.add('show');$('score-rows').innerHTML='<span class="spinner"></span>채점 중...';
+  if(currentCase){$('diagnosis-text').textContent=currentCase.hidden_diagnosis||'—';$('modal-diagnosis').style.display='block';}
+  if(!currentCase||transcript.length===0){
+    $('score-rows').innerHTML='<div style="color:#64748b;font-size:13px">대화 기록이 없습니다.</div>';
+    buildFaceReport();return;
+  }
+  try{
+    const items=KEY_ITEMS[currentCase.case_id]||[];
+    const sc=currentCase.scoring||{};
+    const doctorText=transcript.join(' | ');
+    const prompt=`CPX 채점 시스템입니다. 학생 발화를 채점하세요.
+
+[병력청취 체크리스트]
+${JSON.stringify(items,null,2)}
+
+[신체진찰 예상기술]
+${JSON.stringify(sc.expected_skills||[],null,2)}
+
+[임상추론 - 필요검사]
+${JSON.stringify(sc.required_tests||[],null,2)}
+
+[임상추론 - 치료계획]
+${JSON.stringify(sc.required_treatments||[],null,2)}
+
+[학생 발화]
+${doctorText}
+
+채점기준:
+- history(병력청취,max40): 체크리스트 keywords가 발화에 포함되면 score 부여
+- exam(신체진찰,max20): expected_skills 수행 여부
+- ppi(환자소통,max20): 인사/자기소개/공감/배려 등
+- reasoning(임상추론,max20): required_tests/treatments 언급 여부
+
+순수 JSON으로만 응답(마크다운 없이):
+{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"한 줄 피드백"}`;
+    const raw=await callClaude('CPX 채점관. 순수 JSON만 출력. 마크다운 코드블록 사용 금지.',[{role:'user',content:prompt}],2000);
+    const cleaned=raw.replace(/```json|```/g,'').trim();
+    const si=cleaned.indexOf('{'),ei=cleaned.lastIndexOf('}');
+    if(si===-1||ei===-1)throw new Error('JSON 없음: '+cleaned.slice(0,200));
+    renderScore(JSON.parse(cleaned.slice(si,ei+1)));
+  }catch(e){$('score-rows').innerHTML=`<div style="color:#ef4444;font-size:13px">채점 오류: ${e.message}</div>`;}
+  buildFaceReport();
+}
+
+function renderScore(r){
+  const secs=[{label:'병력청취',k:'history',mk:'history_max'},{label:'신체진찰',k:'exam',mk:'exam_max'},
+    {label:'PPI(환자소통)',k:'ppi',mk:'ppi_max'},{label:'임상추론',k:'reasoning',mk:'reasoning_max'}];
+  let html='';
+  for(const{label,k,mk}of secs){
+    const earned=+(r[k]||0),mx=+(r[mk]||0),pct=mx>0?Math.round(earned/mx*100):0;
+    html+=`<div class="score-row"><span>${label}</span><span class="score-val">${earned} / ${mx}점</span></div>
+<div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>`;
+  }
+  const tot=+(r.total||0),tp=Math.round(tot);
+  html+=`<div class="score-row" style="border-top:1px solid #334155;margin-top:8px;padding-top:8px">
+<span style="font-weight:700">총점</span><span class="score-val" style="font-size:16px">${tot} / 100점 (${tp}%)</span></div>`;
+  if(r.feedback)html+=`<div style="margin-top:10px;font-size:13px;color:#94a3b8;line-height:1.7">${r.feedback}</div>`;
+  $('score-rows').innerHTML=html;
+  setTimeout(()=>{document.querySelectorAll('.score-bar').forEach((b,i)=>{const w=b.style.width;b.style.width='0';setTimeout(()=>b.style.width=w,100+i*80);});},100);
+}
+
+function buildFaceReport(){
+  const barsEl=$('face-bars'),commentEl=$('face-comment');
+  if(emotionLog.length===0){
+    barsEl.innerHTML='<div style="font-size:12px;color:#475569">카메라가 꺼져 있어 분석을 할 수 없습니다.<br>다음엔 📷를 눌러 카메라를 켜보세요!</div>';
+    commentEl.textContent='';return;
+  }
+  const tot={neutral:0,happy:0,surprised:0,fearful:0,disgusted:0,angry:0,sad:0};
+  emotionLog.forEach(({expr})=>{Object.entries(expr).forEach(([k,v])=>{if(tot[k]!==undefined)tot[k]+=v;});});
+  const sum=Object.values(tot).reduce((a,b)=>a+b,0);
+  const pct={};Object.entries(tot).forEach(([k,v])=>pct[k]=Math.round(v/sum*100));
+  const labels={neutral:'😐 안정',happy:'😊 긍정',surprised:'😲 놀람',fearful:'😨 긴장',disgusted:'😤 당황',angry:'😠 답답',sad:'😢 슬픔'};
+  const colors={neutral:'#64748b',happy:'#22c55e',surprised:'#f59e0b',fearful:'#6366f1',disgusted:'#f97316',angry:'#ef4444',sad:'#60a5fa'};
+  const sorted=Object.entries(pct).sort((a,b)=>b[1]-a[1]);
+  barsEl.innerHTML=sorted.slice(0,5).map(([k,p])=>`<div class="emo-bar-row"><span style="width:72px;color:#94a3b8">${labels[k]}</span><div class="emo-bar-track"><div class="emo-bar-fill" style="width:${p}%;background:${colors[k]}"></div></div><span style="width:30px;text-align:right;color:#64748b">${p}%</span></div>`).join('');
+  const fp=(pct.fearful||0)+(pct.surprised||0),comments=[];
+  if(fp>40)comments.push('⚠️ 긴장/불안한 표정이 많았습니다.');
+  if((pct.neutral||0)>55)comments.push('✅ 전반적으로 안정된 표정 유지.');
+  if((pct.happy||0)>20)comments.push('✅ 공감하는 따뜻한 표정이 관찰됐습니다.');
+  if((pct.disgusted||0)>15||(pct.angry||0)>10)comments.push('⚠️ 당황하거나 불편한 표정이 감지됐습니다.');
+  commentEl.textContent=comments.join(' ')||'표정 분석 완료.';
+}
+function closeModal(){$('modal').classList.remove('show');}
+
+// ── WEBCAM ──────────────────────────────────────────────────────────────
+async function togglePip(){
+  if(webcamStream)return;
+  try{
+    webcamStream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    const vid=$('webcam-video');vid.srcObject=webcamStream;vid.style.display='block';
+    $('pip-off').style.display='none';$('face-snap').srcObject=webcamStream;
+    await loadFaceModels();startFaceDetection();
+  }catch(e){$('pip-off').innerHTML='<span>🚫</span>카메라 거부됨';}
+}
+async function loadFaceModels(){
+  try{
+    const MURL='https://justadudewhohacks.github.io/face-api.js/models';
+    await Promise.all([faceapi.nets.tinyFaceDetector.loadFromUri(MURL),faceapi.nets.faceExpressionNet.loadFromUri(MURL)]);
+    faceApiReady=true;
+  }catch(e){}
+}
+function startFaceDetection(){
+  if(!faceApiReady)return;
+  faceDetectInterval=setInterval(async()=>{
+    const vid=$('webcam-video');if(!vid||vid.readyState<2)return;
+    try{
+      const result=await faceapi.detectSingleFace(vid,new faceapi.TinyFaceDetectorOptions({inputSize:128})).withFaceExpressions();
+      if(result){
+        emotionLog.push({ts:Date.now(),expr:result.expressions});
+        const dom=Object.entries(result.expressions).sort((a,b)=>b[1]-a[1])[0][0];
+        const map={neutral:'😐',happy:'😊',surprised:'😲',fearful:'😨',disgusted:'😤',angry:'😠',sad:'😢'};
+        $('student-emo').textContent=map[dom]||'😐';
+      }
+    }catch(e){}
+  },1500);
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────────
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function insertExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;$('chat-input').focus();}
+function quickExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;sendMessage();}
+function quickCmd(t){$('chat-input').value=t;sendMessage();}
+</script>
+</body>
+</html>

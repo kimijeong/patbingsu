@@ -1,0 +1,208 @@
+{
+  "scenario_id": "acute_03",
+  "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통)",
+  "category": "급성 복통",
+  "hidden_diagnosis": "만성 췌장염",
+  "top_diagnoses": [
+    "만성 췌장염",
+    "급성 췌장염",
+    "위궤양"
+  ],
+  "patient": {
+    "name": "정민성",
+    "age": 51,
+    "gender": "남",
+    "vital_signs": {
+      "BP": "124/82",
+      "PR": 88,
+      "RR": 17,
+      "BT": 37.3
+    },
+    "setting": "응급실",
+    "appearance": "[응급실에서 진료 진행]"
+  },
+  "chief_complaint": "배가 아파요",
+  "history": {
+    "O_onset": "오늘 아침",
+    "L_location": "명치 부위",
+    "D_duration_course": "지속",
+    "Co_change": "큰 차이 없음",
+    "Ex_prior_episode": "이전에도 2차례",
+    "C_character": "쥐어 짜는듯한 통증, NRS 6~8점, 방사통(+, 등)",
+    "A_associated": {
+      "전신": "발열/식은땀/체중감소/오한/피로감(-/-/+/-/+, 2달간 8kg 감소)",
+      "소화기": "구역/구토/식욕부진/변비/설사(-/-/+/-/-), 지방변(+), 황달(-), 혈변(-)",
+      "비뇨": "빈뇨/절박뇨/야간뇨/배뇨통(+, 소변이 자주 마려움/-/-/-)",
+      "내분비": "다음(+)/다뇨(+)/다갈(+)"
+    },
+    "F_factor": "식후/음주 후 심해지는 통증, 통증으로 인해 식사량 감소, 자세에 따른 변화(+, 앞으로 숙이면 완화), 어제 저녁 회식에서 음주함",
+    "E_prior_exam": "2년 전 내시경 모두 받음, 위염 있어 약 처방 받음",
+    "PSH": "-",
+    "PMH": "DM/TB/HTN/간염(-/-/-/-), 전립선 비대증(+)",
+    "medication": "전립선 비대증약",
+    "social": "술(+, 1주일 3~4번, 하루 소주 2병, 최근 줄였음), 담배(+, 30갑년, 최근 금연), 직업(회사원)",
+    "family": "-",
+    "female_hx": null
+  },
+  "physical_exam": {
+    "General": "V/S 확인",
+    "HEENT": "구강 탈수 소견(-), 결막/공막 정상",
+    "Abdomen": "복부 시/청/타/촉(-/-/-/+), 명치 부위 Td/rTd(+/-), DRE/CVAT(-/-)",
+    "Extremity": "피부 긴장도/오목 부종(-/-)"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[응급실에서 진료 진행]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+    "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+    "baseline_emotion": "불안",
+    "patient_question": "심각한 병일까요?"
+  },
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+  },
+  "scoring": {
+    "required_tests": [
+      "복부 CT",
+      "복부초음파",
+      "혈중 amylase/lipase 농도"
+    ],
+    "required_treatments": [
+      "진통제",
+      "수분 공급 및 안정",
+      "소화효소 보충"
+    ],
+    "expected_skills": [
+      "체중감소/지방변/다음다뇨다갈 등 췌장 기능 관련 문진"
+    ],
+    "history_checklist": [
+      {
+        "item": "인사/자기소개",
+        "keywords": [
+          "안녕",
+          "학생의사"
+        ],
+        "score": 2
+      },
+      {
+        "item": "진료시간 안내 및 동의",
+        "keywords": [
+          "분 동안",
+          "괜찮으시겠어요"
+        ],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀 안내",
+        "keywords": [
+          "불편하시면",
+          "말씀해"
+        ],
+        "score": 1
+      },
+      {
+        "item": "O - 발병 시기",
+        "keywords": [
+          "언제",
+          "얼마나"
+        ],
+        "score": 3
+      },
+      {
+        "item": "L - 위치",
+        "keywords": [
+          "어디",
+          "짚어"
+        ],
+        "score": 3
+      },
+      {
+        "item": "C - 통증 양상",
+        "keywords": [
+          "어떻게 아프",
+          "양상"
+        ],
+        "score": 2
+      },
+      {
+        "item": "C - NRS",
+        "keywords": [
+          "몇 점",
+          "10점"
+        ],
+        "score": 2
+      },
+      {
+        "item": "Co - 경과",
+        "keywords": [
+          "심해지",
+          "변화"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 발열/오한",
+        "keywords": [
+          "열",
+          "오한"
+        ],
+        "score": 3
+      },
+      {
+        "item": "A - 구역/구토",
+        "keywords": [
+          "구역",
+          "구토",
+          "토"
+        ],
+        "score": 2
+      },
+      {
+        "item": "F - 악화/완화 요인",
+        "keywords": [
+          "악화",
+          "완화",
+          "먹으면",
+          "자세"
+        ],
+        "score": 3
+      },
+      {
+        "item": "사회력 - 음주/흡연",
+        "keywords": [
+          "술",
+          "담배",
+          "흡연"
+        ],
+        "score": 2
+      },
+      {
+        "item": "과거력/복용약",
+        "keywords": [
+          "수술",
+          "지병",
+          "약"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 응급증상(두근/어지럼/소변감소)",
+        "keywords": [
+          "두근",
+          "어지럼",
+          "소변"
+        ],
+        "score": 4
+      },
+      {
+        "item": "L - 통증 이동",
+        "keywords": [
+          "이동",
+          "처음에는",
+          "옮겼"
+        ],
+        "score": 3
+      }
+    ]
+  }
+}

@@ -1,0 +1,313 @@
+{
+  "scenario_id": "IBS_01",
+  "category": "만성복통/소화불량",
+  "hidden_diagnosis": "과민성 장증후군 (IBS)",
+
+  "patient": {
+    "name": "최지우",
+    "age": 23,
+    "gender": "여",
+    "address": "서울시 서대문구 신촌동",
+    "vital_signs": {
+      "BP": "110/70",
+      "PR": 76,
+      "RR": 16,
+      "BT": 36.6,
+      "SpO2": 99
+    },
+    "appearance": "[다소 피곤해 보이는 표정으로 앉아 있음. 특별히 급성 병색은 아님]"
+  },
+
+  "chief_complaint": {
+    "initial_response": "배가 자꾸 아프고 설사를 자주 해서요. 오랫동안 그랬는데 요즘 더 심해진 것 같아서 왔어요.",
+    "volunteered_extras": [
+      "화장실을 너무 자주 가서 일상생활이 좀 힘들어요"
+    ]
+  },
+
+  "history": {
+    "O_onset": {
+      "when": "한 2년 전부터인 것 같아요. 대학 입학하고 나서부터요",
+      "how": "서서히",
+      "situation": "처음에는 그냥 과민한가 싶었는데 계속 그래요"
+    },
+    "L_location": {
+      "primary": "[아랫배 전체를 손으로 감싸며] 여기 아랫배 전체요. 특히 왼쪽이 좀 더 아픈 것 같아요",
+      "radiation": "없어요",
+      "migration": "없어요"
+    },
+    "D_duration": {
+      "frequency": "하루에 설사를 3~4번 하는 날도 있어요",
+      "duration_each": "배가 아프다가 화장실 다녀오면 좀 나아져요",
+      "pattern": "매일은 아닌데 스트레스 받으면 특히 심해요"
+    },
+    "Co_course": {
+      "progression": "좋아졌다 나빠졌다"
+    },
+    "Ex_experience": {
+      "previous_episode": true,
+      "previous_detail": "계속 이러다가 나아졌다가 반복해요. 병원은 처음 와봐요"
+    },
+    "C_character": {
+      "quality": "쥐어짜는 것 같이 아파요. 경련 오는 느낌이요",
+      "nrs": 5
+    },
+    "A_associated": {
+      "emergency": {
+        "palpitation": false,
+        "dyspnea": false,
+        "dizziness": false,
+        "decreased_urine": false
+      },
+      "systemic": {
+        "fever": false,
+        "chills": false,
+        "fatigue": true,
+        "fatigue_response": "좀 피곤한 편이에요, 요즘 잠도 잘 못 자고",
+        "weight_loss": false,
+        "night_sweats": false
+      },
+      "GI": {
+        "anorexia": false,
+        "nausea": false,
+        "vomiting": false,
+        "diarrhea": true,
+        "diarrhea_response": "네, 설사를 자주 해요. 물처럼 나올 때도 있고",
+        "constipation": true,
+        "constipation_response": "설사하다가 갑자기 변비처럼 변하는 경우도 있어요",
+        "hematemesis": false,
+        "melena": false,
+        "hematochezia": false,
+        "bloating": true,
+        "bloating_response": "배가 빵빵하게 부르고 가스도 많이 차요",
+        "jaundice": false,
+        "fatty_stool": false
+      },
+      "urinary": {
+        "dysuria": false,
+        "hematuria": false,
+        "frequency": false
+      },
+      "gynecologic": {
+        "vaginal_bleeding": false,
+        "vaginal_discharge": false,
+        "LMP": "생리는 규칙적이에요, 지난주에 했어요",
+        "pregnancy_possible": false
+      }
+    },
+    "F_factor": {
+      "aggravating": ["스트레스 받을 때", "밥 먹고 나서", "커피 마시면"],
+      "aggravating_response": "시험 기간이나 스트레스 받으면 훨씬 심해져요. 커피 마시면 바로 화장실 가고 싶어져요",
+      "relieving": ["화장실 다녀오면"],
+      "relieving_response": "배가 아프다가 화장실 다녀오면 좀 나아요",
+      "posture_effect": "자세는 별로 관계없는 것 같아요"
+    }
+  },
+
+  "social_history": {
+    "alcohol": {
+      "drinks": true,
+      "amount": "가끔 친구들이랑 맥주 한두 잔 정도요",
+      "recent_binge": false
+    },
+    "smoking": {
+      "smokes": false
+    },
+    "diet": "불규칙하게 먹어요. 학교 근처 자극적인 음식 자주 먹고, 커피를 하루 두세 잔 마셔요",
+    "recent_food": "오늘은 점심에 매운 음식 먹었어요",
+    "occupation": "대학교 3학년이에요",
+    "exercise": "거의 못 해요, 너무 바빠서",
+    "stress": "요즘 학교 과제랑 취업 준비로 스트레스가 많아요",
+    "travel": "여행은 최근에 없었어요"
+  },
+
+  "past_medical_history": {
+    "conditions": [],
+    "conditions_response": "따로 지병은 없어요",
+    "surgeries": [],
+    "surgeries_response": "수술은 없어요",
+    "medications": [],
+    "medications_response": "약은 안 먹어요",
+    "allergies": "없어요",
+    "vaccinations": {
+      "hep_A": true,
+      "hep_B": true
+    },
+    "health_checkup": "작년에 건강검진 했는데 정상이었어요. 내시경은 안 해봤어요"
+  },
+
+  "family_history": {
+    "relevant": ["어머니 과민성 장증후군"],
+    "response": "어머니도 배 자주 아프다고 하시더라고요. 비슷한 것 같아요"
+  },
+
+  "physical_exam": {
+    "general": "전반적으로 양호, 급성 병색 없음",
+    "eyes": "결막 창백 없음, 공막 황달 없음",
+    "mouth": "탈수 소견 없음",
+    "lymph_nodes": "촉지 안 됨",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 약간 항진",
+      "percussion": "특이소견 없음",
+      "palpation": "좌하복부 경미한 압통. 반동 압통 없음",
+      "tenderness_location": "좌하복부 경미",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "rovsing_sign": false,
+      "mcburney_point": false,
+      "obturator_sign": false,
+      "psoas_sign": false,
+      "CVAT": false
+    },
+    "DRE": "특이소견 없음"
+  },
+
+  "nonverbal_expressions": {
+    "on_entry": "[피곤해 보이는 얼굴로 들어옴. 특별한 통증 표현은 없음]",
+    "on_pain_question": "[살짝 얼굴을 찡그리며] 네, 이쪽이요 [아랫배를 가볍게 만짐]",
+    "on_stress_question": "[한숨을 쉬며] 요즘 많이 힘들긴 해요...",
+    "on_bad_news": "[걱정스러운 표정으로] 큰 병은 아니죠?",
+    "on_diagnosis": "[안도하면서도 의아한 표정으로] 과민성이요? 스트레스 때문인 건가요?",
+    "baseline_emotion": "초조함"
+  },
+
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "specific_unknowns": [
+      {
+        "question_pattern": "혈변",
+        "response": "피는 본 적 없어요"
+      },
+      {
+        "question_pattern": "체중",
+        "response": "체중은 그대로인 것 같아요"
+      },
+      {
+        "question_pattern": "대장내시경",
+        "response": "내시경은 해본 적 없어요"
+      }
+    ]
+  },
+
+  "scoring": {
+    "rapport_checklist": [
+      {
+        "item": "인사 및 자기소개",
+        "keywords": ["안녕하세요", "학생의사", "저는"],
+        "score": 2
+      },
+      {
+        "item": "진료 시간 및 동의 안내",
+        "keywords": ["분 동안", "괜찮으시겠어요"],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀해달라 안내",
+        "keywords": ["불편", "말씀해주세요"],
+        "score": 1
+      },
+      {
+        "item": "환자 편의 배려",
+        "keywords": ["오시는 길", "날씨"],
+        "score": 1
+      }
+    ],
+    "history_checklist": [
+      {
+        "category": "O - 발병시기",
+        "question_example": "언제부터 그러셨나요?",
+        "keywords": ["언제", "얼마나", "시작"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "D - 배변 횟수",
+        "question_example": "하루에 화장실 몇 번 가세요?",
+        "keywords": ["몇 번", "화장실", "배변"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "F - 배변 후 완화 (핵심!)",
+        "question_example": "화장실 다녀오면 나아지나요?",
+        "keywords": ["화장실", "배변 후", "다녀오면", "완화"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "F - 스트레스 악화 (핵심!)",
+        "question_example": "스트레스 받으면 더 심해지나요?",
+        "keywords": ["스트레스", "악화", "심해"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "A - 복부팽만/가스",
+        "question_example": "배가 빵빵하거나 가스가 차나요?",
+        "keywords": ["팽만", "가스", "빵빵", "트림", "방귀"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "A - 혈변 감별 (악성 배제!)",
+        "question_example": "변에 피가 섞여 나온 적 있나요?",
+        "keywords": ["혈변", "피", "흑색변"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "A - 체중감소 감별 (악성 배제!)",
+        "question_example": "체중이 줄었나요?",
+        "keywords": ["체중", "살", "빠졌"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "F - 음식 관련",
+        "question_example": "음식 드시고 나면 더 아프세요?",
+        "keywords": ["음식", "먹으면", "커피", "우유"],
+        "score": 2,
+        "required": false
+      },
+      {
+        "category": "사회력 - 스트레스/생활",
+        "question_example": "요즘 스트레스 받는 일이 있으신가요?",
+        "keywords": ["스트레스", "생활", "직업", "학교"],
+        "score": 2,
+        "required": false
+      }
+    ],
+    "exam_checklist": [
+      {
+        "item": "복부 시진-청진-타진-촉진",
+        "keywords": ["촉진", "청진", "장음", "눌러"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "item": "반동 압통 확인 (없음 확인)",
+        "keywords": ["반동", "rebound"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "Murphy sign (없음 확인)",
+        "keywords": ["murphy", "머피"],
+        "score": 2,
+        "required": false
+      }
+    ],
+    "diagnosis_score": {
+      "correct_keywords": ["과민성 장", "IBS", "irritable bowel"],
+      "score": 10
+    },
+    "treatment_plan_score": {
+      "required_workup": ["대변검사", "대장내시경"],
+      "required_treatment": ["심리적 안정", "운동", "식습관 교정", "고섬유식", "FODMAP", "진경제"],
+      "score": 10
+    },
+    "total_score": 65
+  }
+}

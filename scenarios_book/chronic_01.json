@@ -1,0 +1,205 @@
+{
+  "scenario_id": "chronic_01",
+  "source": "한 권으로 끝내는 CPX 증례 - 소화기 (급성 복통 / 소화불량·만성 복통)",
+  "category": "소화불량/만성 복통",
+  "hidden_diagnosis": "십이지장궤양",
+  "top_diagnoses": [
+    "십이지장궤양",
+    "위염/위궤양",
+    "기능성 소화불량"
+  ],
+  "patient": {
+    "name": "이상혁",
+    "age": 42,
+    "gender": "남",
+    "vital_signs": {
+      "BP": "131/79",
+      "PR": 80,
+      "RR": 19,
+      "BT": 36.5
+    },
+    "setting": "외래",
+    "appearance": "[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]"
+  },
+  "chief_complaint": "배가 아파요",
+  "history": {
+    "O_onset": "2개월",
+    "L_location": "명치",
+    "D_duration_course": "계속, 2주 전부터 심해짐",
+    "Co_change": "2주 전부터 심해짐",
+    "Ex_prior_episode": "-",
+    "C_character": "양상: 아리는 듯한 느낌, 약간 쓰리기도 함, 방사통(-), 통증 부위 이동(-) / 정도: NRS 5~6점",
+    "A_associated": {
+      "전신": "발열/오한/피로/체중변화(-/-/-/+, 2달 동안 4kg 감소)",
+      "소화기": "A/N/V/C/D(+/+/-/-/-), 황달/복부팽만(-/-), 소화불량/속쓰림/신물 올라옴/삼킴곤란(+/+/-/-), 토혈/혈변/흑색변/지방변/점액변(-/-/-/-/-)",
+      "기타": "흉통/기침(-/-), 추위불내성(-)"
+    },
+    "F_factor": "악화(+, 식전에 특히 심함, 공복 시 악화, 스트레스/우유에 의한 악화-/-), 완화(+, 식후 괜찮아짐, 배변에 의한 완화-)",
+    "E_prior_exam": "-",
+    "PSH": "-",
+    "PMH": "1년 전 위염이라고 들었으나 치료하지 않음, DM/HTN/Tb/Hepatitis(-/-/-/-)",
+    "medication": "홍삼 복용 중",
+    "social": "음주(-), 흡연(+, 20갑년), 스트레스(+, 아프기 전부터 원래 있었음), 식사 불규칙/고른 식단, 직업(택시 운전사)",
+    "family": "아버지(간암)",
+    "female_hx": null
+  },
+  "physical_exam": {
+    "General": "V/S 정상",
+    "HEENT": "결막/공막 정상, 갑상샘 정상, 림프절 정상, 입술/피부 긴장도 감소(-/-)",
+    "Abdomen": "Epigastric Td/rTd(+/-), 간비대/비장비대/Murphy's sign(-/-/-)",
+    "Extremity": "복부 시/청(-/-), DRE 정상, 피부 긴장도 감소/오목 부종(-/-)"
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[제시문에 '배가 아프다'고만 적혀 있어 급성/만성 여부 모른 상태로 들어감, 환자 대답 빠르고 잘 대답해 주심]",
+    "on_pain_question": "[아픈 부위를 가리키며 눈살을 찌푸림]",
+    "on_bad_news": "[걱정스러운 표정으로] 많이 심각한 건가요?",
+    "baseline_emotion": "불안",
+    "patient_question": "-"
+  },
+  "unknown_responses": {
+    "default_unknown": "글쎄요, 잘 모르겠어요.",
+    "rule": "시나리오에 명시되지 않은 정보는 절대 만들어내지 말 것."
+  },
+  "scoring": {
+    "required_tests": [
+      "상부위장관내시경",
+      "요소날숨검사"
+    ],
+    "required_treatments": [
+      "약물 치료",
+      "생활 습관 교정"
+    ],
+    "expected_skills": [
+      "H. pylori에 대한 진단과 치료 설명"
+    ],
+    "history_checklist": [
+      {
+        "item": "인사/자기소개",
+        "keywords": [
+          "안녕",
+          "학생의사"
+        ],
+        "score": 2
+      },
+      {
+        "item": "진료시간 안내 및 동의",
+        "keywords": [
+          "분 동안",
+          "괜찮으시겠어요"
+        ],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀 안내",
+        "keywords": [
+          "불편하시면",
+          "말씀해"
+        ],
+        "score": 1
+      },
+      {
+        "item": "O - 발병 시기",
+        "keywords": [
+          "언제",
+          "얼마나"
+        ],
+        "score": 3
+      },
+      {
+        "item": "L - 위치",
+        "keywords": [
+          "어디",
+          "짚어"
+        ],
+        "score": 3
+      },
+      {
+        "item": "C - 통증 양상",
+        "keywords": [
+          "어떻게 아프",
+          "양상"
+        ],
+        "score": 2
+      },
+      {
+        "item": "C - NRS",
+        "keywords": [
+          "몇 점",
+          "10점"
+        ],
+        "score": 2
+      },
+      {
+        "item": "Co - 경과",
+        "keywords": [
+          "심해지",
+          "변화"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 발열/오한",
+        "keywords": [
+          "열",
+          "오한"
+        ],
+        "score": 3
+      },
+      {
+        "item": "A - 구역/구토",
+        "keywords": [
+          "구역",
+          "구토",
+          "토"
+        ],
+        "score": 2
+      },
+      {
+        "item": "F - 악화/완화 요인",
+        "keywords": [
+          "악화",
+          "완화",
+          "먹으면",
+          "자세"
+        ],
+        "score": 3
+      },
+      {
+        "item": "사회력 - 음주/흡연",
+        "keywords": [
+          "술",
+          "담배",
+          "흡연"
+        ],
+        "score": 2
+      },
+      {
+        "item": "과거력/복용약",
+        "keywords": [
+          "수술",
+          "지병",
+          "약"
+        ],
+        "score": 2
+      },
+      {
+        "item": "A - 체중감소 (악성 감별)",
+        "keywords": [
+          "체중",
+          "살",
+          "빠졌"
+        ],
+        "score": 4
+      },
+      {
+        "item": "A - 혈변/흑색변 (악성 감별)",
+        "keywords": [
+          "혈변",
+          "검은 변",
+          "흑색"
+        ],
+        "score": 4
+      }
+    ]
+  }
+}

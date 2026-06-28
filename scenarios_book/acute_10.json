@@ -1,0 +1,79 @@
+{
+  "scenario_id": "acute_10",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "요관결석",
+  "top_diagnoses": ["요관결석", "급성 신우신염", "급성 충수돌기염"],
+  "patient": {
+    "name": "김명진",
+    "age": 34,
+    "gender": "남",
+    "vitals": { "BP": "135/85", "PR": 92, "RR": 20, "BT": 36.6 },
+    "appearance": "[침대에 가만히 눕지 못하고 앉았다 일어났다 하며 몸을 비틂. 식은땀을 흘림]"
+  },
+  "chief_complaint": "옆구리가 끊어질 것처럼 아파요",
+  "history": {
+    "O_onset": "2시간 전, 자다가 갑자기 깸",
+    "L_location": "오른쪽 옆구리에서 시작해 아랫배 및 음낭 쪽으로 뻗침",
+    "D_duration_course": "통증이 가라앉았다 갑자기 미칠 듯이 아픈 증상이 반복됨",
+    "Co_change": "통증이 올 때 NRS 9점에 달하는 극심한 강도",
+    "Ex_prior_episode": "처음 느껴보는 통증",
+    "C_character": "쥐어짜고 찌르는 듯한 격심한 통증, 우측 하복부·음낭 방사통(+)",
+    "A_associated": "혈뇨(+, 소변이 붉고 탁함), 빈뇨(+), 배뇨통(+, 소변볼 때 찌릿함), 구역/구토(+/+), 식은땀(+), 발열/오한(-/-)",
+    "F_factor": "자세를 어떻게 바꿔도 통증이 줄어들지 않음",
+    "PSH": "없음",
+    "PMH": "특이사항 없음",
+    "medication": "없음",
+    "social": "술(주 2~3회 과음), 흡연(10갑년), 직업(IT 개발자, 하루 종일 앉아 물을 거의 안 마심)",
+    "family": "아버지(요로결석으로 쇄석술 받은 적 있음)"
+  },
+  "physical_exam": {
+    "general": "통증으로 안절부절못하며 몸을 비틂. Tossing and turning 소견.",
+    "eyes": "결막/공막 정상. 식은땀.",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "특이소견 없음",
+      "palpation": "복부 부드러움. 뚜렷한 압통 없음",
+      "tenderness_location": "없음",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": true,
+      "CVAT_side": "우측(++, 극심한 통증 호소)"
+    }
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[침대 위에서 앉았다 누웠다 하며 가만히 있지 못함. 매우 괴로워함]",
+    "on_pain_question": "[옆구리를 가리키며 몸을 비틂] 여기가 죽을 것 같이 아파요",
+    "on_cvat": "[악 소리를 내며] 아!! 거기 너무 아파요!",
+    "on_hematuria_question": "[당황한 표정] 네, 소변이 빨갛게 나왔어요",
+    "on_analgesia_request": "진통제 주사 좀 먼저 빨리 놓아주시면 안 되나요? 죽을 것 같아요.",
+    "baseline_emotion": "극심한 통증, 초조함"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "쇄석술", "response": "아버지가 그 치료 받으셨어요." },
+      { "question_pattern": "요산", "response": "요산 수치는 재본 적이 없어요." }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "L - 옆구리→사타구니 방사통 (핵심!)", "keywords": ["옆구리", "사타구니", "음낭", "방사", "뻗치"], "score": 6 },
+      { "category": "C - 산통 양상 (핵심!)", "keywords": ["간헐", "반복", "파도", "왔다갔다", "쥐어짜"], "score": 5 },
+      { "category": "A - 혈뇨 (핵심!)", "keywords": ["혈뇨", "소변", "붉", "빨갛", "탁"], "score": 5 },
+      { "category": "A - 비뇨기 증상", "keywords": ["빈뇨", "배뇨통", "찌릿", "소변볼 때"], "score": 4 },
+      { "category": "A - 발열 없음 (신우신염 감별)", "keywords": ["열", "발열", "오한"], "score": 3 },
+      { "category": "family - 가족력", "keywords": ["가족", "아버지", "결석", "가족력"], "score": 3 },
+      { "category": "social - 수분 섭취 부족 (위험인자)", "keywords": ["물", "수분", "커피"], "score": 2 }
+    ],
+    "required_tests": ["소변 검사", "비조영 CT", "KUB"],
+    "required_treatments": ["진통제(NSAIDs/마약성)", "수액 공급", "체외충격파쇄석술(ESWL)"],
+    "expected_skills": [
+      "늑골척추각 압통(CVAT) 검사 시행",
+      "Colicky pain 양상과 비뇨기계 증상 연계 문진",
+      "진통제 우선 투여로 환자 안심"
+    ]
+  }
+}

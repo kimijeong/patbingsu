@@ -1,0 +1,305 @@
+{
+  "scenario_id": "ectopic_pregnancy_01",
+  "category": "급성복통",
+  "hidden_diagnosis": "자궁외임신",
+
+  "patient": {
+    "name": "박서연",
+    "age": 27,
+    "gender": "여",
+    "address": "서울시 강남구 역삼동",
+    "vital_signs": {
+      "BP": "98/62",
+      "PR": 112,
+      "RR": 22,
+      "BT": 36.8,
+      "SpO2": 98
+    },
+    "appearance": "[얼굴이 창백하고 다소 불안해 보임. 하복부를 감싸며 앉아 있음. 약간 식은땀이 보임]"
+  },
+
+  "chief_complaint": {
+    "initial_response": "아랫배가 갑자기 너무 심하게 아파서요... 어지럽기도 하고요.",
+    "volunteered_extras": []
+  },
+
+  "history": {
+    "O_onset": {
+      "when": "오늘 오전 10시쯤 갑자기요",
+      "how": "갑자기",
+      "situation": "집에서 갑자기 아랫배가 너무 아파서 왔어요"
+    },
+    "L_location": {
+      "primary": "[오른쪽 하복부를 가리키며] 여기요, 오른쪽 아랫배요",
+      "radiation": "어깨 쪽도 뭔가 좀 불편한 것 같기도 해요",
+      "migration": "처음부터 여기가 아팠어요"
+    },
+    "D_duration": {
+      "frequency": "계속 아파요",
+      "duration_each": "아까부터 지금까지 계속이요",
+      "pattern": "계속 지속되고 있어요"
+    },
+    "Co_course": {
+      "progression": "점점 심해짐"
+    },
+    "Ex_experience": {
+      "previous_episode": false,
+      "previous_detail": null
+    },
+    "C_character": {
+      "quality": "찌르는 것 같이 날카롭게 아파요",
+      "nrs": 8
+    },
+    "A_associated": {
+      "emergency": {
+        "palpitation": true,
+        "palpitation_response": "네, 가슴이 두근거려요",
+        "dyspnea": false,
+        "dizziness": true,
+        "dizziness_response": "네, 어지러워요. 일어서면 더 심해요",
+        "decreased_urine": false
+      },
+      "systemic": {
+        "fever": false,
+        "chills": false,
+        "fatigue": true,
+        "weight_loss": false,
+        "night_sweats": false
+      },
+      "GI": {
+        "anorexia": true,
+        "nausea": true,
+        "nausea_response": "네, 좀 메스껍기도 해요",
+        "vomiting": false,
+        "diarrhea": false,
+        "constipation": false,
+        "hematemesis": false,
+        "melena": false,
+        "hematochezia": false,
+        "bloating": false,
+        "jaundice": false,
+        "fatty_stool": false
+      },
+      "urinary": {
+        "dysuria": false,
+        "hematuria": false,
+        "frequency": false
+      },
+      "gynecologic": {
+        "vaginal_bleeding": true,
+        "vaginal_bleeding_response": "네... 사실 소량 비쳤어요. 생리가 늦어져서 그런 건가 싶었어요",
+        "vaginal_discharge": false,
+        "LMP": "마지막 생리가... 한 7주 전이에요. 생리가 좀 불규칙한 편이긴 해서...",
+        "pregnancy_possible": true,
+        "pregnancy_response": "남자친구 있어요... [머뭇거리며] 임신은 아닐 것 같은데... 혹시 모르겠어요"
+      }
+    },
+    "F_factor": {
+      "aggravating": ["움직일 때"],
+      "aggravating_response": "움직이면 더 아파요",
+      "relieving": [],
+      "relieving_response": "가만히 있어도 많이 아파요",
+      "posture_effect": "특별히 달라지는 건 없는 것 같아요"
+    }
+  },
+
+  "social_history": {
+    "alcohol": {
+      "drinks": true,
+      "amount": "가끔 친구들이랑 와인 한두 잔 정도요",
+      "recent_binge": false
+    },
+    "smoking": {
+      "smokes": false
+    },
+    "diet": "보통이에요",
+    "recent_food": "오늘 아침에 간단히 빵 먹었어요",
+    "occupation": "직장인이에요, 마케팅 회사요",
+    "exercise": "요가 주 2회 해요",
+    "stress": "요즘 좀 바빠요",
+    "travel": "최근 여행은 없었어요"
+  },
+
+  "past_medical_history": {
+    "conditions": [],
+    "conditions_response": "따로 지병은 없어요",
+    "surgeries": [],
+    "surgeries_response": "수술은 없어요",
+    "medications": [],
+    "medications_response": "먹는 약 없어요",
+    "allergies": "없어요",
+    "vaccinations": {
+      "hep_A": true,
+      "hep_B": true
+    },
+    "health_checkup": "1년 전에 했는데 정상이었어요"
+  },
+
+  "family_history": {
+    "relevant": [],
+    "response": "특별한 가족력은 없어요"
+  },
+
+  "physical_exam": {
+    "general": "급성 병색. 창백하고 불안해 보임. 혈압 저하 및 빈맥 주목",
+    "eyes": "결막 창백 있음 (빈혈 시사), 공막 황달 없음",
+    "mouth": "탈수 경미",
+    "lymph_nodes": "촉지 안 됨",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "우하복부 압통",
+      "palpation": "우하복부 압통 심함, 전반적 복막 자극 증상 있음",
+      "tenderness_location": "우하복부, 전반적 하복부",
+      "rebound_tenderness": true,
+      "guarding": true,
+      "murphy_sign": false,
+      "rovsing_sign": false,
+      "mcburney_point": false,
+      "obturator_sign": false,
+      "psoas_sign": false,
+      "CVAT": false
+    },
+    "DRE": "시행하지 않음 (산부인과 협진 필요)"
+  },
+
+  "nonverbal_expressions": {
+    "on_entry": "[얼굴이 창백하고 하복부를 감싸며 들어옴. 걸음이 약간 불안정함]",
+    "on_pain_question": "[얼굴을 찡그리며 오른쪽 하복부를 손으로 감쌈] 여기가 너무 아파요",
+    "on_gynecologic_question": "[약간 당황한 표정, 잠시 머뭇거림] 그게... 말씀드려도 될까요?",
+    "on_pregnancy_question": "[눈이 커지며 당황한 표정] 설마... 임신은 아닐 것 같은데요...",
+    "on_bad_news": "[눈물을 글썽이며] 어떡하죠... 위험한 건가요?",
+    "on_standing": "[일어설 때 더 어지럽다며 손으로 벽을 짚음]",
+    "baseline_emotion": "두려움"
+  },
+
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      {
+        "question_pattern": "피임",
+        "response": "[잠시 망설이다] 피임은... 항상 한 건 아니에요"
+      },
+      {
+        "question_pattern": "임신 테스트",
+        "response": "집에서 해본 적 없어요. 생리가 좀 불규칙해서 그냥 그런가 했어요"
+      },
+      {
+        "question_pattern": "산부인과",
+        "response": "산부인과는 오래전에 한 번 갔었는데 최근에는 안 갔어요"
+      }
+    ]
+  },
+
+  "scoring": {
+    "rapport_checklist": [
+      {
+        "item": "인사 및 자기소개",
+        "keywords": ["안녕하세요", "학생의사", "저는"],
+        "score": 2
+      },
+      {
+        "item": "진료 시간 및 동의 안내",
+        "keywords": ["분 동안", "괜찮으시겠어요"],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀해달라 안내",
+        "keywords": ["불편", "말씀해주세요"],
+        "score": 1
+      },
+      {
+        "item": "프라이버시 배려",
+        "keywords": ["편하게", "안전한", "말씀해주시면"],
+        "score": 1
+      }
+    ],
+    "history_checklist": [
+      {
+        "category": "O - 발병",
+        "question_example": "언제부터 아프셨나요?",
+        "keywords": ["언제", "시작"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "L - 위치",
+        "question_example": "어디가 아프신지 짚어보세요",
+        "keywords": ["어디", "짚어"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "A - 응급 (두근거림/어지럼) - 핵심!",
+        "question_example": "가슴이 두근거리거나 어지럽지 않으세요?",
+        "keywords": ["두근", "어지럼", "어지럽"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "부인과 - 마지막 생리 (핵심!)",
+        "question_example": "마지막 생리는 언제였나요?",
+        "keywords": ["생리", "마지막", "월경", "LMP"],
+        "score": 6,
+        "required": true
+      },
+      {
+        "category": "부인과 - 임신 가능성 (핵심!)",
+        "question_example": "임신 가능성이 있으신가요?",
+        "keywords": ["임신", "가능성", "피임"],
+        "score": 6,
+        "required": true
+      },
+      {
+        "category": "부인과 - 질출혈",
+        "question_example": "질 출혈이 있으신가요?",
+        "keywords": ["출혈", "피", "생리"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "C - 양상/NRS",
+        "question_example": "어떻게 아프세요?",
+        "keywords": ["양상", "어떻게", "몇 점"],
+        "score": 2,
+        "required": true
+      }
+    ],
+    "exam_checklist": [
+      {
+        "item": "활력징후 확인 (저혈압/빈맥 응급 판단)",
+        "keywords": ["혈압", "맥박", "활력"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "item": "결막 빈혈 확인",
+        "keywords": ["결막", "눈", "빈혈"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "복부 촉진",
+        "keywords": ["촉진", "눌러"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "반동 압통",
+        "keywords": ["반동", "rebound"],
+        "score": 2,
+        "required": true
+      }
+    ],
+    "diagnosis_score": {
+      "correct_keywords": ["자궁외임신", "이소성임신", "ectopic"],
+      "score": 10
+    },
+    "treatment_plan_score": {
+      "required_workup": ["골반 초음파", "urine hCG", "serum hCG", "CBC"],
+      "required_treatment": ["수액", "메토트렉세이트", "복강경술", "응급 처치"],
+      "score": 10
+    },
+    "total_score": 66
+  }
+}

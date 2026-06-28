@@ -1,0 +1,79 @@
+{
+  "scenario_id": "acute_14",
+  "source": "added",
+  "category": "급성복통",
+  "hidden_diagnosis": "급성 A형 간염",
+  "top_diagnoses": ["급성 A형 간염", "급성 담낭염", "약인성 간손상"],
+  "patient": {
+    "name": "임도현",
+    "age": 26,
+    "gender": "남",
+    "vitals": { "BP": "118/76", "PR": 80, "RR": 16, "BT": 38.1 },
+    "appearance": "[전반적으로 피곤해 보이고 피부와 눈 흰자가 약간 노랗게 보임]"
+  },
+  "chief_complaint": "오른쪽 윗배가 아프고 몸이 너무 피곤해요. 눈도 노래진 것 같아요",
+  "history": {
+    "O_onset": "1주일 전부터 피로감과 식욕부진, 3일 전부터 황달",
+    "L_location": "오른쪽 윗배(우상복부), 전반적 피로감",
+    "D_duration_course": "처음에는 몸살인 줄 알았는데 점점 피부/눈이 노래지고 소변이 진해짐",
+    "Co_change": "점점 황달이 심해지고 소변 색이 진한 갈색(콜라색)으로 변함",
+    "Ex_prior_episode": "없음",
+    "C_character": "우상복부 둔한 불편감, NRS 3점. 날카로운 통증은 아님",
+    "A_associated": "황달(+, 3일 전부터), 진한 갈색 소변(+), 회색 변(+), 발열(+, 38.1도), 식욕부진(+), 구역(+), 구토(+), 심한 피로감(+)",
+    "F_factor": "특별한 악화/완화 요인 없음",
+    "PSH": "없음",
+    "PMH": "없음",
+    "medication": "없음",
+    "social": "술(주 2~3회 회식), 흡연(-), 직업(직장인 1년차)",
+    "family": "없음",
+    "travel_food": "3~4주 전 동남아 배낭여행, 현지 길거리 음식 자주 섭취"
+  },
+  "physical_exam": {
+    "general": "급성 피로 병색. BT 38.1(발열). 피부 및 공막 황달 뚜렷.",
+    "eyes": "공막 황달(+, 뚜렷), 결막 정상",
+    "abdomen": {
+      "inspection": "특이소견 없음",
+      "auscultation": "장음 정상",
+      "percussion": "간 타진 시 간비대 소견(간 탁음 범위 증가)",
+      "palpation": "우상복부 간 촉진 시 압통 및 간비대(+). 반동압통(-)",
+      "tenderness_location": "우상복부(간)",
+      "rebound_tenderness": false,
+      "guarding": false,
+      "murphy_sign": false,
+      "CVAT": false
+    }
+  },
+  "nonverbal_expressions": {
+    "on_entry": "[기운 없이 천천히 들어옴. 눈 흰자가 노랗게 보임]",
+    "on_jaundice_question": "[본인 손을 보며] 피부도 노랗게 된 것 같아요. 친구들도 그러더라고요",
+    "on_urine_question": "[당황한 표정] 소변이 콜라색으로 나와서 놀랐어요",
+    "on_travel_question": "[기억하며] 아, 한 달 전에 베트남 여행 갔다 왔어요. 길거리 음식 많이 먹었는데...",
+    "on_alcohol_question": "[머뭇거리며] 회식이 좀 잦긴 했어요...",
+    "baseline_emotion": "피로, 불안"
+  },
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요.",
+    "specific_unknowns": [
+      { "question_pattern": "A형 간염", "response": "A형 간염 예방접종은 안 맞은 것 같아요." },
+      { "question_pattern": "예방접종", "response": "A형 간염 예방접종은 안 맞았어요." }
+    ]
+  },
+  "scoring": {
+    "history_checklist": [
+      { "category": "A - 황달 (핵심!)", "keywords": ["황달", "노래", "눈", "피부", "공막"], "score": 6 },
+      { "category": "A - 소변 색 변화 (콜라색)", "keywords": ["소변", "진한", "갈색", "콜라", "소변색"], "score": 5 },
+      { "category": "travel - 해외여행/오염 음식 (역학)", "keywords": ["여행", "해외", "동남아", "길거리", "음식"], "score": 6 },
+      { "category": "A - 회색 변 (폐색성 황달 감별)", "keywords": ["변", "회색", "흰색", "색", "대변"], "score": 4 },
+      { "category": "A - 피로감/식욕부진/발열 (전구증상)", "keywords": ["피로", "피곤", "식욕", "밥맛", "열"], "score": 3 },
+      { "category": "PMH - 간염 예방접종 여부", "keywords": ["예방접종", "간염", "백신", "맞은"], "score": 3 },
+      { "category": "social - 음주 (악화 인자)", "keywords": ["술", "음주", "회식"], "score": 2 }
+    ],
+    "required_tests": ["간기능 검사(AST/ALT/Bilirubin)", "HAV IgM 항체", "복부 초음파"],
+    "required_treatments": ["절대 금주", "충분한 수분/영양 공급", "안정 가료(입원)"],
+    "expected_skills": [
+      "황달 3종 세트 확인(황달/진한 소변/회색 변)",
+      "해외여행력 및 오염 음식 섭취 역학 문진",
+      "A형 간염 예방접종 여부 확인"
+    ]
+  }
+}

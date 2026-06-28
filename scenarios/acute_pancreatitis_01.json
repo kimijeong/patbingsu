@@ -1,0 +1,315 @@
+{
+  "scenario_id": "acute_pancreatitis_01",
+  "category": "급성복통",
+  "hidden_diagnosis": "급성 췌장염",
+
+  "patient": {
+    "name": "이태양",
+    "age": 38,
+    "gender": "남",
+    "address": "경기도 성남시 분당구",
+    "vital_signs": {
+      "BP": "105/68",
+      "PR": 108,
+      "RR": 20,
+      "BT": 37.8,
+      "SpO2": 97
+    },
+    "appearance": "[이마에 땀이 맺혀 있고 얼굴이 창백함. 앞으로 살짝 몸을 굽힌 채 앉아 있음. 매우 힘들어 보임]"
+  },
+
+  "chief_complaint": {
+    "initial_response": "배가... 너무 아파요. 명치 쪽이랑 옆구리 쪽이 너무 심하게 아파서요.",
+    "volunteered_extras": [
+      "어젯밤에 술을 좀 마셨는데 자고 일어나니까 이렇게 됐어요"
+    ]
+  },
+
+  "history": {
+    "O_onset": {
+      "when": "오늘 아침 6시쯤 일어났을 때부터요",
+      "how": "갑자기",
+      "situation": "어젯밤에 술을 마시고 잔 뒤에 일어나보니 심하게 아팠어요"
+    },
+    "L_location": {
+      "primary": "[명치에서 왼쪽 옆구리를 가리키며] 여기 명치랑 여기 옆구리 쪽이요",
+      "radiation": "등 쪽으로도 아픈 것 같아요. 허리 뒤쪽이요",
+      "migration": "처음부터 여기가 아팠어요"
+    },
+    "D_duration": {
+      "frequency": "계속 아파요, 쉬지 않고",
+      "duration_each": "아침부터 지금까지 계속요",
+      "pattern": "계속 지속되고 있어요"
+    },
+    "Co_course": {
+      "progression": "점점 심해짐"
+    },
+    "Ex_experience": {
+      "previous_episode": true,
+      "previous_detail": "작년에도 비슷하게 아팠는데 그때는 그냥 좀 있으니까 나아졌어요"
+    },
+    "C_character": {
+      "quality": "칼로 찌르는 것 같이 아파요. 쥐어짜는 것 같기도 하고요",
+      "nrs": 9
+    },
+    "A_associated": {
+      "emergency": {
+        "palpitation": true,
+        "palpitation_response": "네, 가슴이 두근거리는 것 같아요",
+        "dyspnea": false,
+        "dizziness": true,
+        "dizziness_response": "좀 어지럽기도 해요",
+        "decreased_urine": false
+      },
+      "systemic": {
+        "fever": true,
+        "fever_response": "좀 열이 나는 것 같기도 해요",
+        "chills": false,
+        "fatigue": true,
+        "weight_loss": false,
+        "night_sweats": false
+      },
+      "GI": {
+        "anorexia": true,
+        "anorexia_response": "밥은 생각도 없어요",
+        "nausea": true,
+        "nausea_response": "네, 속이 많이 메스꺼워요",
+        "vomiting": true,
+        "vomiting_response": "두 번 토했어요. 음식물이랑 같이 나왔어요",
+        "diarrhea": false,
+        "constipation": false,
+        "hematemesis": false,
+        "melena": false,
+        "hematochezia": false,
+        "bloating": true,
+        "bloating_response": "배가 좀 부른 것 같아요",
+        "jaundice": false,
+        "fatty_stool": false
+      },
+      "urinary": {
+        "dysuria": false,
+        "hematuria": false,
+        "frequency": false
+      }
+    },
+    "F_factor": {
+      "aggravating": ["음식 먹을 때", "누울 때"],
+      "aggravating_response": "아까 물 좀 마셨더니 더 아파졌어요. 똑바로 누우면 더 심한 것 같아요",
+      "relieving": ["앞으로 굽힐 때"],
+      "relieving_response": "이렇게 [앞으로 살짝 숙이며] 앞으로 구부리고 있으면 좀 나은 것 같아요",
+      "posture_effect": "앞으로 굽히면 좀 덜 아파요"
+    }
+  },
+
+  "social_history": {
+    "alcohol": {
+      "drinks": true,
+      "amount": "소주 한 병 정도를 한 주에 서너 번은 마시는 것 같아요",
+      "recent_binge": true,
+      "recent_binge_response": "어젯밤에 친구들이랑 소주 두 병 반 정도 마셨어요"
+    },
+    "smoking": {
+      "smokes": true,
+      "amount": "하루 반 갑 피워요, 10년 됐어요"
+    },
+    "diet": "회식 자주 하고, 기름진 음식 많이 먹는 편이에요",
+    "recent_food": "어젯밤에 삼겹살에 소주 마셨어요",
+    "occupation": "IT 회사 다녀요, 영업직이에요",
+    "exercise": "거의 못 해요",
+    "stress": "요즘 일이 많아서 스트레스를 많이 받고 있어요",
+    "travel": "최근 여행은 없었어요"
+  },
+
+  "past_medical_history": {
+    "conditions": ["고지혈증"],
+    "conditions_response": "고지혈증이 있다고 작년에 들었어요. 약은 먹다 말다 해요",
+    "surgeries": [],
+    "surgeries_response": "수술은 없어요",
+    "medications": ["고지혈증 약 (간헐적 복용)"],
+    "medications_response": "고지혈증 약 처방받았는데 잘 안 먹게 되더라고요",
+    "allergies": "없어요",
+    "vaccinations": {
+      "hep_A": false,
+      "hep_B": true
+    },
+    "health_checkup": "작년에 건강검진 했는데 고지혈증이랑 지방간 있다고 했어요"
+  },
+
+  "family_history": {
+    "relevant": ["아버지 당뇨"],
+    "response": "아버지가 당뇨 있으세요. 어머니는 건강하세요"
+  },
+
+  "physical_exam": {
+    "general": "급성 병색 심함. 창백하고 땀 흘림. 앞으로 굽힌 자세 선호",
+    "eyes": "결막 창백 경미, 공막 황달 없음",
+    "mouth": "탈수 소견 있음, 점막 건조",
+    "lymph_nodes": "촉지 안 됨",
+    "abdomen": {
+      "inspection": "복부 팽만 경미",
+      "auscultation": "장음 감소",
+      "percussion": "탁음 (복수는 없음)",
+      "palpation": "상복부 전반적 압통, 특히 명치 및 좌상복부 심함",
+      "tenderness_location": "상복부, 명치 및 좌상복부",
+      "rebound_tenderness": true,
+      "guarding": true,
+      "murphy_sign": false,
+      "rovsing_sign": false,
+      "mcburney_point": false,
+      "obturator_sign": false,
+      "psoas_sign": false,
+      "CVAT": false
+    },
+    "DRE": "특이소견 없음"
+  },
+
+  "nonverbal_expressions": {
+    "on_entry": "[이마에 식은땀, 얼굴 창백. 앞으로 몸을 살짝 굽힌 채 천천히 들어옴. 앉을 때 '흡'하는 소리]",
+    "on_pain_question": "[미간을 찌푸리며] 지금도 너무 아파요... [명치 쪽을 손으로 감쌈]",
+    "on_epigastric_palpation": "[크게 움찔하며 몸을 뒤로 빼려 함] 아! 거기 너무 아파요!",
+    "on_alcohol_question": "[약간 머뭇거리며] 어... 좀 많이 마시긴 했어요...",
+    "on_bad_news": "[겁먹은 표정으로] 입원이요? 얼마나 있어야 해요?",
+    "on_leaning_forward": "[자연스럽게 앞으로 몸을 구부리려 함]",
+    "baseline_emotion": "두려움"
+  },
+
+  "unknown_responses": {
+    "default_unknown": "잘 모르겠어요, 그런 건 들은 적 없는 것 같아요.",
+    "specific_unknowns": [
+      {
+        "question_pattern": "담석",
+        "response": "담석이요? 그런 말은 들은 적 없어요."
+      },
+      {
+        "question_pattern": "혈뇨",
+        "response": "소변에 피는 없었어요."
+      }
+    ]
+  },
+
+  "scoring": {
+    "rapport_checklist": [
+      {
+        "item": "인사 및 자기소개",
+        "keywords": ["안녕하세요", "학생의사", "저는"],
+        "score": 2
+      },
+      {
+        "item": "진료 시간 및 동의 안내",
+        "keywords": ["분 동안", "괜찮으시겠어요"],
+        "score": 2
+      },
+      {
+        "item": "불편 시 말씀해달라 안내",
+        "keywords": ["불편", "말씀해주세요"],
+        "score": 1
+      },
+      {
+        "item": "환자 편의 배려",
+        "keywords": ["오시는 길", "날씨", "괜찮으셨나요"],
+        "score": 1
+      }
+    ],
+    "history_checklist": [
+      {
+        "category": "O - 발병시기",
+        "question_example": "언제부터 아프셨나요?",
+        "keywords": ["언제", "얼마나", "시작"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "L - 위치 및 방사통",
+        "question_example": "어디가 아프신지 짚어보시겠어요? 등 쪽으로 퍼지나요?",
+        "keywords": ["어디", "등", "퍼지", "방사"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "C - 양상/NRS",
+        "question_example": "어떻게 아프세요? 몇 점 정도?",
+        "keywords": ["어떻게", "몇 점", "양상"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "F - 앞으로 굽히면 완화",
+        "question_example": "자세에 따라 통증이 달라지나요?",
+        "keywords": ["자세", "굽히", "누우면", "앞으로"],
+        "score": 4,
+        "required": true
+      },
+      {
+        "category": "F - 음식 후 악화",
+        "question_example": "음식 드신 후 더 아프세요?",
+        "keywords": ["음식", "식사", "먹으면"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "A - 구역/구토",
+        "question_example": "토하셨나요?",
+        "keywords": ["구역", "구토", "토"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "category": "사회력 - 음주 (핵심!)",
+        "question_example": "술을 드시나요? 어제 드셨나요?",
+        "keywords": ["술", "음주", "어제"],
+        "score": 5,
+        "required": true
+      },
+      {
+        "category": "A - 응급 증상 (두근거림/어지럼)",
+        "question_example": "가슴이 두근거리거나 어지럽지 않으세요?",
+        "keywords": ["두근", "어지럼", "어지럽"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "category": "과거력 - 고지혈증/지방간",
+        "question_example": "지병이 있으신가요?",
+        "keywords": ["지병", "질환", "건강검진"],
+        "score": 2,
+        "required": false
+      }
+    ],
+    "exam_checklist": [
+      {
+        "item": "활력징후 확인 (BP, PR)",
+        "keywords": ["혈압", "맥박", "활력"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "복부 청진 (장음 감소 확인)",
+        "keywords": ["청진", "장음"],
+        "score": 2,
+        "required": true
+      },
+      {
+        "item": "복부 촉진 (상복부 압통)",
+        "keywords": ["촉진", "눌러", "압통"],
+        "score": 3,
+        "required": true
+      },
+      {
+        "item": "반동 압통",
+        "keywords": ["반동", "rebound"],
+        "score": 2,
+        "required": true
+      }
+    ],
+    "diagnosis_score": {
+      "correct_keywords": ["췌장염", "pancreatitis"],
+      "score": 10
+    },
+    "treatment_plan_score": {
+      "required_workup": ["amylase", "lipase", "복부 CT", "혈액검사"],
+      "required_treatment": ["금식", "수액", "수분 공급", "진통제", "전해질 교정"],
+      "score": 10
+    },
+    "total_score": 65
+  }
+}

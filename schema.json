@@ -1,0 +1,419 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "CPX 환자 시나리오 스키마 - LLM 기반 환자역할 시뮬레이션",
+
+  "type": "object",
+  "required": ["scenario_id", "category", "hidden_diagnosis", "patient", "history", "physical_exam", "scoring"],
+
+  "properties": {
+
+    "scenario_id": {
+      "type": "string",
+      "description": "고유 식별자 예: acute_appendicitis_01"
+    },
+
+    "category": {
+      "type": "string",
+      "enum": ["급성복통", "만성복통/소화불량", "토혈", "혈변", "구토", "설사", "변비", "황달"]
+    },
+
+    "hidden_diagnosis": {
+      "type": "string",
+      "description": "실제 진단명. 환자는 절대 모름. 채점 및 LLM 시스템 프롬프트에서만 사용"
+    },
+
+    "patient": {
+      "type": "object",
+      "description": "기본 정보 - 학생이 처음 진료실 들어올 때 볼 수 있는 정보",
+      "required": ["name", "age", "gender", "address", "vital_signs", "appearance"],
+      "properties": {
+        "name": { "type": "string" },
+        "age": { "type": "integer" },
+        "gender": { "type": "string", "enum": ["남", "여"] },
+        "address": { "type": "string" },
+        "vital_signs": {
+          "type": "object",
+          "properties": {
+            "BP": { "type": "string", "description": "예: 118/76 mmHg" },
+            "PR": { "type": "integer", "description": "회/분" },
+            "RR": { "type": "integer", "description": "회/분" },
+            "BT": { "type": "number", "description": "°C" },
+            "SpO2": { "type": "integer", "description": "%" }
+          }
+        },
+        "appearance": {
+          "type": "string",
+          "description": "진료실 입장 시 첫인상. 비언어 포함. 예: '오른쪽 배를 감싸며 앉아있음, 표정이 굳어있음'"
+        }
+      }
+    },
+
+    "chief_complaint": {
+      "type": "object",
+      "description": "어디가 불편해서 오셨어요? 에 대한 초기 응답",
+      "required": ["initial_response"],
+      "properties": {
+        "initial_response": {
+          "type": "string",
+          "description": "환자가 처음 자발적으로 하는 말. 진단 단서가 아닌 증상 위주로."
+        },
+        "volunteered_extras": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "물어보지 않아도 자발적으로 추가하는 말들 (1-2개만)"
+        }
+      }
+    },
+
+    "history": {
+      "type": "object",
+      "description": "OLDCEX+A+F 기반 병력. 각 항목은 특정 질문에만 응답함",
+      "properties": {
+
+        "O_onset": {
+          "type": "object",
+          "description": "발병 시점/양상",
+          "properties": {
+            "when": { "type": "string", "description": "언제부터" },
+            "how": { "type": "string", "enum": ["갑자기", "서서히"], "description": "발병 양상" },
+            "situation": { "type": "string", "description": "어떤 상황에서" }
+          }
+        },
+
+        "L_location": {
+          "type": "object",
+          "description": "통증 위치",
+          "properties": {
+            "primary": { "type": "string", "description": "주 통증 부위. 짚어보라고 하면 나오는 부위" },
+            "radiation": { "type": "string", "description": "다른 부위로 퍼지는지. null이면 없음" },
+            "migration": { "type": "string", "description": "통증 이동 여부. 예: 명치→RLQ" }
+          }
+        },
+
+        "D_duration": {
+          "type": "object",
+          "description": "지속 시간/빈도",
+          "properties": {
+            "frequency": { "type": "string", "description": "하루 몇 번" },
+            "duration_each": { "type": "string", "description": "한 번에 얼마나 지속" },
+            "pattern": { "type": "string", "description": "규칙적 여부" }
+          }
+        },
+
+        "Co_course": {
+          "type": "object",
+          "properties": {
+            "progression": { "type": "string", "enum": ["점점 심해짐", "비슷함", "좋아졌다 나빠졌다", "점점 나아짐"] }
+          }
+        },
+
+        "Ex_experience": {
+          "type": "object",
+          "properties": {
+            "previous_episode": { "type": "boolean" },
+            "previous_detail": { "type": "string", "description": "이전 에피소드 내용. previous_episode가 false면 null" }
+          }
+        },
+
+        "C_character": {
+          "type": "object",
+          "description": "통증 양상",
+          "properties": {
+            "quality": {
+              "type": "string",
+              "description": "답답/콕콕/베이듯/타듯/쥐어짜듯/찌르는듯 등"
+            },
+            "nrs": { "type": "integer", "minimum": 0, "maximum": 10 }
+          }
+        },
+
+        "A_associated": {
+          "type": "object",
+          "description": "동반증상. 없는 증상은 false 또는 null로. LLM이 없다고 응답해야 함",
+          "properties": {
+            "emergency": {
+              "type": "object",
+              "properties": {
+                "palpitation": { "type": "boolean" },
+                "dyspnea": { "type": "boolean" },
+                "dizziness": { "type": "boolean" },
+                "decreased_urine": { "type": "boolean" }
+              }
+            },
+            "systemic": {
+              "type": "object",
+              "properties": {
+                "fever": { "type": "boolean" },
+                "chills": { "type": "boolean" },
+                "fatigue": { "type": "boolean" },
+                "weight_loss": { "type": "boolean" },
+                "night_sweats": { "type": "boolean" }
+              }
+            },
+            "GI": {
+              "type": "object",
+              "properties": {
+                "anorexia": { "type": "boolean" },
+                "nausea": { "type": "boolean" },
+                "vomiting": { "type": "boolean" },
+                "diarrhea": { "type": "boolean" },
+                "constipation": { "type": "boolean" },
+                "hematemesis": { "type": "boolean" },
+                "melena": { "type": "boolean" },
+                "hematochezia": { "type": "boolean" },
+                "bloating": { "type": "boolean" },
+                "jaundice": { "type": "boolean" },
+                "fatty_stool": { "type": "boolean" }
+              }
+            },
+            "urinary": {
+              "type": "object",
+              "properties": {
+                "dysuria": { "type": "boolean" },
+                "hematuria": { "type": "boolean" },
+                "frequency": { "type": "boolean" }
+              }
+            },
+            "gynecologic": {
+              "type": "object",
+              "description": "여성 환자에만 해당",
+              "properties": {
+                "vaginal_bleeding": { "type": "boolean" },
+                "vaginal_discharge": { "type": "boolean" },
+                "LMP": { "type": "string", "description": "마지막 월경일 또는 주기 정보" },
+                "pregnancy_possible": { "type": "boolean" }
+              }
+            }
+          }
+        },
+
+        "F_factor": {
+          "type": "object",
+          "description": "악화/완화 요인",
+          "properties": {
+            "aggravating": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "예: ['식사 후', '음주 후', '앞으로 굽히면']"
+            },
+            "relieving": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "예: ['앞으로 굽히면 나아짐', '배변 후 완화']"
+            },
+            "posture_effect": { "type": "string", "description": "자세에 따른 변화" }
+          }
+        }
+      }
+    },
+
+    "social_history": {
+      "type": "object",
+      "description": "술/음변자식/여우스 - 직접 물어봐야 나오는 정보들",
+      "properties": {
+        "alcohol": {
+          "type": "object",
+          "properties": {
+            "drinks": { "type": "boolean" },
+            "amount": { "type": "string", "description": "예: 소주 1병/주 3회" },
+            "recent_binge": { "type": "boolean" }
+          }
+        },
+        "smoking": {
+          "type": "object",
+          "properties": {
+            "smokes": { "type": "boolean" },
+            "amount": { "type": "string" }
+          }
+        },
+        "diet": { "type": "string", "description": "식습관 특이사항. 예: 불규칙, 맵고 기름진 음식 선호" },
+        "recent_food": { "type": "string", "description": "최근에 먹은 특이한 음식. 해산물, 날것 등" },
+        "occupation": { "type": "string" },
+        "exercise": { "type": "string" },
+        "stress": { "type": "string", "description": "최근 스트레스 여부" },
+        "travel": { "type": "string", "description": "최근 여행 여부" }
+      }
+    },
+
+    "past_medical_history": {
+      "type": "object",
+      "properties": {
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "기저질환. 예: ['당뇨병 10년', '고혈압']"
+        },
+        "surgeries": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "medications": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "복용 중인 약. 예: ['아스피린', 'NSAIDs']"
+        },
+        "allergies": { "type": "string" },
+        "vaccinations": {
+          "type": "object",
+          "properties": {
+            "hep_A": { "type": "boolean" },
+            "hep_B": { "type": "boolean" }
+          }
+        },
+        "health_checkup": { "type": "string", "description": "최근 건강검진 결과. 담석/요로결석 등 발견 여부" }
+      }
+    },
+
+    "family_history": {
+      "type": "object",
+      "properties": {
+        "relevant": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "예: ['아버지 위암', '어머니 당뇨']"
+        }
+      }
+    },
+
+    "physical_exam": {
+      "type": "object",
+      "description": "신체 진찰 결과 - 학생이 시행하면 나오는 소견",
+      "properties": {
+        "general": { "type": "string", "description": "전반적 인상. 예: 급성 병색" },
+        "eyes": { "type": "string", "description": "눈 소견. 예: 공막 황달 없음, 결막 창백 없음" },
+        "mouth": { "type": "string", "description": "구강. 탈수 여부 등" },
+        "lymph_nodes": { "type": "string" },
+        "abdomen": {
+          "type": "object",
+          "properties": {
+            "inspection": { "type": "string" },
+            "auscultation": { "type": "string" },
+            "percussion": { "type": "string" },
+            "palpation": { "type": "string" },
+            "tenderness_location": { "type": "string", "description": "압통 부위" },
+            "rebound_tenderness": { "type": "boolean" },
+            "guarding": { "type": "boolean" },
+            "murphy_sign": { "type": "boolean" },
+            "rovsing_sign": { "type": "boolean" },
+            "mcburney_point": { "type": "boolean" },
+            "obturator_sign": { "type": "boolean" },
+            "psoas_sign": { "type": "boolean" },
+            "CVAT": { "type": "boolean" }
+          }
+        },
+        "DRE": { "type": "string", "description": "직장수지검사 소견" }
+      }
+    },
+
+    "nonverbal_expressions": {
+      "type": "object",
+      "description": "상황별 비언어적 표현. LLM이 [괄호] 형태로 출력",
+      "properties": {
+        "on_entry": { "type": "string", "description": "진료실 들어올 때" },
+        "on_pain_question": { "type": "string", "description": "통증 물어볼 때" },
+        "on_RLQ_palpation": { "type": "string", "description": "우하복부 촉진 시" },
+        "on_bad_news": { "type": "string", "description": "심각한 내용 들을 때" },
+        "baseline_emotion": {
+          "type": "string",
+          "enum": ["불안", "두려움", "당당함", "무관심", "초조함", "슬픔", "화남"]
+        }
+      }
+    },
+
+    "unknown_responses": {
+      "type": "object",
+      "description": "환자가 모르는 정보에 대한 응답 패턴",
+      "properties": {
+        "default_unknown": {
+          "type": "string",
+          "default": "글쎄요, 잘 모르겠어요.",
+          "description": "정보가 없는 질문에 기본 응답"
+        },
+        "specific_unknowns": {
+          "type": "array",
+          "description": "특정 질문에 대한 '모른다' 응답들",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question_pattern": { "type": "string" },
+              "response": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "scoring": {
+      "type": "object",
+      "description": "채점 기준",
+      "properties": {
+        "rapport_checklist": {
+          "type": "array",
+          "description": "라포형성 필수 항목",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": { "type": "string" },
+              "keywords": { "type": "array", "items": { "type": "string" } },
+              "score": { "type": "integer" }
+            }
+          }
+        },
+        "history_checklist": {
+          "type": "array",
+          "description": "병력 청취 필수 질문들",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": { "type": "string", "description": "예: O, L, A_fever 등" },
+              "question_example": { "type": "string" },
+              "keywords": { "type": "array", "items": { "type": "string" }, "description": "이 단어들이 포함되면 체크됨" },
+              "score": { "type": "integer" },
+              "required": { "type": "boolean" }
+            }
+          }
+        },
+        "exam_checklist": {
+          "type": "array",
+          "description": "신체 진찰 필수 항목",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": { "type": "string", "description": "예: 복부 촉진, Rovsing sign" },
+              "keywords": { "type": "array", "items": { "type": "string" } },
+              "score": { "type": "integer" },
+              "required": { "type": "boolean" }
+            }
+          }
+        },
+        "diagnosis_score": {
+          "type": "object",
+          "properties": {
+            "correct_keywords": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "예: ['충수염', '맹장염', 'appendicitis']"
+            },
+            "score": { "type": "integer" }
+          }
+        },
+        "treatment_plan_score": {
+          "type": "object",
+          "properties": {
+            "required_workup": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "예: ['복부 초음파', 'CT', '혈액검사']"
+            },
+            "required_treatment": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "score": { "type": "integer" }
+          }
+        },
+        "total_score": { "type": "integer" }
+      }
+    }
+  }
+}
