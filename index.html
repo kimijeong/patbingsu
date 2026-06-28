@@ -299,6 +299,13 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
       <div class="tag" onclick="insertExam('DRE(직장수지검사)')">DRE</div>
     </div>
   </div>
+  <!-- MEMO -->
+  <div id="memo-panel" style="display:none;flex-direction:column;gap:6px;background:#1e293b;border-radius:10px;padding:10px 12px;flex-shrink:0;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#475569;">메모</div>
+    <textarea id="memo-text" placeholder="문진 메모..." style="background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;font-size:12px;line-height:1.6;padding:8px 10px;resize:none;height:140px;outline:none;font-family:inherit;"></textarea>
+    <div style="font-size:10px;color:#475569;text-align:right;">자동 저장됨</div>
+  </div>
+  <button onclick="toggleMemo()" id="memo-btn" style="background:#1e293b;border:1px solid #334155;border-radius:8px;color:#94a3b8;font-size:12px;padding:7px 10px;cursor:pointer;text-align:left;width:100%;flex-shrink:0;">📝 메모</button>
   <div class="timer-box">
     <span>⏱</span>
     <div>
@@ -477,7 +484,10 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 <div class="chat-panel">
   <div class="chat-header">
     <h3>CPX 환자 시뮬레이션</h3>
-    <button class="btn-end" onclick="endSession()">종료 및 채점</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="rec-btn" onclick="toggleRecording()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s;">⏺ 녹화</button>
+      <button class="btn-end" onclick="endSession()">종료 및 채점</button>
+    </div>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-area">
@@ -641,6 +651,7 @@ function closeGuideWithKey(){
 // ── LOAD CASES ──────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
   showGuide();
+  initMemo();
   const saved=cleanKey(sessionStorage.getItem('cpx_api_key'));
   if(saved&&$('api-key-input')){$('api-key-input').value=saved;ANTHROPIC_API_KEY=saved;}
   allCases=CASE_BANK.cases;
@@ -1253,6 +1264,51 @@ function examPhrase(n){return `(${n}${objJosa(n)} 한다)`;}
 function insertExam(n){$('chat-input').value=examPhrase(n);$('chat-input').focus();}
 function quickExam(n){$('chat-input').value=examPhrase(n);sendMessage();}
 function quickCmd(t){$('chat-input').value=t;sendMessage();}
+
+// ── 메모장 ───────────────────────────────────────────────────────────────
+function toggleMemo(){
+  const p=$('memo-panel'),b=$('memo-btn');
+  const show=(p.style.display==='none'||!p.style.display);
+  p.style.display=show?'flex':'none';
+  if(b)b.textContent=show?'📝 메모 닫기':'📝 메모';
+  if(show)$('memo-text')&&$('memo-text').focus();
+}
+function initMemo(){
+  const t=$('memo-text'); if(!t)return;
+  const saved=sessionStorage.getItem('cpx_memo'); if(saved)t.value=saved;
+  t.addEventListener('input',()=>sessionStorage.setItem('cpx_memo',t.value));
+}
+
+// ── 화면 녹화 ─────────────────────────────────────────────────────────────
+let mediaRecorder=null, recordedChunks=[], recStream=null;
+function recMime(){for(const m of ['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'])if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;return '';}
+async function toggleRecording(){
+  const btn=$('rec-btn');
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){addMsg('[안내] 이 브라우저는 화면 녹화를 지원하지 않습니다. Chrome을 사용하세요.','system');return;}
+  try{
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:true});
+    try{const mic=await navigator.mediaDevices.getUserMedia({audio:true});mic.getAudioTracks().forEach(tr=>stream.addTrack(tr));}catch(e){}
+    recStream=stream; recordedChunks=[];
+    mediaRecorder=new MediaRecorder(stream,recMime()?{mimeType:recMime()}:undefined);
+    mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size>0)recordedChunks.push(e.data);};
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(recordedChunks,{type:recordedChunks[0]?recordedChunks[0].type:'video/webm'});
+      const url=URL.createObjectURL(blob), a=document.createElement('a');
+      const name=(currentCase&&currentCase.patient?currentCase.patient.name:'CPX');
+      const ts=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+      a.href=url; a.download=`CPX_${name}_${ts}.webm`; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),2000);
+      if(recStream){recStream.getTracks().forEach(tr=>tr.stop());recStream=null;}
+      btn.textContent='⏺ 녹화'; btn.style.background='#1e293b'; btn.style.color='#94a3b8'; btn.style.borderColor='#334155';
+      addMsg('[안내] 녹화 파일이 저장(다운로드)되었습니다.','system');
+    };
+    stream.getVideoTracks()[0].addEventListener('ended',()=>{if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();});
+    mediaRecorder.start();
+    btn.textContent='⏹ 녹화중'; btn.style.background='#7f1d1d'; btn.style.color='#fca5a5'; btn.style.borderColor='#b91c1c';
+    addMsg('[안내] 화면 녹화를 시작했습니다. 다시 누르면 중지·저장됩니다.','system');
+  }catch(e){addMsg('[안내] 녹화를 시작할 수 없습니다: '+(e.message||e),'system');}
+}
 
 // ── EXAM MAP (부위 클릭형 검진) ──────────────────────────────────────────
 const EXAM_MENU={
