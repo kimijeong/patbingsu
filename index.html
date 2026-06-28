@@ -862,6 +862,8 @@ function startSession(){
   const idx=parseInt($('caseSelect').value||'0');
   currentCase=allCases[idx]; if(!currentCase)return;
   chatHistory=[]; transcript=[]; convoLog=[];
+  try{sessionStorage.removeItem('cpx_memo');}catch(e){}   // 진료마다 메모 초기화(백지)
+  ['memo-text','exam-map-memo'].forEach(id=>{const el=$(id);if(el)el.value='';});
   sessionActive=true; sessionEnded=false; timerStarted=false;
   const tmVal=parseInt(($('timerMode')&&$('timerMode').value)||'720');
   timerUnlimited=(tmVal===0); totalSeconds=timerUnlimited?0:tmVal; elapsedSeconds=0;
