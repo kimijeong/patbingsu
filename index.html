@@ -247,6 +247,92 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   </div>
 </div>
 
+<!-- PROFESSOR OVERLAY -->
+<div class="guide-overlay hidden" id="prof-overlay">
+  <div class="guide-box" style="max-width:700px">
+    <h1>🏫 교수 모드 — 증례 제작</h1>
+    <p style="text-align:center;color:#64748b;font-size:13px;margin-top:-10px">증례를 입력하면 학생용 링크가 생성됩니다</p>
+    <div class="guide-section">
+      <h2>① 환자 기본 정보</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px">
+          <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">환자명 <span style="color:#ef4444">*</span></label>
+          <input id="pf-name" type="text" placeholder="홍길동" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none">
+        </div>
+        <div style="flex:0 0 65px">
+          <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">나이 <span style="color:#ef4444">*</span></label>
+          <input id="pf-age" type="number" placeholder="38" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 8px;font-size:13px;outline:none">
+        </div>
+        <div style="flex:0 0 80px">
+          <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">성별 <span style="color:#ef4444">*</span></label>
+          <select id="pf-sex" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 6px;font-size:13px;outline:none">
+            <option value="여">여성</option><option value="남">남성</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:140px">
+          <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">장소/시간</label>
+          <input id="pf-setting" type="text" placeholder="응급실, 오전 9시" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none">
+        </div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h2>② 활력징후 (바이탈)</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">BP (mmHg)</label><input id="pf-bp" type="text" placeholder="144/90" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none"></div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">PR (회/분)</label><input id="pf-pr" type="text" placeholder="90" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none"></div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">RR (회/분)</label><input id="pf-rr" type="text" placeholder="22" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none"></div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">BT (°C)</label><input id="pf-bt" type="text" placeholder="38.2" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none"></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h2>③ 주소 &amp; 진단명</h2>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1"><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">주소 (Chief Complaint) <span style="color:#ef4444">*</span></label><input id="pf-chief" type="text" placeholder="배가 아파요" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none"></div>
+        <div style="flex:1"><label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px">진단명 <span style="color:#ef4444">*</span> <span style="color:#475569;font-size:10px">(학생에게 비공개)</span></label><input id="pf-dx" type="text" placeholder="급성 충수돌기염" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none"></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h2>④ 병력 (OLDCARTS)</h2>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">O — 발병 시기 <span style="color:#ef4444">*</span></label><input id="pf-onset" type="text" placeholder="3일 전" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">L — 통증 위치 <span style="color:#ef4444">*</span></label><input id="pf-location" type="text" placeholder="오른쪽 아랫배" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">D — 지속/경과</label><input id="pf-duration" type="text" placeholder="3일 전부터 간헐적, 1일 전부터 지속" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">C — 통증 양상</label><input id="pf-character" type="text" placeholder="쥐어짜는듯한, NRS 6점" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+        </div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">A — 동반증상</label><input id="pf-assoc" type="text" placeholder="발열(+), 오심(+), 식욕부진(+), 구토(-), 설사(-)" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">F — 악화/완화 요인</label><input id="pf-factor" type="text" placeholder="악화: 걸을 때, 완화: 가만히 있으면" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">PMH — 과거력/기저질환</label><input id="pf-pmh" type="text" placeholder="없음 / 고혈압 10년" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">PSH — 수술력</label><input id="pf-psh" type="text" placeholder="없음 / 맹장수술 5년 전" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">복용약</label><input id="pf-meds" type="text" placeholder="없음 / 타이레놀" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+          <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">사회력 (음주/흡연)</label><input id="pf-social" type="text" placeholder="음주(+, 주 1회), 흡연(-)" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+        </div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">여성력 <span style="color:#475569">(여성 환자인 경우)</span></label><input id="pf-female" type="text" placeholder="없음 / LMP 3주 전, 주기 정상, 임신 가능성 없음" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+      </div>
+    </div>
+    <div class="guide-section">
+      <h2>⑤ 신체진찰 소견</h2>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">복부 소견 (Abdomen)</label><textarea id="pf-abdomen" rows="2" placeholder="복부 시/청/타/촉(-/-/-/+), 우하복부 압통(+), 반동압통(+), McBurney point 압통, Psoas sign(+)" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:7px 9px;font-size:12px;outline:none;resize:vertical;line-height:1.5;font-family:inherit"></textarea></div>
+        <div><label style="font-size:10px;color:#64748b;display:block;margin-bottom:3px">전신/기타 소견</label><input id="pf-general" type="text" placeholder="고열(38.2°C), 빈호흡(22회/분)" style="width:100%;background:#0f1117;border:1px solid #334155;border-radius:6px;color:#e2e8f0;padding:6px 9px;font-size:12px;outline:none"></div>
+      </div>
+    </div>
+    <div id="pf-result" style="display:none;background:#0f2f1a;border:1px solid #166534;border-radius:10px;padding:14px 16px;flex-direction:column;gap:8px">
+      <p style="font-size:12px;color:#4ade80;font-weight:700">✅ 학생용 링크가 생성됐습니다</p>
+      <div style="display:flex;gap:8px">
+        <input id="pf-link" type="text" readonly style="flex:1;background:#0a1f10;border:1px solid #166534;border-radius:6px;color:#86efac;padding:7px 10px;font-size:12px;outline:none">
+        <button onclick="pfCopyLink()" id="pf-copy-btn" style="background:#166534;border:1px solid #16a34a;color:#4ade80;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">복사</button>
+      </div>
+      <p style="font-size:11px;color:#4ade80;opacity:.7">이 링크를 학생들에게 공유하세요. 링크를 열면 해당 증례가 자동으로 로드됩니다.</p>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-guide-start" onclick="pfGenerateLink()" style="background:#7c3aed">🔗 링크 생성</button>
+      <button class="btn-guide-start" onclick="closeProfessor()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETUP BAR -->
 <div class="setup-bar">
   <div class="field">
@@ -259,6 +345,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   </div>
   <button class="btn-start" id="startBtn" onclick="startSession()">진료 시작</button>
   <button class="btn-guide" onclick="showGuide()">📖 사용 가이드</button>
+  <button class="btn-guide" onclick="showProfessor()" style="border-color:#7c3aed;color:#a78bfa">🏫 교수 모드</button>
 </div>
 
 <!-- MAIN -->
@@ -283,21 +370,6 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   <div>
     <div class="section-label">주소</div>
     <div class="chief-badge" id="chief-badge">—</div>
-  </div>
-  <div>
-    <div class="section-label">신체검진</div>
-    <div class="exam-tags">
-      <div class="tag" onclick="insertExam('복부 시진')">시진</div>
-      <div class="tag" onclick="insertExam('복부 청진')">청진</div>
-      <div class="tag" onclick="insertExam('복부 타진')">타진</div>
-      <div class="tag" onclick="insertExam('복부 촉진')">촉진</div>
-      <div class="tag" onclick="insertExam('압통/반발통')">반발통</div>
-      <div class="tag" onclick="insertExam('Murphy\'s sign')">머피징후</div>
-      <div class="tag" onclick="insertExam('CVAT')">CVAT</div>
-      <div class="tag" onclick="insertExam('Psoas sign')">Psoas</div>
-      <div class="tag" onclick="insertExam('Obturator sign')">Obturator</div>
-      <div class="tag" onclick="insertExam('DRE(직장수지검사)')">DRE</div>
-    </div>
   </div>
   <!-- MEMO -->
   <div id="memo-panel" style="display:none;flex-direction:column;gap:6px;background:#1e293b;border-radius:10px;padding:10px 12px;flex-shrink:0;">
@@ -485,6 +557,8 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   <div class="chat-header">
     <h3>CPX 환자 시뮬레이션</h3>
     <div style="display:flex;gap:8px;align-items:center;">
+      <button id="mic-btn" onclick="toggleMic()" title="음성 대화 시작/종료" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s;">🎤 음성대화</button>
+      <button id="tts-btn" onclick="toggleTts()" title="환자 음성 켜기/끄기" style="background:#1e293b;border:1px solid #166534;color:#4ade80;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s;">🔊 음성</button>
       <button id="rec-btn" onclick="toggleRecording()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:all .2s;">⏺ 녹화</button>
       <button class="btn-end" onclick="endSession()">종료 및 채점</button>
     </div>
@@ -495,14 +569,6 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
       <span style="font-size:11px;color:#475569;align-self:center">빠른검진:</span>
       <button class="eq-btn" onclick="openExamMap()" style="background:#1d4ed8;color:#fff;border-color:#1d4ed8">🩺 검진맵</button>
       <span style="font-size:10.5px;color:#fbbf24;align-self:center;line-height:1.3">⚠️ 검진 전 환자에게 <b>"누우세요"</b> 등 자세를 먼저 지시한 뒤 검진하세요</span>
-      <button class="eq-btn" onclick="quickExam('복부 청진')">청진</button>
-      <button class="eq-btn" onclick="quickExam('복부 촉진')">촉진</button>
-      <button class="eq-btn" onclick="quickExam('압통/반발통')">반발통</button>
-      <button class="eq-btn" onclick="quickExam('CVAT')">CVAT</button>
-      <button class="eq-btn" onclick="quickExam('Murphy\'s sign')">머피</button>
-      <button class="eq-btn" onclick="quickCmd('누워주세요.')">눕기</button>
-      <button class="eq-btn" onclick="quickCmd('다리를 들어올려 보세요.')">다리올리기</button>
-      <button class="eq-btn" onclick="quickCmd('무릎을 구부려 주세요.')">무릎굽히기</button>
     </div>
     <div class="input-row">
       <textarea class="chat-input" id="chat-input" rows="1"
@@ -646,15 +712,59 @@ function closeGuideWithKey(){
   ANTHROPIC_API_KEY=key;
   sessionStorage.setItem('cpx_api_key',key);
   closeGuide();
+  if(_pendingCustomCase){ startSession(); }   // 교수 출제 증례면 키 입력 후 자동 시작
+}
+
+// ── 교수 모드 ──────────────────────────────────────────────────────────
+function showProfessor(){ $('prof-overlay').classList.remove('hidden'); }
+function closeProfessor(){ $('prof-overlay').classList.add('hidden'); }
+function pfGenerateLink(){
+  const v=id=>($(id)?$(id).value.trim():'');
+  const name=v('pf-name'), age=parseInt($('pf-age').value), sex=$('pf-sex').value;
+  const setting=v('pf-setting')||'외래 진료실', chief=v('pf-chief'), dx=v('pf-dx');
+  const onset=v('pf-onset'), loc=v('pf-location'), dur=v('pf-duration'), charac=v('pf-character');
+  const assoc=v('pf-assoc'), factor=v('pf-factor'), pmh=v('pf-pmh'), psh=v('pf-psh');
+  const meds=v('pf-meds'), social=v('pf-social'), female=v('pf-female');
+  const abdomen=v('pf-abdomen'), general=v('pf-general');
+  const bp=v('pf-bp'), pr=v('pf-pr'), rr=v('pf-rr'), bt=v('pf-bt');
+  if(!name){alert('환자명을 입력하세요.');return;}
+  if(!age){alert('나이를 입력하세요.');return;}
+  if(!chief){alert('주소를 입력하세요.');return;}
+  if(!dx){alert('진단명을 입력하세요.');return;}
+  if(!onset){alert('발병 시기(O)를 입력하세요.');return;}
+  if(!loc){alert('통증 위치(L)를 입력하세요.');return;}
+  const caseData={
+    case_id:'custom_'+Date.now(), category:'교수 출제', hidden_diagnosis:dx, chief_complaint:chief,
+    patient:{ name, age, sex, setting, vital_signs:{BP:bp||'—',PR:pr||'—',RR:rr||'—',BT:bt||'—'} },
+    history:{ O_onset:onset, L_location:loc, D_duration_course:dur||'—', C_character:charac||'—',
+      A_associated:assoc||'—', F_factor:factor||'—', PMH:pmh||'없음', PSH:psh||'없음',
+      medication:meds||'없음', social:social||'—', female_hx:female||'—' },
+    physical_exam:{ Abdomen:abdomen||'특이소견 없음', General:general||'—' },
+    nonverbal_expressions:{ baseline_emotion:'불안하고 아픔' }
+  };
+  const encoded=btoa(encodeURIComponent(JSON.stringify(caseData)));
+  const link=`${location.origin}${location.pathname}?case=${encoded}`;
+  $('pf-link').value=link;
+  $('pf-result').style.display='flex';
+  $('pf-result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function pfCopyLink(){
+  const inp=$('pf-link'); inp.select(); inp.setSelectionRange(0,99999);
+  try{ navigator.clipboard.writeText(inp.value); }catch(e){ document.execCommand('copy'); }
+  const btn=$('pf-copy-btn'); btn.textContent='✅ 복사됨'; setTimeout(()=>btn.textContent='복사',2000);
 }
 
 // ── LOAD CASES ──────────────────────────────────────────────────────────
+let _pendingCustomCase=null;
 window.addEventListener('load',()=>{
-  showGuide();
   initMemo();
+  // 교수 출제 증례 URL(?case=) 감지
+  let customCase=null;
+  const urlCase=new URLSearchParams(location.search).get('case');
+  if(urlCase){try{customCase=JSON.parse(decodeURIComponent(atob(urlCase)));}catch(e){console.warn('커스텀 증례 파싱 실패',e);}}
   const saved=cleanKey(sessionStorage.getItem('cpx_api_key'));
   if(saved&&$('api-key-input')){$('api-key-input').value=saved;ANTHROPIC_API_KEY=saved;}
-  allCases=CASE_BANK.cases;
+  allCases=customCase?[customCase,...CASE_BANK.cases]:CASE_BANK.cases;
   const sel=$('caseSelect'); sel.innerHTML='';
   allCases.forEach((c,i)=>{
     const opt=document.createElement('option');
@@ -662,9 +772,24 @@ window.addEventListener('load',()=>{
     opt.textContent=`[${c.case_id}] ${c.category} — ${c.patient.name}(${c.patient.age}${c.patient.sex})`;
     sel.appendChild(opt);
   });
+  sel.value=0;
   previewCase(0);
   sel.addEventListener('change',()=>previewCase(parseInt(sel.value)));
   setFace('neutral');
+  if(customCase){
+    _pendingCustomCase=customCase;
+    if(saved){ closeGuide(); startSession(); }
+    else {
+      const hint=document.createElement('div');
+      hint.style.cssText='background:#1a1040;border:1px solid #7c3aed;border-radius:10px;padding:12px 16px;color:#a78bfa;font-size:13px;text-align:center';
+      hint.innerHTML='🏫 <strong>교수 출제 증례</strong>로 접속했습니다.<br>API 키를 입력하면 바로 시작합니다.';
+      const guideBox=document.querySelector('.guide-box');
+      if(guideBox)guideBox.insertBefore(hint,guideBox.firstChild);
+      showGuide();
+    }
+  } else {
+    showGuide();
+  }
 });
 
 function previewCase(idx){
@@ -1047,7 +1172,8 @@ async function sendMessage(){
     const emo=detectEmoFromReply(reply);setFace(emo.emotion,emo.intensity);
     if(!isExam&&imgPose!=='lie'&&/\?\s*[”"']?\s*$/.test(reply)){imgEmo='question';updatePatientImage();}
     if(isExam)triggerFlinch();
-    addMsg(reply,'patient');showSpeech(reply);
+    addMsg(reply,'patient');showSpeech(reply);speakPatient(reply);
+    if(voiceMode&&(!ttsOn||!ttsCleanText(reply)))setTimeout(micResume,400);
     const tag=reply.match(/\(([^)]+)\)\s*$/);
     if(tag)setTimeout(()=>addMsg(`📋 ${tag[1]}`,'patient','result'),400);
   }catch(e){removeTyping();addMsg(`[오류] ${e.message}`,'system');}
@@ -1067,7 +1193,7 @@ async function endSession(){
   if(sessionEnded&&$('modal').classList.contains('show')){closeModal();return;}
   if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
   if(sessionEnded){$('modal').classList.add('show');return;}
-  sessionEnded=true;clearInterval(timerInterval);clearInterval(faceDetectInterval);
+  sessionEnded=true;clearInterval(timerInterval);clearInterval(faceDetectInterval);try{speechSynthesis.cancel();}catch(e){}voiceMode=false;stopListening();micBtnUI(false);
   $('modal').classList.add('show');$('score-rows').innerHTML='<span class="spinner"></span>채점 중...';
   if($('detail-section'))$('detail-section').style.display='none';
   if(currentCase){$('diagnosis-text').textContent=currentCase.hidden_diagnosis||'—';$('modal-diagnosis').style.display='block';}
@@ -1117,12 +1243,12 @@ ${doctorText}
 상세 피드백 작성 규칙:
 - history_items: 위 병력청취 체크리스트의 "각 항목"마다 1개씩, 학생이 그 항목을 물었으면 done=true, 안 물었으면 done=false. comment에는 잘한 점(물었을 때) 또는 놓친 점·왜 물어봤어야 하는지(놓쳤을 때)를 한 줄로.
 - exam_items: 학생이 실제로 시행한 신체진찰 + 케이스에 꼭 필요했던 핵심 검진을 평가한다. 각 항목 객체는 {item, done(시행 여부), appropriate(케이스에 적절했는지 true/false), comment} 형식. 규칙: ① 적절한데 시행함 → done=true, appropriate=true(잘함). ② 적절한데 안 함 → done=false, appropriate=true(놓침, comment에 했어야 하는 이유). ③ 시행했지만 부적절·불필요 → done=true, appropriate=false(comment에 감점 사유). 학생이 한 무관한 검진은 반드시 ③으로 넣을 것.
+- reasoning_items: 임상추론·계획 체크리스트를 history_items와 동일한 {item, done, comment} 형식으로 만든다. 다음 항목들을 포함: ① required_tests 각 검사를 "검사 제안: ○○"으로 (학생이 환자에게 제안/언급했으면 done=true) ② required_treatments 각 치료를 "치료 계획: ○○"으로 ③ "환자교육 - 핵심 검사 설명" ④ "환자교육 - 치료/관리 계획 설명". comment에는 잘한 점 또는 빠뜨려서 했어야 할 점을 한 줄로.
 - reasoning_review.findings: 이 환자에서 확인되었어야 할 핵심 소견(병력+진찰)을 2~4문장으로 정리.
 - reasoning_review.flow: "이러이러한 소견(근거) → 따라서 ○○ 진단을 추론" 형태로, 화살표(→)를 사용한 짧은 추론 흐름을 3~5줄로. 정답 진단으로 이어지는 논리를 복습하듯 서술.
-- reasoning_review.education: 환자교육 평가. 학생이 환자에게 (1) 필요한 핵심 검사를 제안·설명했는지, (2) 치료/관리 계획을 안내했는지 1~2문장으로 평가하고, 빠뜨렸다면 무엇을 설명했어야 하는지 적는다.
 
 순수 JSON으로만 응답(마크다운/코드블록 없이):
-{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"총평 한두 줄","history_items":[{"item":"항목명","done":true/false,"comment":"한 줄"}],"exam_items":[{"item":"항목명","done":true/false,"appropriate":true/false,"comment":"한 줄"}],"reasoning_review":{"findings":"소견 정리","flow":"근거 → 추론 흐름","education":"환자교육(검사 제안·치료 계획) 평가"}}`;
+{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"총평 한두 줄","history_items":[{"item":"항목명","done":true/false,"comment":"한 줄"}],"exam_items":[{"item":"항목명","done":true/false,"appropriate":true/false,"comment":"한 줄"}],"reasoning_items":[{"item":"검사 제안: ○○","done":true/false,"comment":"한 줄"}],"reasoning_review":{"findings":"소견 정리","flow":"근거 → 추론 흐름"}}`;
     const raw=await callClaude('CPX 채점관. 순수 JSON만 출력. 마크다운 코드블록 사용 금지.',[{role:'user',content:prompt}],4000);
     const cleaned=raw.replace(/```json|```/g,'').trim();
     const si=cleaned.indexOf('{'),ei=cleaned.lastIndexOf('}');
@@ -1171,8 +1297,8 @@ function fbItemList(arr){
 
 function renderDetail(r){
   const box=$('detail-rows'); if(!box)return;
-  const hist=r.history_items, exam=r.exam_items, rev=r.reasoning_review||{};
-  const hasAny=(Array.isArray(hist)&&hist.length)||(Array.isArray(exam)&&exam.length)||rev.findings||rev.flow;
+  const hist=r.history_items, exam=r.exam_items, reas=r.reasoning_items, rev=r.reasoning_review||{};
+  const hasAny=(Array.isArray(hist)&&hist.length)||(Array.isArray(exam)&&exam.length)||(Array.isArray(reas)&&reas.length)||rev.findings||rev.flow;
   if(!hasAny){$('detail-section').style.display='none';return;}
   let h='';
   if(Array.isArray(hist)&&hist.length){
@@ -1185,16 +1311,17 @@ function renderDetail(r){
     h+=`<div class="fb-group-title">✋ 신체진찰 — ${got}/${exam.length}개 항목 수행</div>`;
     h+=`<div class="fb-group">${fbItemList(exam)}</div>`;
   }
+  if(Array.isArray(reas)&&reas.length){
+    const got=reas.filter(x=>x&&x.done).length;
+    h+=`<div class="fb-group-title">🧠 임상추론 · 계획 — ${got}/${reas.length}개 항목 수행</div>`;
+    h+=`<div class="fb-group">${fbItemList(reas)}</div>`;
+  }
   if(rev.findings||rev.flow){
-    h+=`<div class="fb-group-title">🧠 임상추론 복습</div>`;
+    h+=`<div class="fb-group-title">🔎 진단 추론 복습</div>`;
     h+=`<div class="fb-review">`;
     if(rev.findings)h+=`<div><b>확인했어야 할 소견</b><br>${esc(rev.findings)}</div>`;
     if(rev.flow)h+=`<div style="margin-top:8px"><b>진단 추론 흐름</b><div class="fb-flow">${esc(rev.flow)}</div></div>`;
     h+=`</div>`;
-  }
-  if(rev.education){
-    h+=`<div class="fb-group-title">📣 환자교육 · 계획</div>`;
-    h+=`<div class="fb-review"><div><b>핵심 검사 제안 · 치료 계획 설명</b><br>${esc(rev.education)}</div></div>`;
   }
   box.innerHTML=h;
   $('detail-section').style.display='block';
@@ -1264,6 +1391,79 @@ function examPhrase(n){return `(${n}${objJosa(n)} 한다)`;}
 function insertExam(n){$('chat-input').value=examPhrase(n);$('chat-input').focus();}
 function quickExam(n){$('chat-input').value=examPhrase(n);sendMessage();}
 function quickCmd(t){$('chat-input').value=t;sendMessage();}
+
+// ── TTS (환자 음성 출력, 브라우저 speechSynthesis) ───────────────────────────
+let ttsOn=true;
+function toggleTts(){
+  ttsOn=!ttsOn;
+  const b=$('tts-btn'); if(!b)return;
+  if(ttsOn){b.textContent='🔊 음성';b.style.color='#4ade80';b.style.borderColor='#166534';}
+  else{try{speechSynthesis.cancel();}catch(e){}b.textContent='🔇 음성';b.style.color='#94a3b8';b.style.borderColor='#334155';}
+}
+function ttsCleanText(t){
+  return String(t||'')
+    .replace(/\[[^\]]*\]/g,' ')        // [지문] 제거
+    .replace(/\([^)]*\)\s*$/,' ')      // 끝의 (진찰 소견) 제거
+    .replace(/[“”"'’]/g,' ')
+    .replace(/📋/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function pickKoVoice(sex){
+  const vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
+  const ko=vs.filter(v=>/ko/i.test(v.lang)); if(!ko.length)return null;
+  const fH=/female|여|yuna|sora|heami|nara|sun/i, mH=/male|남|minsu|injoon|jin/i;
+  if(sex==='남'){const m=ko.find(v=>mH.test(v.name)); if(m)return m;}
+  else{const f=ko.find(v=>fH.test(v.name)); if(f)return f;}
+  return ko[0];
+}
+function speakPatient(text){
+  if(!ttsOn||!('speechSynthesis' in window))return;
+  const clean=ttsCleanText(text); if(!clean)return;
+  try{speechSynthesis.cancel();}catch(e){}
+  const u=new SpeechSynthesisUtterance(clean); u.lang='ko-KR';
+  const p=currentCase&&currentCase.patient; const sex=p?p.sex:'여', age=p?p.age:40;
+  const v=pickKoVoice(sex); if(v)u.voice=v;
+  u.pitch=(sex==='여')?1.15:0.85; u.rate=1.0;
+  if(age>=65){u.pitch-=0.1;u.rate=0.92;}
+  if(age<=15)u.pitch+=0.25;
+  u.onend=()=>{ if(voiceMode)setTimeout(micResume,250); };  // 환자 음성 끝→다시 받아들이기
+  u.onerror=u.onend;
+  try{speechSynthesis.speak(u);}catch(e){ if(voiceMode)setTimeout(micResume,250); }
+}
+if('speechSynthesis' in window){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}catch(e){}}
+
+// ── 음성 인식 (STT) + 대화 루프 ───────────────────────────────────────────
+// 연속(continuous) 인식: 음성대화 켤 때 1번만 start() → 권한 요청도 1회(브라우저가 기억하는 환경 기준)
+let srInstance=null, voiceMode=false, micPaused=false;
+function micBtnUI(on){
+  const b=$('mic-btn'); if(!b)return;
+  if(on){b.textContent='🔴 듣는 중';b.style.background='#7f1d1d';b.style.color='#fca5a5';b.style.borderColor='#b91c1c';}
+  else{b.textContent='🎤 음성대화';b.style.background='#1e293b';b.style.color='#94a3b8';b.style.borderColor='#334155';}
+}
+function toggleMic(){
+  if(voiceMode){ voiceMode=false; stopListening(); micBtnUI(false); return; }
+  if(!(window.SpeechRecognition||window.webkitSpeechRecognition)){addMsg('[안내] 음성 인식은 Chrome 브라우저에서만 됩니다.','system');return;}
+  if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
+  voiceMode=true; micPaused=false; micBtnUI(true); startListening();
+}
+function micResume(){ micPaused=false; }   // 환자 답변/음성 끝나면 다시 받아들이기
+function startListening(){
+  if(!voiceMode)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return;
+  if(srInstance){ try{srInstance.start();}catch(e){} return; }  // 같은 인스턴스 재시작(권한 재요청 최소화)
+  srInstance=new SR(); srInstance.lang='ko-KR'; srInstance.continuous=true; srInstance.interimResults=true;
+  srInstance.onresult=e=>{
+    if(micPaused)return;                       // 환자 응답/TTS 중에는 무시(자기 음성 인식 방지)
+    let interim='', fin='';
+    for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];(r.isFinal?fin+=r[0].transcript:interim+=r[0].transcript);}
+    if(interim){$('chat-input').value=interim;autoResize($('chat-input'));}
+    if(fin.trim()){ micPaused=true; $('chat-input').value=fin.trim(); sendMessage(); }
+  };
+  srInstance.onend=()=>{ if(voiceMode){ try{srInstance.start();}catch(e){} } };  // 자동 종료 시 같은 인스턴스 재개
+  srInstance.onerror=ev=>{ /* no-speech/aborted 등은 onend에서 재개 처리 */ };
+  try{srInstance.start();}catch(e){}
+}
+function stopListening(){ const s=srInstance; srInstance=null; try{s&&s.stop();}catch(e){} }
 
 // ── 메모장 ───────────────────────────────────────────────────────────────
 function toggleMemo(){
