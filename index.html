@@ -333,6 +333,24 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   </div>
 </div>
 
+<!-- MY PAGE OVERLAY -->
+<div class="guide-overlay hidden" id="mypage-overlay">
+  <div class="guide-box" style="max-width:760px">
+    <h1>📊 마이페이지 — 나의 CPX 기록</h1>
+    <p style="text-align:center;color:#64748b;font-size:13px;margin-top:-10px">이 브라우저에 저장된 채점 기록을 분석합니다</p>
+    <div id="mp-empty" style="display:none;text-align:center;color:#64748b;font-size:14px;padding:30px 0">아직 저장된 채점 기록이 없습니다.<br>진료를 종료·채점하면 여기에 기록이 쌓입니다.</div>
+    <div id="mp-body" style="display:none;flex-direction:column;gap:16px">
+      <div class="guide-section"><h2>① 요약 · 약점 분석</h2><div id="mp-summary"></div></div>
+      <div class="guide-section"><h2>② 파트별 점수 추이</h2><div id="mp-chart"></div><div style="font-size:11px;color:#475569;margin-top:6px">가로축: 시도 순서 · 세로축: 100점 환산 점수</div></div>
+      <div class="guide-section"><h2>③ 전체 기록</h2><div id="mp-list" style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto"></div></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:space-between;align-items:center">
+      <button onclick="clearHistory()" style="background:#7f1d1d;border:none;color:#fca5a5;padding:9px 16px;border-radius:8px;font-size:13px;cursor:pointer">🗑 기록 전체 삭제</button>
+      <button class="btn-guide-start" onclick="closeMyPage()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;margin-top:0">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- SETUP BAR -->
 <div class="setup-bar">
   <div class="field">
@@ -346,6 +364,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   <button class="btn-start" id="startBtn" onclick="startSession()">진료 시작</button>
   <button class="btn-guide" onclick="showGuide()">📖 사용 가이드</button>
   <button class="btn-guide" onclick="showProfessor()" style="border-color:#7c3aed;color:#a78bfa">🏫 교수 모드</button>
+  <button class="btn-guide" onclick="openMyPage()" style="border-color:#0ea5e9;color:#38bdf8">📊 마이페이지</button>
 </div>
 
 <!-- MAIN -->
@@ -601,8 +620,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
           <ellipse class="hot" data-region="ear"   cx="66"  cy="88" rx="8" ry="13"/>
           <ellipse class="hot" data-region="ear"   cx="178" cy="88" rx="8" ry="13"/>
           <ellipse class="hot" data-region="mouth" cx="122" cy="111" rx="16" ry="8"/>
-          <rect    class="hot" data-region="neck"  x="100" y="117" width="44" height="12" rx="4"/>
-          <rect    class="hot" data-region="thyroid" x="100" y="129" width="44" height="10" rx="3"/>
+          <rect    class="hot" data-region="neck"  x="100" y="117" width="44" height="22" rx="4"/>
           <rect    class="hot" data-region="chest" x="80" y="139" width="86" height="47" rx="4"/>
           <rect    class="hot" data-region="abd_general" x="106" y="178" width="34" height="22"/>
           <rect    class="hot" data-region="ruq" x="86" y="186" width="37" height="28"/>
@@ -673,7 +691,10 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
       </div>
       <div id="face-comment" style="font-size:12px;color:#94a3b8;margin-top:10px;line-height:1.7"></div>
     </div>
-    <button class="btn-close" onclick="closeModal()">닫기</button>
+    <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;">
+      <button onclick="exportReportPDF()" style="background:#166534;border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;">📄 PDF 저장</button>
+      <button class="btn-close" onclick="closeModal()">닫기</button>
+    </div>
   </div>
 </div>
 
@@ -1173,10 +1194,10 @@ async function sendMessage(){
     if(!isExam&&imgPose!=='lie'&&/\?\s*[”"']?\s*$/.test(reply)){imgEmo='question';updatePatientImage();}
     if(isExam)triggerFlinch();
     addMsg(reply,'patient');showSpeech(reply);speakPatient(reply);
-    if(voiceMode&&(!ttsOn||!ttsCleanText(reply)))setTimeout(micResume,400);
+    if(voiceMode&&(!ttsOn||!ttsCleanText(reply)))setTimeout(resumeListening,400);
     const tag=reply.match(/\(([^)]+)\)\s*$/);
     if(tag)setTimeout(()=>addMsg(`📋 ${tag[1]}`,'patient','result'),400);
-  }catch(e){removeTyping();addMsg(`[오류] ${e.message}`,'system');}
+  }catch(e){removeTyping();addMsg(`[오류] ${e.message}`,'system');if(voiceMode)setTimeout(resumeListening,400);}
   finally{setLoading(false);}
 }
 function detectEmoFromReply(text){
@@ -1253,9 +1274,109 @@ ${doctorText}
     const cleaned=raw.replace(/```json|```/g,'').trim();
     const si=cleaned.indexOf('{'),ei=cleaned.lastIndexOf('}');
     if(si===-1||ei===-1)throw new Error('JSON 없음: '+cleaned.slice(0,200));
-    renderScore(JSON.parse(cleaned.slice(si,ei+1)));
+    const parsed=JSON.parse(cleaned.slice(si,ei+1));
+    lastScore=parsed;
+    renderScore(parsed);
+    saveScoreHistory(parsed);
   }catch(e){$('score-rows').innerHTML=`<div style="color:#ef4444;font-size:13px">채점 오류: ${e.message}</div>`;}
   buildFaceReport();
+}
+
+// ── 채점 기록 (로컬 누적) ──────────────────────────────────────────────────
+let lastScore=null;
+const HISTORY_KEY='cpx_history';
+function loadHistory(){ try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return [];} }
+function saveScoreHistory(r){
+  if(!r)return;
+  const rec={
+    ts:Date.now(),
+    date:new Date().toLocaleString('ko-KR'),
+    case_id:currentCase?currentCase.case_id:'',
+    case_name:currentCase?`${currentCase.patient.name}(${currentCase.patient.age}${currentCase.patient.sex}) · ${currentCase.category}`:'',
+    diagnosis:currentCase?(currentCase.hidden_diagnosis||''):'',
+    history:+(r.history||0), history_max:+(r.history_max||40),
+    exam:+(r.exam||0), exam_max:+(r.exam_max||20),
+    ppi:+(r.ppi||0), ppi_max:+(r.ppi_max||20),
+    reasoning:+(r.reasoning||0), reasoning_max:+(r.reasoning_max||20),
+    total:+(r.total||0), feedback:r.feedback||''
+  };
+  try{ const h=loadHistory(); h.push(rec); localStorage.setItem(HISTORY_KEY,JSON.stringify(h.slice(-200))); }catch(e){}
+}
+
+// ── 채점 결과 PDF 저장 (브라우저 인쇄 → PDF) ───────────────────────────────
+function exportReportPDF(){
+  const r=lastScore; if(!r){alert('채점 결과가 없습니다.');return;}
+  const c=currentCase;
+  const E=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const secs=[['병력청취','history','history_max'],['신체진찰','exam','exam_max'],['PPI(환자소통)','ppi','ppi_max'],['임상추론','reasoning','reasoning_max']];
+  let rows=''; secs.forEach(([label,k,mk])=>{const e=+(r[k]||0),m=+(r[mk]||0),pct=m?Math.round(e/m*100):0;
+    rows+=`<tr><td>${label}</td><td style="text-align:right">${e} / ${m}</td><td><div class="bar"><div style="width:${pct}%"></div></div></td><td style="text-align:right">${pct}%</td></tr>`;});
+  const itemHtml=(title,arr)=>{ if(!Array.isArray(arr)||!arr.length)return '';
+    const li=arr.map(it=>{const done=!!it.done,bad=it.appropriate===false;const mk=done&&bad?'⚠':(done?'✓':'✗');const col=done&&bad?'#b45309':(done?'#166534':'#b91c1c');
+      return `<li><b style="color:${col}">${mk}</b> ${E(it.item||it.name||it.skill||'')}${it.comment?` — <span style="color:#555">${E(it.comment)}</span>`:''}</li>`;}).join('');
+    return `<h3>${title}</h3><ul>${li}</ul>`; };
+  const rev=r.reasoning_review||{};
+  const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>CPX 채점결과</title>
+<style>body{font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#1a1a1a;padding:32px;max-width:760px;margin:0 auto;}
+h1{font-size:22px;border-bottom:2px solid #1d4ed8;padding-bottom:8px;margin:0} h2{font-size:15px;margin:22px 0 4px;color:#1d4ed8} h3{font-size:13px;margin:14px 0 2px}
+.meta{color:#555;font-size:13px;line-height:1.7;margin-top:6px} table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px} td{padding:6px 8px;border-bottom:1px solid #eee}
+.bar{background:#eee;border-radius:4px;height:8px;width:140px;overflow:hidden}.bar>div{height:100%;background:#1d4ed8}
+.total{font-size:18px;font-weight:700;margin-top:10px} ul{padding-left:18px;font-size:12.5px;line-height:1.7;margin:2px 0} li{margin:2px 0}
+.flow{background:#f3f6ff;border-left:3px solid #1d4ed8;padding:10px;white-space:pre-wrap;font-size:12.5px;margin-top:6px}
+@media print{body{padding:0}}</style></head><body>
+<h1>🩺 CPX 채점 결과</h1>
+<div class="meta">일시: ${E(new Date().toLocaleString('ko-KR'))}<br>증례: ${c?E(`${c.patient.name}(${c.patient.age}${c.patient.sex}) · ${c.category}`):'-'}<br>정답 진단: ${c?E(c.hidden_diagnosis||'-'):'-'}</div>
+<h2>채점 (100점 만점)</h2><table>${rows}</table>
+<div class="total">총점 ${+(r.total||0)} / 100점</div>
+${r.feedback?`<p style="font-size:13px;color:#444;margin-top:8px">${E(r.feedback)}</p>`:''}
+<h2>항목별 피드백</h2>${itemHtml('병력청취',r.history_items)}${itemHtml('신체진찰',r.exam_items)}${itemHtml('임상추론·계획',r.reasoning_items)}
+${(rev.findings||rev.flow)?`<h2>진단 추론 복습</h2>${rev.findings?`<p style="font-size:12.5px">${E(rev.findings)}</p>`:''}${rev.flow?`<div class="flow">${E(rev.flow)}</div>`:''}`:''}
+</body></html>`;
+  const w=window.open('','_blank'); if(!w){alert('팝업이 차단됐습니다. 브라우저에서 팝업을 허용해주세요.');return;}
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{ try{w.focus();w.print();}catch(e){} },400);
+}
+
+// ── 마이페이지 (기록·추이·약점 분석) ───────────────────────────────────────
+function openMyPage(){ renderMyPage(); $('mypage-overlay').classList.remove('hidden'); }
+function closeMyPage(){ $('mypage-overlay').classList.add('hidden'); }
+function clearHistory(){ if(!confirm('이 브라우저에 저장된 채점 기록을 모두 삭제할까요?'))return; try{localStorage.removeItem(HISTORY_KEY);}catch(e){} renderMyPage(); }
+function pctOf(r,k,mk){const m=+(r[mk]||0),v=+(r[k]||0);return m?Math.round(v/m*100):0;}
+function weakAdvice(k){
+  return ({history:'문진 항목(OLDCARTS·계통문진·과거력·약물·사회력·여성력)을 체계적으로 빠짐없이 묻는 연습이 필요합니다.',
+    exam:'시진→청진→타진→촉진 순서와 음성 소견 확인, 케이스에 맞는 특수검사 수행을 보완하세요.',
+    ppi:'인사·자기소개·공감·배려 등 환자와의 소통(PPI)을 의식적으로 챙기세요.',
+    reasoning:'필요한 검사 제안과 치료/관리 계획을 환자에게 설명하는 임상추론·환자교육을 강화하세요.'})[k]||'';
+}
+function mpChartSVG(h){
+  const W=640,H=240,L=34,R=10,T=10,B=22;
+  const x=i=> h.length>1 ? L+(W-L-R)*i/(h.length-1) : (L+(W-R))/2;
+  const y=v=> (H-B)-((H-B)-T)*Math.max(0,Math.min(100,v))/100;
+  const series=[['병력청취',r=>pctOf(r,'history','history_max'),'#3b82f6'],['신체진찰',r=>pctOf(r,'exam','exam_max'),'#22c55e'],['PPI',r=>pctOf(r,'ppi','ppi_max'),'#f59e0b'],['임상추론',r=>pctOf(r,'reasoning','reasoning_max'),'#a855f7'],['총점',r=>+(r.total||0),'#e2e8f0']];
+  let g='';
+  [0,50,100].forEach(v=>{ g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#2d3148" stroke-width="1"/><text x="${L-4}" y="${y(v)+3}" fill="#475569" font-size="9" text-anchor="end">${v}</text>`; });
+  series.forEach(([label,fn,col])=>{
+    const pts=h.map((r,i)=>`${x(i).toFixed(1)},${y(fn(r)).toFixed(1)}`).join(' ');
+    g+=`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="${label==='총점'?2.5:1.6}" opacity="${label==='총점'?1:.9}"/>`;
+    g+=h.map((r,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(fn(r)).toFixed(1)}" r="${label==='총점'?3:2.2}" fill="${col}"/>`).join('');
+  });
+  const legend=series.map(([label,,col])=>`<span style="display:inline-flex;align-items:center;gap:4px;margin-right:10px;font-size:11px;color:#94a3b8"><span style="width:10px;height:3px;background:${col};display:inline-block"></span>${label}</span>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;background:#0c1018;border:1px solid #2d3148;border-radius:8px">${g}</svg><div style="margin-top:6px">${legend}</div>`;
+}
+function renderMyPage(){
+  const h=loadHistory();
+  if(!h.length){ $('mp-empty').style.display='block'; $('mp-body').style.display='none'; return; }
+  $('mp-empty').style.display='none'; $('mp-body').style.display='flex';
+  const parts=[['병력청취','history','history_max'],['신체진찰','exam','exam_max'],['PPI','ppi','ppi_max'],['임상추론','reasoning','reasoning_max']];
+  const avgs=parts.map(([label,k,mk])=>({label,k,avg:Math.round(h.reduce((s,r)=>s+pctOf(r,k,mk),0)/h.length)}));
+  const totalAvg=Math.round(h.reduce((s,r)=>s+(+r.total||0),0)/h.length);
+  const weakest=avgs.slice().sort((a,b)=>a.avg-b.avg)[0];
+  let s=`<div style="font-size:13px;color:#cbd5e1;margin-bottom:8px">총 <b>${h.length}</b>회 · 평균 총점 <b style="color:#60a5fa">${totalAvg}</b>/100</div>`;
+  s+='<div style="display:flex;flex-wrap:wrap;gap:8px">'+avgs.map(a=>`<div style="background:#0f1117;border:1px solid #2d3148;border-radius:8px;padding:8px 12px;min-width:96px"><div style="font-size:11px;color:#64748b">${a.label} 평균</div><div style="font-size:18px;font-weight:700;color:${a.avg<60?'#f87171':a.avg<80?'#fbbf24':'#4ade80'}">${a.avg}%</div></div>`).join('')+'</div>';
+  s+=`<div style="margin-top:10px;background:#1a1040;border:1px solid #7c3aed;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#c4b5fd;line-height:1.7">🔎 <b>가장 약한 영역: ${weakest.label} (평균 ${weakest.avg}%)</b><br>${weakAdvice(weakest.k)}</div>`;
+  $('mp-summary').innerHTML=s;
+  $('mp-chart').innerHTML=mpChartSVG(h);
+  $('mp-list').innerHTML=h.slice().reverse().map(r=>`<div style="background:#0f1117;border:1px solid #2d3148;border-radius:8px;padding:8px 11px;font-size:12px;display:flex;justify-content:space-between;gap:10px;align-items:center"><div><div style="color:#cbd5e1">${esc(r.case_name||r.case_id||'-')}</div><div style="color:#64748b;font-size:11px">${esc(r.date||'')} · 진단: ${esc(r.diagnosis||'-')}</div></div><div style="text-align:right;white-space:nowrap"><div style="font-weight:700;color:#60a5fa">${r.total||0}점</div><div style="font-size:10.5px;color:#64748b">병${r.history}·진${r.exam}·소통${r.ppi}·추론${r.reasoning}</div></div></div>`).join('');
 }
 
 function renderScore(r){
@@ -1426,15 +1547,15 @@ function speakPatient(text){
   u.pitch=(sex==='여')?1.15:0.85; u.rate=1.0;
   if(age>=65){u.pitch-=0.1;u.rate=0.92;}
   if(age<=15)u.pitch+=0.25;
-  u.onend=()=>{ if(voiceMode)setTimeout(micResume,250); };  // 환자 음성 끝→다시 받아들이기
+  u.onend=()=>{ if(voiceMode)setTimeout(resumeListening,250); };  // 환자 음성 끝→마이크 다시 켜기
   u.onerror=u.onend;
-  try{speechSynthesis.speak(u);}catch(e){ if(voiceMode)setTimeout(micResume,250); }
+  try{speechSynthesis.speak(u);}catch(e){ if(voiceMode)setTimeout(resumeListening,250); }
 }
 if('speechSynthesis' in window){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}catch(e){}}
 
 // ── 음성 인식 (STT) + 대화 루프 ───────────────────────────────────────────
 // 연속(continuous) 인식: 음성대화 켤 때 1번만 start() → 권한 요청도 1회(브라우저가 기억하는 환경 기준)
-let srInstance=null, voiceMode=false, micPaused=false;
+let srInstance=null, voiceMode=false, micBusy=false;
 function micBtnUI(on){
   const b=$('mic-btn'); if(!b)return;
   if(on){b.textContent='🔴 듣는 중';b.style.background='#7f1d1d';b.style.color='#fca5a5';b.style.borderColor='#b91c1c';}
@@ -1444,26 +1565,30 @@ function toggleMic(){
   if(voiceMode){ voiceMode=false; stopListening(); micBtnUI(false); return; }
   if(!(window.SpeechRecognition||window.webkitSpeechRecognition)){addMsg('[안내] 음성 인식은 Chrome 브라우저에서만 됩니다.','system');return;}
   if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
-  voiceMode=true; micPaused=false; micBtnUI(true); startListening();
+  voiceMode=true; micBusy=false; micBtnUI(true); startListening();
 }
-function micResume(){ micPaused=false; }   // 환자 답변/음성 끝나면 다시 받아들이기
 function startListening(){
   if(!voiceMode)return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return;
-  if(srInstance){ try{srInstance.start();}catch(e){} return; }  // 같은 인스턴스 재시작(권한 재요청 최소화)
-  srInstance=new SR(); srInstance.lang='ko-KR'; srInstance.continuous=true; srInstance.interimResults=true;
-  srInstance.onresult=e=>{
-    if(micPaused)return;                       // 환자 응답/TTS 중에는 무시(자기 음성 인식 방지)
-    let interim='', fin='';
-    for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];(r.isFinal?fin+=r[0].transcript:interim+=r[0].transcript);}
-    if(interim){$('chat-input').value=interim;autoResize($('chat-input'));}
-    if(fin.trim()){ micPaused=true; $('chat-input').value=fin.trim(); sendMessage(); }
-  };
-  srInstance.onend=()=>{ if(voiceMode){ try{srInstance.start();}catch(e){} } };  // 자동 종료 시 같은 인스턴스 재개
-  srInstance.onerror=ev=>{ /* no-speech/aborted 등은 onend에서 재개 처리 */ };
+  if(!srInstance){
+    srInstance=new SR(); srInstance.lang='ko-KR'; srInstance.continuous=true; srInstance.interimResults=true;
+    srInstance.onresult=e=>{
+      if(micBusy)return;
+      let interim='', fin='';
+      for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];(r.isFinal?fin+=r[0].transcript:interim+=r[0].transcript);}
+      if(interim){$('chat-input').value=interim;autoResize($('chat-input'));}
+      if(fin.trim()){ micBusy=true; try{srInstance.stop();}catch(e){} $('chat-input').value=fin.trim(); sendMessage(); }
+    };
+    // 듣는 중(micBusy=false) 자동 종료 시에만 재개. 환자 응답/TTS 중(micBusy=true)엔 마이크 꺼둠
+    srInstance.onend=()=>{ if(voiceMode && !micBusy){ try{srInstance.start();}catch(e){} } };
+    srInstance.onerror=ev=>{};
+  }
+  micBusy=false;
   try{srInstance.start();}catch(e){}
 }
-function stopListening(){ const s=srInstance; srInstance=null; try{s&&s.stop();}catch(e){} }
+// 환자 답변+음성 출력이 끝난 뒤 다시 듣기 시작 (그 전까지 마이크는 꺼져 있어 TTS가 안 들어감)
+function resumeListening(){ if(!voiceMode)return; micBusy=false; try{srInstance&&srInstance.start();}catch(e){} }
+function stopListening(){ const s=srInstance; srInstance=null; try{s&&s.abort();}catch(e){} }
 
 // ── 메모장 ───────────────────────────────────────────────────────────────
 function toggleMemo(){
@@ -1528,13 +1653,12 @@ const EXAM_MENU={
   mouth:{name:'구강',opts:[
     ['구강 점막(탈수)','exam','구강 점막 시진(탈수 확인)',''],
     ['편도/인두(발적·삼출물)','exam','편도·인두 시진(발적·삼출물)','']]},
-  neck:{name:'목',opts:[
+  neck:{name:'목 (경부·갑상선)',opts:[
     ['경부 림프절 촉진','exam','경부 림프절 촉진',''],
     ['경정맥 시진(JVD)','exam','경정맥 팽대(JVD) 시진',''],
     ['경동맥 청진','exam','경동맥 청진',''],
     ['경부 강직(수막자극)','exam','경부 강직 검사(수막자극징후)',''],
-    ['Lhermitte 징후','exam','Lhermitte 징후 검사','']]},
-  thyroid:{name:'갑상선',opts:[
+    ['Lhermitte 징후','exam','Lhermitte 징후 검사',''],
     ['갑상선 촉진','exam','갑상선 촉진',''],
     ['침 삼킴 시진','exam','침 삼킴 시 갑상선 시진','']]},
   chest:{name:'흉부',opts:[
