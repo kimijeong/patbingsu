@@ -188,6 +188,40 @@ def score_session(req: ScoreReq):
 
 
 # ── RUN ──────────────────────────────────────────────────
+
+# ── TTS (edge-tts) ─────────────────────────────────────────────────────────
+import os as _os
+from fastapi.responses import FileResponse
+
+# voice, rate, pitch
+VOICE_MAP = {
+    "child_female":   ("ko-KR-SunHiNeural",  "+8%",  "+12Hz"),
+    "child_male":     ("ko-KR-InJoonNeural",  "+8%",  "+8Hz"),
+    "youth_female":   ("ko-KR-SunHiNeural",   "+0%",  "+0Hz"),
+    "youth_male":     ("ko-KR-InJoonNeural",  "+0%",  "+0Hz"),
+    "elderly_female": ("ko-KR-SunHiNeural",  "-12%",  "-5Hz"),
+    "elderly_male":   ("ko-KR-InJoonNeural", "-12%",  "-5Hz"),
+}
+
+class TTSReq(BaseModel):
+    text: str
+    voice_key: str
+
+@app.post("/api/tts")
+async def synthesize_tts(req: TTSReq):
+    import edge_tts, tempfile
+    print(f"[TTS] key={req.voice_key}, text={req.text[:30]}")
+    tmp_path = str(BASE / "tts_output.mp3")
+    try:
+        voice_name, rate, pitch = VOICE_MAP.get(req.voice_key, ("ko-KR-SunHiNeural", "+0%", "+0Hz"))
+        communicate = edge_tts.Communicate(req.text, voice_name, rate=rate, pitch=pitch)
+        await communicate.save(tmp_path)
+        print(f"[TTS] 완료: {_os.path.getsize(tmp_path)} bytes")
+        return FileResponse(tmp_path, media_type="audio/mpeg")
+    except Exception as e:
+        print(f"[TTS 오류] {e}")
+        raise HTTPException(500, str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
