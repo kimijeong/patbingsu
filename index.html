@@ -70,7 +70,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 .webcam-pip:hover { transform:scale(1.03); }
 .webcam-pip video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); }
 .pip-label { position:absolute; bottom:4px; left:6px; font-size:10px; color:#93c5fd; background:rgba(0,0,0,.5); padding:1px 5px; border-radius:4px; }
-.student-emo { position:absolute; top:4px; right:5px; font-size:14px; background:rgba(0,0,0,.5); border-radius:50%; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+.student-emo { position:absolute; top:6px; right:6px; font-size:28px; background:rgba(0,0,0,.6); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.4); }
 .pip-off-msg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#475569; font-size:11px; text-align:center; }
 .pip-off-msg span { font-size:22px; }
 
@@ -85,7 +85,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 
 /* EMOTION ROW */
 .emotion-row { position:absolute; bottom:8px; left:0; right:0; z-index:2; display:flex; justify-content:center; }
-.emotion-badge { background:#1e293b; border:1px solid #334155; border-radius:20px; padding:4px 16px; font-size:12px; color:#94a3b8; transition:all .3s; }
+.emotion-badge { background:#1e293b; border:1px solid #334155; border-radius:22px; padding:8px 22px; font-size:18px; font-weight:600; color:#cbd5e1; transition:all .3s; box-shadow:0 2px 10px rgba(0,0,0,.35); }
 
 /* SVG CHARACTER */
 .char-svg { display:block; transition:all 0.5s ease; }
@@ -216,6 +216,10 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
     <label>증례 선택</label>
     <select id="caseSelect"><option>로딩 중...</option></select>
   </div>
+  <div class="field">
+    <label>시험 시간</label>
+    <select id="timerMode"><option value="720">12분</option><option value="0">무제한(연습)</option></select>
+  </div>
   <button class="btn-start" id="startBtn" onclick="startSession()">진료 시작</button>
   <button class="btn-guide" onclick="showGuide()">📖 사용 가이드</button>
 </div>
@@ -262,7 +266,7 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
     <span>⏱</span>
     <div>
       <div class="timer-val" id="timer-display">12:00</div>
-      <div class="timer-sub">남은 시간</div>
+      <div class="timer-sub" id="timer-sub">남은 시간</div>
     </div>
   </div>
 </div>
@@ -3083,7 +3087,7 @@ const KEY_ITEMS = {
 // ── STATE ───────────────────────────────────────────────────────────────
 let allCases=[], currentCase=null, chatHistory=[], transcript=[];
 let timerInterval=null, totalSeconds=720, sessionActive=false, sessionEnded=false;
-let timerStarted=false;
+let timerStarted=false, timerUnlimited=false, elapsedSeconds=0;
 let bodyState='sitting', animTO=null, spTO=null;
 let webcamStream=null, faceDetectInterval=null, emotionLog=[];
 let faceApiReady=false, curEmotion='neutral';
@@ -3162,14 +3166,22 @@ function startSession(){
   currentCase=allCases[idx]; if(!currentCase)return;
   chatHistory=[]; transcript=[];
   sessionActive=true; sessionEnded=false; timerStarted=false;
-  totalSeconds=720;
-  $('timer-display').textContent='12:00'; $('timer-display').classList.remove('warn');
+  const tmVal=parseInt(($('timerMode')&&$('timerMode').value)||'720');
+  timerUnlimited=(tmVal===0); totalSeconds=timerUnlimited?0:tmVal; elapsedSeconds=0;
+  if(timerUnlimited){
+    $('timer-display').textContent='∞ 00:00';
+    if($('timer-sub'))$('timer-sub').textContent='경과 시간';
+  }else{
+    const mm=String(Math.floor(totalSeconds/60)).padStart(2,'0');
+    $('timer-display').textContent=`${mm}:00`;
+    if($('timer-sub'))$('timer-sub').textContent='남은 시간';
+  }
+  $('timer-display').classList.remove('warn');
   clearInterval(timerInterval); $('chat-messages').innerHTML='';
   setBodyState(null); setFace('neutral');
   const p=currentCase.patient;
   addMsg(`[시작] ${p.name} 환자 (${p.age}세 ${p.sex==='여'?'여성':'남성'}) · ${currentCase.category}`,'system');
-  if(p.appearance)addMsg(p.appearance,'system');
-  addMsg('[안내] 첫 메시지를 보내면 12분 타이머가 시작됩니다.','system');
+  addMsg(timerUnlimited?'[안내] 무제한(연습) 모드입니다. 첫 메시지를 보내면 경과 시간이 표시됩니다.':`[안내] 첫 메시지를 보내면 ${Math.floor(totalSeconds/60)}분 타이머가 시작됩니다.`,'system');
   $('startBtn').textContent='재시작';
 }
 
@@ -3178,6 +3190,13 @@ function startTimer(){
   clearInterval(timerInterval);
   timerInterval=setInterval(()=>{
     if(sessionEnded)return;
+    if(timerUnlimited){
+      elapsedSeconds++;
+      const m=String(Math.floor(elapsedSeconds/60)).padStart(2,'0');
+      const s=String(elapsedSeconds%60).padStart(2,'0');
+      $('timer-display').textContent=`∞ ${m}:${s}`;
+      return;
+    }
     if(--totalSeconds<=0){
       $('timer-display').textContent='00:00'; $('timer-display').classList.add('warn');
       clearInterval(timerInterval);
@@ -3349,29 +3368,50 @@ async function callClaude(system,messages,maxTokens=600){
 // ── PATIENT SYSTEM PROMPT ────────────────────────────────────────────────
 function buildPatientSystemPrompt(){
   const c=currentCase,p=c.patient;
-  return `당신은 CPX 시험 환자 역할을 합니다.
+  return `당신은 CPX(임상수행평가) 시험의 표준화 환자입니다. 의대생(의사 역할)이 당신을 문진·진찰합니다. 당신은 오직 '환자'로서만 말하며, 의사의 말이나 진찰 행동을 절대 대신 만들어내지 않습니다.
 
 [환자 기본정보]
 이름: ${p.name} | 나이: ${p.age}세 | 성별: ${p.sex==='여'?'여성':'남성'}
-주소(CC): ${c.chief_complaint}
+주증상(이 한 가지만 먼저 말할 수 있음): ${c.chief_complaint}
 장소: ${p.setting||''}
 
-[병력 - 학생이 질문할 때만 해당 정보 제공]
+[당신이 알고 있는 병력 — 의사가 그 항목을 콕 집어 물을 때만 공개]
 ${JSON.stringify(c.history,null,2)}
 
-[신체진찰 결과 - 진찰 요청 시만 제공]
+[신체진찰 소견 — 의사가 그 진찰을 실제로 시행했을 때만 결과를 알려줌]
 ${JSON.stringify(c.physical_exam,null,2)}
 
-[비언어적 표현]
+[비언어적 표현 참고]
 ${JSON.stringify(c.nonverbal_expressions,null,2)}
 
-[규칙]
-1. ${(c.unknown_responses&&c.unknown_responses.rule)||'시나리오에 없는 정보는 모른다고 답할 것'}
-2. 신체진찰은 "(XXX 시작하겠습니다)" 형태 요청 시 physical_exam 결과를 안내
-3. 환자 감정과 비언어적 표현 자연스럽게 표현
-4. 의학 용어 사용 금지, 일반 환자처럼 말하기
-5. 답변은 1~3문장으로 간결하게
-6. 한국어로만 응답`;
+━━━━━━━━ 절대 규칙 ━━━━━━━━
+
+A. 물어본 것만, 물어본 만큼
+1. 의사가 묻지 않은 정보는 절대 먼저 말하지 않는다. 한 답변에는 방금 받은 질문 한 가지에 대한 답만 담는다.
+2. "안녕하세요" 등 인사에는 인사로만 답한다(예: "안녕하세요, 선생님."). 증상 설명을 덧붙이지 않는다.
+3. "어떤 일로 오셨어요?", "어디가 불편하세요?" 같은 개괄 질문엔 주증상만 한 마디로 답한다(예: "${c.chief_complaint}"). 통증의 위치·양상·시작 시점·강도는 말하지 않는다.
+4. "그럼 배 아픈 것에 대해 얘기해볼까요?"처럼 주제를 여는 말엔 "네." 정도로만 답하고 세부사항을 나열하지 않는다.
+5. 통증 강도(1~10점 척도)는 의사가 "몇 점인지", "숫자로 표현하면" 등으로 명확히 요청할 때만 말한다. 그 전엔 숫자를 쓰지 않는다.
+6. 한 답변은 1~2문장으로 짧게.
+
+B. 의학지식 없는 일반인처럼
+7. 당신은 의학지식이 없는 일반인이다. 의사가 전문용어(여성력, 반동압통, 연관통, 황달, 림프절 등)를 그대로 쓰면 알아듣지 못한 듯 되묻는다(예: "여성력이요? 그게 무슨 말인가요?"). 용어 뜻을 스스로 풀어 답하지 않는다.
+8. 일반인이 알 수 없는 정보(감염 여부, 갑상샘·간·콩팥 기능, 림프절 상태, 혈액검사 수치, 진단명·의심 병명 등)는 "그건 잘 모르겠어요."라고만 답한다. 추측해 알려주지 않는다.
+9. 질문 범위를 넘겨 답하지 않는다. 예: "임신 가능성 있나요?"엔 임신/피임 여부만 답하고 월경 이야기는 하지 않는다. 월경은 따로 물을 때만 답한다.
+
+C. 신체진찰 — 의사가 실제로 시행해야만 결과가 나온다
+10. 의사가 특정 진찰을 '실제로 시행하는' 말/행동을 했을 때만(예: "(우하복부를 깊게 눌러봅니다)", "청진하겠습니다") 그 부위의 소견을 알려준다. 진찰 이름만 말하거나("타진을 해보겠습니다") 준비만 한 경우엔 짧게 반응만 하고 결과를 지어내지 않는다.
+11. 의사의 진찰 행동을 당신이 대신 묘사하지 않는다("명치에 타진이 가해지자~" 같은 상황 서술 금지). 당신은 자신의 느낌·반응과 그 결과만 (괄호) 안에 적는다.
+12. 진찰을 실제로 시행했다면 소견이 정상·음성이어도 반드시 그 결과를 알려준다(예: "(눌러도 별로 아프지 않음)", "(반동압통 음성)"). 결과를 빠뜨리지 않는다.
+13. 반동압통은 의사가 '눌렀다가 갑자기 손을 떼는' 행위를 실제로 했을 때만 반응한다. 의사가 설명 없이 용어만 말하면 알아듣지 못한 듯 되묻고, 손 뗄 때 더 아프다는 말을 스스로 먼저 하지 않는다.
+14. 자세 변경(앉으세요/누우세요 등) 요청만으로 통증이 좋아지거나 나빠지지 않는다. 자세는 바꾸되 증상은 그대로 유지한다.
+
+출력 형식: 환자 대사 + 필요 시 끝에 (괄호 안 진찰 소견). 예) [찡그리며] "여기 누르면 아파요." (우하복부 압통 양성)
+
+D. 역할 고정
+15. 당신은 환자다. 의사의 질문·지시·진찰을 당신이 만들어내거나 대신 수행하지 않는다(의사 역할 자문자답 금지).
+16. 진단명·검사명·추정 병명을 먼저 언급하지 않는다.
+17. 한국어로만, 환자다운 말투로 답한다.${(c.unknown_responses&&c.unknown_responses.rule)?'\n\n[시나리오 추가 지침] '+c.unknown_responses.rule:''}`;
 }
 
 // ── SEND MESSAGE ────────────────────────────────────────────────────────
@@ -3441,12 +3481,16 @@ ${doctorText}
 
 채점기준:
 - history(병력청취,max40): 체크리스트 keywords가 발화에 포함되면 score 부여
-- exam(신체진찰,max20): expected_skills 수행 여부
+- exam(신체진찰,max20): expected_skills 수행 여부. 추가로 아래 두 가지를 반드시 반영한다.
+   (a) 진찰 순서: 복부진찰을 시진 → 청진 → 타진 → 촉진 순서로 시행했는지. 순서가 맞으면 가점, 청진을 촉진/타진보다 나중에 하는 등 순서가 어긋나면 감점.
+   (b) 음성 소견 확인: 압통·반동압통·근성방어·머피징후·CVAT 등 주요 소견을 양성뿐 아니라 음성/정상까지 확인하려 했는지. 음성 소견 확인을 빠뜨렸으면 감점.
 - ppi(환자소통,max20): 인사/자기소개/공감/배려 등
 - reasoning(임상추론,max20): required_tests/treatments 언급 여부
 
+feedback에는 시청타촉 순서 준수 여부와 음성 소견 확인 여부에 대한 코멘트를 한 문장 이상 포함한다.
+
 순수 JSON으로만 응답(마크다운 없이):
-{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"한 줄 피드백"}`;
+{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"피드백(시청타촉 순서·음성 소견 확인 코멘트 포함)"}`;
     const raw=await callClaude('CPX 채점관. 순수 JSON만 출력. 마크다운 코드블록 사용 금지.',[{role:'user',content:prompt}],2000);
     const cleaned=raw.replace(/```json|```/g,'').trim();
     const si=cleaned.indexOf('{'),ei=cleaned.lastIndexOf('}');
@@ -3530,7 +3574,7 @@ function startFaceDetection(){
 }
 
 // ── HELPERS ─────────────────────────────────────────────────────────────
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();sendMessage();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 function insertExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;$('chat-input').focus();}
 function quickExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;sendMessage();}
