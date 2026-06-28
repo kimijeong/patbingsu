@@ -88,7 +88,9 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 .emotion-badge { background:#1e293b; border:1px solid #334155; border-radius:22px; padding:8px 22px; font-size:18px; font-weight:600; color:#cbd5e1; transition:all .3s; box-shadow:0 2px 10px rgba(0,0,0,.35); }
 
 /* SVG CHARACTER */
-.char-svg { display:block; transition:all 0.5s ease; }
+.patient-photo { position:absolute; bottom:18px; left:50%; transform:translateX(-50%); max-width:300px; max-height:460px; width:auto; height:auto; object-fit:contain; z-index:1; transition:opacity .3s ease; pointer-events:none; filter:drop-shadow(0 6px 18px rgba(0,0,0,.35)); }
+.patient-photo.lying { max-height:430px; max-width:300px; }
+.char-svg { display:none; transition:all 0.5s ease; }
 .char-svg.sitting { width:290px; height:420px; }
 .char-svg.lying   { width:320px; height:160px; }
 
@@ -163,11 +165,34 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 .fb-mark{flex-shrink:0;width:16px;text-align:center;}
 .fb-ok .fb-name{color:#cbd5e1;}
 .fb-miss .fb-name{color:#f87171;}
+.fb-warn .fb-name{color:#fbbf24;}
 .fb-name{font-weight:600;}
 .fb-cmt{color:#94a3b8;}
 .fb-review{font-size:12.5px;color:#cbd5e1;line-height:1.75;}
 .fb-review b{color:#93c5fd;}
 .fb-flow{background:#0c1220;border-left:3px solid #3b82f6;border-radius:6px;padding:10px 12px;margin-top:8px;white-space:pre-wrap;color:#dbeafe;}
+/* EXAM MAP */
+.exam-map-modal{max-width:760px;width:92%;}
+.exam-map-wrap{display:flex;gap:16px;align-items:stretch;}
+.exam-map-svg{flex:0 0 280px;background:#0c1018;border:1px solid #2d3148;border-radius:12px;padding:8px;}
+.exam-map-svg svg{width:100%;height:auto;display:block;}
+.hot{cursor:pointer;fill:#1d4ed8;fill-opacity:0;stroke:#2563eb;stroke-opacity:.3;stroke-width:1.2;stroke-dasharray:2 2;transition:fill-opacity .15s,stroke-opacity .15s;}
+.hot:hover{fill-opacity:.28;stroke-opacity:1;stroke-dasharray:none;}
+.hot.sel{fill-opacity:.4;stroke-opacity:1;stroke-dasharray:none;}
+.exam-map-side{flex:1;display:flex;flex-direction:column;min-width:0;}
+.exam-map-side h3{font-size:15px;color:#93c5fd;margin-bottom:4px;}
+.exam-map-side .hint{font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.6;}
+.exam-opt{display:block;width:100%;text-align:left;background:#1e293b;border:1px solid #334155;color:#e2e8f0;border-radius:9px;padding:10px 14px;font-size:13.5px;margin-bottom:8px;cursor:pointer;transition:background .15s;}
+.exam-opt:hover{background:#27364b;border-color:#3b82f6;}
+.exam-opt small{display:block;color:#94a3b8;font-size:11.5px;margin-top:2px;}
+.exam-pose-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.exam-pose-row button{background:#172033;border:1px solid #334155;color:#cbd5e1;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;}
+.exam-pose-row button:hover{border-color:#3b82f6;color:#fff;}
+.exam-map-label{font-size:8px;font-weight:700;fill:#1e3a8a;paint-order:stroke;stroke:#fff;stroke-width:2px;pointer-events:none;text-anchor:middle;}
+.exam-region-grid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.exam-region-grid button{background:#11161f;border:1px solid #2d3148;color:#94a3b8;border-radius:7px;padding:5px 9px;font-size:11.5px;cursor:pointer;transition:all .12s;}
+.exam-region-grid button:hover{border-color:#3b82f6;color:#fff;}
+.exam-region-grid button.active{background:#1d4ed8;border-color:#1d4ed8;color:#fff;}
 .face-report{display:flex;gap:12px;align-items:flex-start;}
 .face-snap{width:100px;height:75px;border-radius:8px;object-fit:cover;border:1px solid #334155;transform:scaleX(-1);}
 .face-bars{flex:1;display:flex;flex-direction:column;gap:5px;}
@@ -295,6 +320,9 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   </div>
 
   <div class="avatar-speech" id="avatar-speech"></div>
+
+  <!-- PATIENT PHOTO (이미지 있으면 SVG 대신 표시, 없으면 자동 숨김) -->
+  <img id="patient-photo" class="patient-photo" alt="" style="display:none">
 
   <!-- PATIENT SVG -->
   <svg class="char-svg sitting" id="char-svg" viewBox="0 0 280 400" xmlns="http://www.w3.org/2000/svg">
@@ -455,6 +483,8 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
   <div class="chat-input-area">
     <div class="exam-quick">
       <span style="font-size:11px;color:#475569;align-self:center">빠른검진:</span>
+      <button class="eq-btn" onclick="openExamMap()" style="background:#1d4ed8;color:#fff;border-color:#1d4ed8">🩺 검진맵</button>
+      <span style="font-size:10.5px;color:#fbbf24;align-self:center;line-height:1.3">⚠️ 검진 전 환자에게 <b>"누우세요"</b> 등 자세를 먼저 지시한 뒤 검진하세요</span>
       <button class="eq-btn" onclick="quickExam('복부 청진')">청진</button>
       <button class="eq-btn" onclick="quickExam('복부 촉진')">촉진</button>
       <button class="eq-btn" onclick="quickExam('압통/반발통')">반발통</button>
@@ -475,6 +505,71 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; background:#0
 </div>
 
 </div><!-- /main -->
+
+<!-- EXAM MAP MODAL -->
+<div class="modal-overlay" id="exam-map">
+  <div class="modal exam-map-modal">
+    <h2>🩺 신체 검진 맵</h2>
+    <div class="exam-map-wrap">
+      <div class="exam-map-svg">
+        <svg viewBox="0 0 250 400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <image id="exam-map-bg" x="0" y="0" width="250" height="400" preserveAspectRatio="xMidYMid meet" href=""/>
+          <!-- 복부 구획 점선 -->
+          <g stroke="#1d4ed8" stroke-width="0.8" stroke-dasharray="3 3" opacity="0.55">
+            <line x1="123" y1="186" x2="123" y2="244"/>
+            <line x1="86" y1="214" x2="160" y2="214"/>
+          </g>
+          <!-- 클릭 핫스팟 (250x400 누운 이미지 기준) -->
+          <ellipse class="hot" data-region="face"  cx="122" cy="66" rx="38" ry="46"/>
+          <rect    class="hot" data-region="eyes"  x="90" y="68" width="64" height="18" rx="6"/>
+          <ellipse class="hot" data-region="ear"   cx="66"  cy="88" rx="8" ry="13"/>
+          <ellipse class="hot" data-region="ear"   cx="178" cy="88" rx="8" ry="13"/>
+          <ellipse class="hot" data-region="mouth" cx="122" cy="111" rx="16" ry="8"/>
+          <rect    class="hot" data-region="neck"  x="100" y="117" width="44" height="12" rx="4"/>
+          <rect    class="hot" data-region="thyroid" x="100" y="129" width="44" height="10" rx="3"/>
+          <rect    class="hot" data-region="chest" x="80" y="139" width="86" height="47" rx="4"/>
+          <rect    class="hot" data-region="abd_general" x="106" y="178" width="34" height="22"/>
+          <rect    class="hot" data-region="ruq" x="86" y="186" width="37" height="28"/>
+          <rect    class="hot" data-region="luq" x="123" y="186" width="37" height="28"/>
+          <rect    class="hot" data-region="rlq" x="86" y="214" width="37" height="30"/>
+          <rect    class="hot" data-region="llq" x="123" y="214" width="37" height="30"/>
+          <rect    class="hot" data-region="back" x="65" y="186" width="16" height="58" rx="5"/>
+          <rect    class="hot" data-region="back" x="165" y="186" width="16" height="58" rx="5"/>
+          <rect    class="hot" data-region="arm" x="40" y="150" width="34" height="74" rx="9"/>
+          <rect    class="hot" data-region="arm" x="176" y="150" width="34" height="74" rx="9"/>
+          <ellipse class="hot" data-region="hand" cx="40"  cy="234" rx="16" ry="16"/>
+          <ellipse class="hot" data-region="hand" cx="210" cy="234" rx="16" ry="16"/>
+          <ellipse class="hot" data-region="fingers" cx="38"  cy="252" rx="12" ry="9"/>
+          <ellipse class="hot" data-region="fingers" cx="212" cy="252" rx="12" ry="9"/>
+          <rect    class="hot" data-region="pelvis" x="86" y="244" width="74" height="28" rx="6"/>
+          <rect    class="hot" data-region="leg" x="84" y="272" width="38" height="92" rx="11"/>
+          <rect    class="hot" data-region="leg" x="124" y="272" width="38" height="92" rx="11"/>
+          <ellipse class="hot" data-region="knee" cx="103" cy="316" rx="17" ry="16"/>
+          <ellipse class="hot" data-region="knee" cx="143" cy="316" rx="17" ry="16"/>
+          <ellipse class="hot" data-region="foot" cx="103" cy="380" rx="16" ry="12"/>
+          <ellipse class="hot" data-region="foot" cx="143" cy="380" rx="16" ry="12"/>
+          <!-- 사분면 라벨 -->
+          <g class="exam-map-label">
+            <text x="104" y="202">우상</text><text x="142" y="202">좌상</text>
+            <text x="104" y="232">우하</text><text x="142" y="232">좌하</text>
+          </g>
+        </svg>
+      </div>
+      <div class="exam-map-side">
+        <div class="exam-pose-row">
+          <button onclick="examMapPose('누워주세요.')">🛏 눕기</button>
+          <button onclick="examMapPose('앉아주세요.')">🪑 앉기</button>
+          <button onclick="examMapPose('다리를 들어올려 보세요.')">🦵 다리올리기</button>
+        </div>
+        <div class="exam-region-grid" id="exam-region-grid"></div>
+        <h3 id="exam-map-region">부위를 선택하세요</h3>
+        <div class="hint" id="exam-map-hint">왼쪽 그림에서 부위를 클릭하거나, 위 버튼에서 부위를 고르면 해당 검진 항목이 나타납니다. 케이스에 <b>적절한 검진</b>을 고르면 가점, <b>불필요한 검진</b>을 하면 감점됩니다.</div>
+        <div id="exam-map-options"></div>
+      </div>
+    </div>
+    <button class="btn-close" onclick="closeExamMap()">닫기</button>
+  </div>
+</div>
 
 <!-- FEEDBACK MODAL -->
 <div class="modal-overlay" id="modal">
@@ -560,6 +655,8 @@ window.addEventListener('load',()=>{
 function previewCase(idx){
   const c=allCases[idx]; if(!c)return;
   const p=c.patient, v=p.vital_signs||{};
+  const pImg=$('patient-photo');
+  if(pImg){pImg.classList.remove('lying'); pImg.onerror=()=>{pImg.style.display='none';}; pImg.onload=()=>{pImg.style.display='block';}; pImg.src=`assets/patient/${p.sex==='여'?'female':'male'}/smile.png`;}
   $('pt-name').textContent=p.name;
   $('pt-age').textContent=`${p.sex==='여'?'여':'남'} · ${p.age}세`;
   $('pt-location').textContent=p.setting||'';
@@ -647,8 +744,8 @@ function startTimer(){
 
 // ── BODY POSITION ───────────────────────────────────────────────────────
 const POS_RULES=[
-  {re:/누워|눕|바로 누|드러누/, state:'lying',     badge:'🛏 누운 자세',     viewBox:'0 0 480 200'},
-  {re:/앉[아으]|일어나|다시 앉/, state:'sitting',  badge:'🪑 앉은 자세',    viewBox:'0 0 280 400'},
+  {re:/누우|누워|눕|드러누|바로 누|반듯이 누/, state:'lying',     badge:'🛏 누운 자세',     viewBox:'0 0 480 200'},
+  {re:/앉[아으]|앉으세|일어나|다시 앉/, state:'sitting',  badge:'🪑 앉은 자세',    viewBox:'0 0 280 400'},
   {re:/다리.*(들|올려|올리|들어주)|직거상|slr/i,   state:'leg-raise', badge:'🦵 다리 올리기', viewBox:'0 0 480 200'},
   {re:/무릎.*(구부|접어|굽혀)|양 무릎/,            state:'knee-bend', badge:'🦴 무릎 구부리기', viewBox:'0 0 480 200'},
 ];
@@ -659,9 +756,10 @@ function setBodyState(rule){
     $('group-sitting').style.opacity='1';
     ['group-lying','group-leg-raise','group-knee-bend'].forEach(id=>$(id).style.opacity='0');
     $('state-badge').textContent='🪑 앉은 자세'; $('avatar-speech').style.bottom='440px';
-    bodyState='sitting'; return;
+    bodyState='sitting'; imgPose='sit'; updatePatientImage(); return;
   }
   const{state,badge,viewBox}=rule; bodyState=state;
+  imgPose=(state==='sitting')?'sit':'lie';
   $('char-svg').setAttribute('viewBox',viewBox);
   $('char-svg').className=`char-svg ${state==='sitting'?'sitting':'lying'}`;
   $('group-sitting').style.opacity=state==='sitting'?'1':'0';
@@ -672,6 +770,25 @@ function setBodyState(rule){
   const b=$('state-badge'); b.textContent=badge; b.classList.add('changed');
   setTimeout(()=>b.classList.remove('changed'),1500);
   $('avatar-speech').style.bottom=state==='sitting'?'440px':'220px';
+  updatePatientImage();
+}
+
+// ── PATIENT PHOTO (표정/자세 이미지) ─────────────────────────────────────
+// assets/patient/<male|female>/<state>.png  (없으면 기존 SVG로 자동 폴백)
+const PATIENT_IMG_BASE='assets/patient/', PATIENT_IMG_EXT='png';
+const EMO_IMG={neutral:'smile',pain:'angry',nausea:'sad',worry:'think'};
+let imgPose='sit', imgEmo='neutral';
+function patientSex(){return (currentCase&&currentCase.patient&&currentCase.patient.sex==='여')?'female':'male';}
+function setPatientImage(state){
+  const img=$('patient-photo'); if(!img)return;
+  img.onload=()=>{img.style.display='block';};
+  img.onerror=()=>{img.style.display='none';};
+  img.classList.toggle('lying', state==='lie_back'||state==='lie_front');
+  img.src=`${PATIENT_IMG_BASE}${patientSex()}/${state}.${PATIENT_IMG_EXT}`;
+}
+function updatePatientImage(){
+  const state = imgPose==='lie' ? 'lie_back' : (EMO_IMG[imgEmo]||imgEmo||'smile');
+  setPatientImage(state);
 }
 
 // ── ANIMATIONS ──────────────────────────────────────────────────────────
@@ -744,6 +861,7 @@ function setFace(emotion,intensity='low'){
     l.mouth?.setAttribute('d','M35 143 Q52 150 69 143');badge.textContent='😐 안정';
   }
   curEmotion=emotion;
+  imgEmo=emotion; updatePatientImage();
 }
 
 // ── SPEECH ──────────────────────────────────────────────────────────────
@@ -790,14 +908,43 @@ function detectExam(text){
 
 // ── CLAUDE API ──────────────────────────────────────────────────────────
 async function callClaude(system,messages,maxTokens=600){
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_API_KEY,
-      'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:ANTHROPIC_MODEL,max_tokens:maxTokens,system,messages}),
-  });
-  if(!res.ok){const e=await res.text();throw new Error(`API ${res.status}: ${e.slice(0,120)}`);}
-  return(await res.json()).content[0].text;
+  const MAX_RETRY=2, TIMEOUT_MS=60000;
+  let lastErr;
+  for(let attempt=0;attempt<=MAX_RETRY;attempt++){
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),TIMEOUT_MS);
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_API_KEY,
+          'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:ANTHROPIC_MODEL,max_tokens:maxTokens,system,messages}),
+        signal:ctrl.signal,
+      });
+      clearTimeout(timer);
+      if(res.ok)return(await res.json()).content[0].text;
+      const body=await res.text();
+      // 일시적 오류(429/5xx)는 재시도
+      if([429,500,502,503,529].includes(res.status)&&attempt<MAX_RETRY){
+        lastErr=new Error(`API ${res.status}`);
+        await new Promise(r=>setTimeout(r,900*(attempt+1)));
+        continue;
+      }
+      throw new Error(`API ${res.status}: ${body.slice(0,160)}`);
+    }catch(e){
+      clearTimeout(timer);
+      const isNet=(e.name==='AbortError')||/Failed to fetch|NetworkError|load failed/i.test(e.message||'');
+      if(isNet&&attempt<MAX_RETRY){
+        lastErr=e;
+        await new Promise(r=>setTimeout(r,900*(attempt+1)));
+        continue;
+      }
+      if(e.name==='AbortError')throw new Error('요청 시간 초과(60초). 네트워크·VPN·방화벽을 확인하거나 잠시 후 다시 시도하세요.');
+      if(isNet)throw new Error('네트워크 연결 실패(Failed to fetch): api.anthropic.com 에 접속하지 못했습니다. 인터넷·VPN·방화벽·광고차단 확장프로그램을 확인하고, Safari 대신 Chrome으로 열어보세요.');
+      throw e;
+    }
+  }
+  throw lastErr||new Error('알 수 없는 오류');
 }
 
 // ── PATIENT SYSTEM PROMPT ────────────────────────────────────────────────
@@ -876,6 +1023,7 @@ async function sendMessage(){
     const reply=await callClaude(buildPatientSystemPrompt(),chatHistory,600);
     removeTyping();chatHistory.push({role:'assistant',content:reply});
     const emo=detectEmoFromReply(reply);setFace(emo.emotion,emo.intensity);
+    if(!isExam&&imgPose!=='lie'&&/\?\s*[”"']?\s*$/.test(reply)){imgEmo='question';updatePatientImage();}
     if(isExam)triggerFlinch();
     addMsg(reply,'patient');showSpeech(reply);
     const tag=reply.match(/\(([^)]+)\)\s*$/);
@@ -936,18 +1084,22 @@ ${doctorText}
 
 채점기준:
 - history(병력청취,max40): 체크리스트 keywords가 발화에 포함되면 score 부여
-- exam(신체진찰,max20): expected_skills 수행 여부 + (a) 복부진찰을 시진→청진→타진→촉진 순서로 했는지(어긋나면 감점) (b) 압통·반동압통·근성방어·머피징후·CVAT 등 주요 소견을 양성/음성까지 확인했는지(빠뜨리면 감점)
+- exam(신체진찰,max20): 케이스에 '적절한' 검진을 선별해 시행했는지로 채점한다.
+   (a) 주증상·정답 진단과 관련된 적절한 검진(expected_skills 포함)을 시행하면 가점
+   (b) 복부진찰은 시진→청진→타진→촉진 순서 준수 시 가점, 어긋나면 감점
+   (c) 주요 소견(압통·반발압통·근성방어·머피징후·CVAT 등)을 양성/음성까지 확인했는지
+   (d) 임상적으로 불필요·무관한 검진(예: 복통 환자에게 바빈스키 반사·McMurray·Lachman·시야검사·청력검사 등 주증상과 무관한 검진)을 시행하면 감점
 - ppi(환자소통,max20): 인사/자기소개/공감/배려 등
 - reasoning(임상추론,max20): required_tests/treatments 언급 여부
 
 상세 피드백 작성 규칙:
 - history_items: 위 병력청취 체크리스트의 "각 항목"마다 1개씩, 학생이 그 항목을 물었으면 done=true, 안 물었으면 done=false. comment에는 잘한 점(물었을 때) 또는 놓친 점·왜 물어봤어야 하는지(놓쳤을 때)를 한 줄로.
-- exam_items: 복부 시진/청진/타진/촉진 4가지 + expected_skills 각 항목에 대해, 시행했으면 done=true 아니면 false, comment에 한 줄(순서·음성 소견 확인 포함).
+- exam_items: 학생이 실제로 시행한 신체진찰 + 케이스에 꼭 필요했던 핵심 검진을 평가한다. 각 항목 객체는 {item, done(시행 여부), appropriate(케이스에 적절했는지 true/false), comment} 형식. 규칙: ① 적절한데 시행함 → done=true, appropriate=true(잘함). ② 적절한데 안 함 → done=false, appropriate=true(놓침, comment에 했어야 하는 이유). ③ 시행했지만 부적절·불필요 → done=true, appropriate=false(comment에 감점 사유). 학생이 한 무관한 검진은 반드시 ③으로 넣을 것.
 - reasoning_review.findings: 이 환자에서 확인되었어야 할 핵심 소견(병력+진찰)을 2~4문장으로 정리.
 - reasoning_review.flow: "이러이러한 소견(근거) → 따라서 ○○ 진단을 추론" 형태로, 화살표(→)를 사용한 짧은 추론 흐름을 3~5줄로. 정답 진단으로 이어지는 논리를 복습하듯 서술.
 
 순수 JSON으로만 응답(마크다운/코드블록 없이):
-{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"총평 한두 줄","history_items":[{"item":"항목명","done":true/false,"comment":"한 줄"}],"exam_items":[{"item":"항목명","done":true/false,"comment":"한 줄"}],"reasoning_review":{"findings":"소견 정리","flow":"근거 → 추론 흐름"}}`;
+{"history":숫자,"history_max":40,"exam":숫자,"exam_max":20,"ppi":숫자,"ppi_max":20,"reasoning":숫자,"reasoning_max":20,"total":숫자,"feedback":"총평 한두 줄","history_items":[{"item":"항목명","done":true/false,"comment":"한 줄"}],"exam_items":[{"item":"항목명","done":true/false,"appropriate":true/false,"comment":"한 줄"}],"reasoning_review":{"findings":"소견 정리","flow":"근거 → 추론 흐름"}}`;
     const raw=await callClaude('CPX 채점관. 순수 JSON만 출력. 마크다운 코드블록 사용 금지.',[{role:'user',content:prompt}],4000);
     const cleaned=raw.replace(/```json|```/g,'').trim();
     const si=cleaned.indexOf('{'),ei=cleaned.lastIndexOf('}');
@@ -981,10 +1133,15 @@ function fbItemList(arr){
   if(!Array.isArray(arr)||arr.length===0)return '<div class="fb-cmt" style="padding:4px 0">항목 정보가 없습니다.</div>';
   return arr.map(it=>{
     const done=!!(it&&it.done);
+    const inappropriate=(it&&it.appropriate===false);
     const name=esc(it&&(it.item||it.name||it.skill)||'');
     const cmt=esc(it&&it.comment||'');
-    return `<div class="fb-item ${done?'fb-ok':'fb-miss'}">`
-      +`<span class="fb-mark">${done?'✅':'❌'}</span>`
+    let cls,mark;
+    if(done&&inappropriate){cls='fb-warn';mark='⚠️';}       // 시행했지만 불필요 → 감점
+    else if(done){cls='fb-ok';mark='✅';}                    // 적절·시행
+    else{cls='fb-miss';mark='❌';}                           // 놓침
+    return `<div class="fb-item ${cls}">`
+      +`<span class="fb-mark">${mark}</span>`
       +`<span><span class="fb-name">${name}</span>${cmt?` — <span class="fb-cmt">${cmt}</span>`:''}</span></div>`;
   }).join('');
 }
@@ -1075,9 +1232,143 @@ function startFaceDetection(){
 // ── HELPERS ─────────────────────────────────────────────────────────────
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();sendMessage();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
-function insertExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;$('chat-input').focus();}
-function quickExam(n){$('chat-input').value=`(${n} 시작하겠습니다)`;sendMessage();}
+function objJosa(w){const m=String(w).match(/[가-힣](?=[^가-힣]*$)/);if(!m)return '을';return ((m[0].charCodeAt(0)-0xAC00)%28)?'을':'를';}
+function examPhrase(n){return `(${n}${objJosa(n)} 한다)`;}
+function insertExam(n){$('chat-input').value=examPhrase(n);$('chat-input').focus();}
+function quickExam(n){$('chat-input').value=examPhrase(n);sendMessage();}
 function quickCmd(t){$('chat-input').value=t;sendMessage();}
+
+// ── EXAM MAP (부위 클릭형 검진) ──────────────────────────────────────────
+const EXAM_MENU={
+  face:{name:'얼굴',opts:[
+    ['의식상태(GCS)','exam','의식상태(GCS) 평가',''],
+    ['안면 감각','exam','안면 감각 검사',''],
+    ['안면 운동','exam','안면 운동 검사',''],
+    ['부비동 압통','exam','부비동 압통 검사',''],
+    ['황달 시진(피부)','exam','피부 황달 시진','']]},
+  eyes:{name:'눈',opts:[
+    ['결막 시진(빈혈)','exam','결막 시진(빈혈 확인)',''],
+    ['공막 시진(황달)','exam','공막 시진(황달 확인)',''],
+    ['동공반사','exam','동공반사 검사',''],
+    ['안구운동','exam','안구운동 검사',''],
+    ['시야검사','exam','시야검사','']]},
+  ear:{name:'귀',opts:[['청력 검사','exam','청력 검사','']]},
+  mouth:{name:'구강',opts:[
+    ['구강 점막(탈수)','exam','구강 점막 시진(탈수 확인)',''],
+    ['편도/인두(발적·삼출물)','exam','편도·인두 시진(발적·삼출물)','']]},
+  neck:{name:'목',opts:[
+    ['경부 림프절 촉진','exam','경부 림프절 촉진',''],
+    ['경정맥 시진(JVD)','exam','경정맥 팽대(JVD) 시진',''],
+    ['경동맥 청진','exam','경동맥 청진',''],
+    ['경부 강직(수막자극)','exam','경부 강직 검사(수막자극징후)',''],
+    ['Lhermitte 징후','exam','Lhermitte 징후 검사','']]},
+  thyroid:{name:'갑상선',opts:[
+    ['갑상선 촉진','exam','갑상선 촉진',''],
+    ['침 삼킴 시진','exam','침 삼킴 시 갑상선 시진','']]},
+  chest:{name:'흉부',opts:[
+    ['시진(흉곽·호흡)','exam','흉부 시진(흉곽 모양·호흡 양상·흉벽 움직임)',''],
+    ['촉진(성음진동)','exam','흉부 촉진(성음진동)',''],
+    ['타진','exam','흉부 타진',''],
+    ['청진: 폐음','exam','폐 청진',''],
+    ['청진: 심음','exam','심장 청진','']]},
+  abd_general:{name:'복부 (전체)',opts:[
+    ['시진(팽만·흉터)','exam','복부 시진(팽만·흉터·팽대 피부선)',''],
+    ['청진(장음·혈관잡음)','exam','복부 청진(장음·혈관잡음)',''],
+    ['타진(간/비장·이동탁음)','exam','복부 타진(간·비장 크기·이동탁음)',''],
+    ['얕은 촉진','exam','복부 얕은 촉진',''],
+    ['깊은 촉진','exam','복부 깊은 촉진',''],
+    ['반발압통','exam','복부 반발압통(눌렀다 갑자기 뗌)','']]},
+  ruq:{name:'우상복부 (RUQ)',opts:[
+    ['얕은/깊은 촉진','exam','우상복부 촉진',''],
+    ['반발압통','exam','우상복부 반발압통(눌렀다 갑자기 뗌)',''],
+    ["Murphy's sign",'exam',"Murphy's sign",'담낭']]},
+  luq:{name:'좌상복부 (LUQ)',opts:[
+    ['얕은/깊은 촉진','exam','좌상복부 촉진',''],
+    ['반발압통','exam','좌상복부 반발압통(눌렀다 갑자기 뗌)',''],
+    ['췌장 촉진','exam','췌장 촉진',''],
+    ['위 촉진','exam','위 촉진','']]},
+  rlq:{name:'우하복부 (RLQ)',opts:[
+    ['얕은/깊은 촉진','exam','우하복부 촉진',''],
+    ['반발압통','exam','우하복부 반발압통(눌렀다 갑자기 뗌)',''],
+    ["McBurney's point 압통",'exam',"McBurney's point 압통",'충수'],
+    ['Obturator sign','exam','Obturator sign',''],
+    ['Psoas sign','exam','Psoas sign','']]},
+  llq:{name:'좌하복부 (LLQ)',opts:[
+    ['얕은/깊은 촉진','exam','좌하복부 촉진',''],
+    ['반발압통','exam','좌하복부 반발압통(눌렀다 갑자기 뗌)',''],
+    ['Rovsing sign','exam','Rovsing sign','']]},
+  back:{name:'등 (CVA)',opts:[['CVA 압통 타진(CVAT)','exam','CVA 압통 타진(CVAT)','신장']]},
+  arm:{name:'팔',opts:[
+    ['심부건반사','exam','상지 심부건반사',''],
+    ['근력','exam','상지 근력 검사',''],
+    ['근긴장도','exam','상지 근긴장도 검사',''],
+    ['관절가동범위(ROM)','exam','상지 관절가동범위(ROM) 검사',''],
+    ['상지 감각','exam','상지 감각 검사','']]},
+  hand:{name:'손',opts:[
+    ['피부긴장도','exam','손 피부긴장도 검사(탈수)',''],
+    ['Phalen test','exam','Phalen test',''],
+    ['Tinel test','exam','Tinel test',''],
+    ['관절 압통','exam','손 관절 압통 검사','']]},
+  fingers:{name:'손가락',opts:[
+    ['Finger to nose','exam','Finger to nose test',''],
+    ['모세혈관 재충혈(CRT)','exam','모세혈관 재충혈시간(capillary refill) 검사','']]},
+  pelvis:{name:'골반',opts:[
+    ['서혜부 림프절 촉진','exam','서혜부 림프절 촉진',''],
+    ['Patrick test','exam','Patrick test(FABER)',''],
+    ['질경 검사','exam','질경 검사',''],
+    ['DRE(직장수지검사)','exam','DRE(직장수지검사: 압통·종괴·출혈)',''],
+    ['탈장 검사','exam','탈장 검사','']]},
+  leg:{name:'다리',opts:[
+    ['근력','exam','하지 근력 검사',''],
+    ['근긴장도','exam','하지 근긴장도 검사',''],
+    ['관절가동범위(ROM)','exam','하지 관절가동범위(ROM) 검사',''],
+    ['하지 감각','exam','하지 감각 검사',''],
+    ['오목부종','exam','하지 오목부종 검사',''],
+    ['보행검사','exam','보행 검사',''],
+    ['하지직거상(SLR)','exam','하지직거상검사(SLR)','']]},
+  knee:{name:'무릎',opts:[
+    ['심부건반사','exam','슬개건 심부건반사',''],
+    ['Lachman test','exam','Lachman test',''],
+    ['McMurray test','exam','McMurray test',''],
+    ['관절 압통','exam','무릎 관절 압통 검사','']]},
+  foot:{name:'발',opts:[['바빈스키 반사','exam','바빈스키 반사 검사','']]},
+};
+function openExamMap(){
+  if(!sessionActive){addMsg('[안내] 진료 시작 버튼을 먼저 눌러주세요.','system');return;}
+  $('exam-map').classList.add('show');
+  // 성별에 맞는 누운 환자 이미지 배경
+  const bg=$('exam-map-bg');
+  if(bg){const src=`${PATIENT_IMG_BASE}${patientSex()}/lie_back.png`; bg.setAttribute('href',src); bg.setAttributeNS('http://www.w3.org/1999/xlink','href',src);}
+  // 부위 빠른선택 버튼 생성
+  const grid=$('exam-region-grid');
+  if(grid&&!grid.dataset.built){
+    grid.innerHTML=Object.keys(EXAM_MENU).map(k=>`<button data-region="${k}">${EXAM_MENU[k].name}</button>`).join('');
+    grid.querySelectorAll('button').forEach(b=>b.onclick=()=>selectExamRegion(b.getAttribute('data-region'),null));
+    grid.dataset.built='1';
+  }
+  document.querySelectorAll('#exam-map .hot').forEach(el=>{
+    el.onclick=()=>selectExamRegion(el.getAttribute('data-region'),el);
+  });
+}
+function closeExamMap(){
+  $('exam-map').classList.remove('show');
+  document.querySelectorAll('#exam-map .hot.sel').forEach(e=>e.classList.remove('sel'));
+}
+function examMapPose(t){quickCmd(t);}
+function selectExamRegion(region,el){
+  document.querySelectorAll('#exam-map .hot.sel').forEach(e=>e.classList.remove('sel'));
+  // 같은 부위의 모든 핫스팟 강조(좌우 등)
+  document.querySelectorAll(`#exam-map .hot[data-region="${region}"]`).forEach(e=>e.classList.add('sel'));
+  document.querySelectorAll('#exam-region-grid button').forEach(b=>b.classList.toggle('active',b.getAttribute('data-region')===region));
+  const m=EXAM_MENU[region]; if(!m)return;
+  $('exam-map-region').textContent=m.name;
+  $('exam-map-hint').textContent='검진 항목을 누르면 환자에게 전송되고, 결과가 채팅에 표시됩니다.';
+  const box=$('exam-map-options');
+  box.innerHTML=m.opts.map((o,i)=>`<button class="exam-opt" data-i="${i}">${o[0]}${o[3]?`<small>${o[3]}</small>`:''}</button>`).join('');
+  box.querySelectorAll('.exam-opt').forEach((b,i)=>{
+    b.onclick=()=>{const o=m.opts[i]; if(o[1]==='exam')quickExam(o[2]); else quickCmd(o[2]); closeExamMap();};
+  });
+}
 </script>
 </body>
 </html>
